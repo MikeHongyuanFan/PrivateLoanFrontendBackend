@@ -1,0 +1,22 @@
+{
+  "name": "eternity-capital-crm",
+  "version": "1.0.0",
+  "description": "ETERNITY CAPITAL CRM System - Frontend and Backend",
+  "scripts": {
+    "dev": "./dev.sh",
+    "deploy": "./deploy.sh",
+    "deploy:prod": "./deploy.sh",
+    "start": "./dev.sh",
+    "build": "cd ICfding/ICprivate-funding && npm install && npm run build",
+    "install:frontend": "cd ICfding/ICprivate-funding && npm install",
+    "install:all": "npm run install:frontend",
+    "backend:start": "cd PVDOCKER-0e9d989a06b724cfb597e3148652e687871d3891 && docker-compose up -d",
+    "backend:stop": "cd PVDOCKER-0e9d989a06b724cfb597e3148652e687871d3891 && docker-compose down",
+    "backend:logs": "cd PVDOCKER-0e9d989a06b724cfb597e3148652e687871d3891 && docker-compose logs -f",
+    "frontend:dev": "cd ICfding/ICprivate-funding && npm run dev",
+    "status": "cd PVDOCKER-0e9d989a06b724cfb597e3148652e687871d3891 && docker-compose ps"
+  },
+  "keywords": ["crm", "django", "vue", "docker", "eternity-capital"],
+  "author": "Eternity Capital",
+  "license": "MIT"
+} 
