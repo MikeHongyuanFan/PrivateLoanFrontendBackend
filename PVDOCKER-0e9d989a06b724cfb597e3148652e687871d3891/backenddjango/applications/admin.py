@@ -46,7 +46,7 @@ class ApplicationAdmin(admin.ModelAdmin):
             'fields': ('reference_number', 'stage', 'stage_last_updated', 'application_type', 'purpose')
         }),
         ('Loan Details', {
-            'fields': ('loan_amount', 'loan_term', 'interest_rate', 'repayment_frequency', 
+            'fields': ('loan_amount', 'loan_term', 'capitalised_interest_term', 'interest_rate', 'repayment_frequency', 
                       'product_id', 'estimated_settlement_date')
         }),
         ('Loan Purpose', {

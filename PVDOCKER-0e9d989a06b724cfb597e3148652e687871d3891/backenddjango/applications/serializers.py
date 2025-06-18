@@ -350,9 +350,9 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
         fields = [
-            'id', 'reference_number', 'loan_amount', 'loan_term',
+            'id', 'reference_number', 'loan_amount', 'loan_term', 'capitalised_interest_term',
             'interest_rate', 'purpose', 'repayment_frequency',
-            'application_type', 'product_id', 'estimated_settlement_date',
+            'application_type', 'application_type_other', 'product_id', 'estimated_settlement_date',
             'stage', 'branch_id', 'bd_id', 'borrowers', 'guarantors',
             'company_borrowers', 'security_properties', 'loan_requirements',
             'loan_purpose', 'additional_comments', 'prior_application',
@@ -545,9 +545,9 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
         model = Application
         fields = [
             # Basic fields
-            'id', 'reference_number', 'loan_amount', 'loan_term',
+            'id', 'reference_number', 'loan_amount', 'loan_term', 'capitalised_interest_term',
             'interest_rate', 'purpose', 'repayment_frequency',
-            'application_type', 'product_id', 'estimated_settlement_date',
+            'application_type', 'application_type_other', 'product_id', 'estimated_settlement_date',
             'stage', 'stage_display', 'created_at', 'updated_at',
             
             # Loan purpose details
@@ -664,7 +664,7 @@ class ApplicationListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'reference_number', 'borrower_name', 'stage', 'stage_display',
             'bdm_name', 'guarantor_name', 'purpose', 'product_name', 'security_address',
-            'loan_amount', 'estimated_settlement_date', 'updated_at', 'created_at',
+            'loan_amount', 'loan_term', 'capitalised_interest_term', 'estimated_settlement_date', 'updated_at', 'created_at',
             'application_type', 'borrower_count', 'solvency_issues'
         ]
     
