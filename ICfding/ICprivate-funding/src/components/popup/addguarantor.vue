@@ -238,32 +238,19 @@ const form = ref({
 });
 
 const rules = {
-  first_name: [{ required: true, message: 'Please enter first name', trigger: 'blur' }],
-  last_name: [{ required: true, message: 'Please enter last name', trigger: 'blur' }],
-  date_of_birth: [{ required: true, message: 'Please select date of birth', trigger: 'change' }],
+  // All fields are now optional - only validate format when values are provided
   email: [
-    { required: true, message: 'Please enter email address', trigger: 'blur' },
     { type: 'email', message: 'Please enter a valid email address', trigger: 'blur' }
   ],
-  phone: [{ required: true, message: 'Please enter phone number', trigger: 'blur' }],
-  address: [{ required: true, message: 'Please enter street address', trigger: 'blur' }],
-  city: [{ required: true, message: 'Please enter city', trigger: 'blur' }],
-  state: [{ required: true, message: 'Please enter state', trigger: 'blur' }],
-  postal_code: [{ required: true, message: 'Please enter postal code', trigger: 'blur' }],
-  employment_type: [{ required: true, message: 'Please select employment type', trigger: 'change' }],
-  annual_income: [{ required: true, message: 'Please enter annual income', trigger: 'blur' }],
-  relationship: [{ required: true, message: 'Please select relationship', trigger: 'change' }],
   relationship_other: [{
-    required: true,
-    message: 'Please specify relationship',
-    trigger: 'blur',
     validator: (rule, value, callback) => {
       if (form.value.relationship === 'other' && !value) {
-        callback(new Error('Please specify relationship'));
+        callback(new Error('Please specify relationship when "Other" is selected'));
       } else {
         callback();
       }
-    }
+    },
+    trigger: 'blur'
   }]
 };
 

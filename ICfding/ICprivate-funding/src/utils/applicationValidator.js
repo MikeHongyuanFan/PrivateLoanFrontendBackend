@@ -10,45 +10,21 @@
 export function validateApplicationPayload(applicationData) {
   const errors = {};
   
-  // Validate required top-level fields
-  if (!applicationData.loan_amount) {
-    errors.loan_amount = 'Loan amount is required';
-  }
+  // All fields are now optional - only validate format/type when values are provided
   
-  if (!applicationData.loan_term) {
-    errors.loan_term = 'Loan term is required';
-  }
-  
-  if (!applicationData.repayment_frequency) {
-    errors.repayment_frequency = 'Repayment frequency is required';
-  }
-  
-  if (!applicationData.stage) {
-    errors.stage = 'Application stage is required';
-  }
-
-  if (!applicationData.application_type) {
-    errors.application_type = 'Application type is required';
-  }
-  
-  // Validate borrowers if present
+  // Validate borrowers format if present
   if (applicationData.borrowers && applicationData.borrowers.length > 0) {
     const borrowerErrors = [];
     
     applicationData.borrowers.forEach((borrower, index) => {
       const borrowerFieldErrors = {};
       
-      // Check for required borrower fields
-      if (!borrower.first_name) {
-        borrowerFieldErrors.first_name = 'First name is required';
-      }
-      
-      if (!borrower.last_name) {
-        borrowerFieldErrors.last_name = 'Last name is required';
-      }
-
-      if (!borrower.email) {
-        borrowerFieldErrors.email = 'Email is required';
+      // Only validate email format if provided
+      if (borrower.email && borrower.email.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(borrower.email)) {
+          borrowerFieldErrors.email = 'Please enter a valid email address';
+        }
       }
       
       if (Object.keys(borrowerFieldErrors).length > 0) {
@@ -61,43 +37,21 @@ export function validateApplicationPayload(applicationData) {
     }
   }
   
-  // Validate company borrowers if present
+  // Validate company borrowers format if present
   if (applicationData.company_borrowers && applicationData.company_borrowers.length > 0) {
     const companyBorrowerErrors = [];
     
     applicationData.company_borrowers.forEach((companyBorrower, index) => {
       const companyBorrowerFieldErrors = {};
       
-      if (!companyBorrower.company_name) {
-        companyBorrowerFieldErrors.company_name = 'Company name is required';
-      }
-      
-      if (!companyBorrower.company_abn && !companyBorrower.company_acn) {
-        companyBorrowerFieldErrors.company_identification = 'Either ABN or ACN is required';
-      }
-
-      if (!companyBorrower.industry_type) {
-        companyBorrowerFieldErrors.industry_type = 'Industry type is required';
-      }
-
-      if (!companyBorrower.contact_number) {
-        companyBorrowerFieldErrors.contact_number = 'Contact number is required';
-      }
-      
-      // Validate directors if present
+      // Validate directors format if present
       if (companyBorrower.directors && companyBorrower.directors.length > 0) {
         const directorErrors = [];
         
         companyBorrower.directors.forEach((director, dirIndex) => {
           const directorFieldErrors = {};
           
-          if (!director.name) {
-            directorFieldErrors.name = 'Director name is required';
-          }
-          
-          if (!director.roles) {
-            directorFieldErrors.roles = 'Director roles are required';
-          }
+          // No required validations - all optional
           
           if (Object.keys(directorFieldErrors).length > 0) {
             directorErrors[dirIndex] = directorFieldErrors;
@@ -119,92 +73,18 @@ export function validateApplicationPayload(applicationData) {
     }
   }
   
-  // Validate guarantors if present
+  // Validate guarantors format if present
   if (applicationData.guarantors && applicationData.guarantors.length > 0) {
     const guarantorErrors = [];
     
     applicationData.guarantors.forEach((guarantor, index) => {
       const guarantorFieldErrors = {};
       
-      if (!guarantor.guarantor_type) {
-        guarantorFieldErrors.guarantor_type = 'Guarantor type is required';
-      }
-      
-      if (!guarantor.first_name) {
-        guarantorFieldErrors.first_name = 'First name is required';
-      }
-      
-      if (!guarantor.last_name) {
-        guarantorFieldErrors.last_name = 'Last name is required';
-      }
-
-      if (!guarantor.email) {
-        guarantorFieldErrors.email = 'Email is required';
-      }
-
-      if (!guarantor.mobile) {
-        guarantorFieldErrors.mobile = 'Mobile number is required';
-      }
-      
-      // Validate guarantor assets if present
-      if (guarantor.assets && guarantor.assets.length > 0) {
-        const assetErrors = [];
-        
-        guarantor.assets.forEach((asset, assetIndex) => {
-          const assetFieldErrors = {};
-          
-          if (!asset.asset_type) {
-            assetFieldErrors.asset_type = 'Asset type is required';
-          }
-          
-          if (!asset.bg_type) {
-            assetFieldErrors.bg_type = 'BG type is required for guarantor assets';
-          }
-
-          if (!asset.value) {
-            assetFieldErrors.value = 'Asset value is required';
-          }
-          
-          if (Object.keys(assetFieldErrors).length > 0) {
-            assetErrors[assetIndex] = assetFieldErrors;
-          }
-        });
-        
-        if (assetErrors.length > 0) {
-          guarantorFieldErrors.assets = assetErrors;
-        }
-      }
-
-      // Validate guarantor liabilities if present
-      if (guarantor.liabilities && guarantor.liabilities.length > 0) {
-        const liabilityErrors = [];
-        
-        guarantor.liabilities.forEach((liability, liabilityIndex) => {
-          const liabilityFieldErrors = {};
-          
-          if (!liability.liability_type) {
-            liabilityFieldErrors.liability_type = 'Liability type is required';
-          }
-          
-          if (!liability.description) {
-            liabilityFieldErrors.description = 'Description is required';
-          }
-
-          if (!liability.amount) {
-            liabilityFieldErrors.amount = 'Amount is required';
-          }
-
-          if (!liability.bg_type) {
-            liabilityFieldErrors.bg_type = 'BG type is required';
-          }
-          
-          if (Object.keys(liabilityFieldErrors).length > 0) {
-            liabilityErrors[liabilityIndex] = liabilityFieldErrors;
-          }
-        });
-        
-        if (liabilityErrors.length > 0) {
-          guarantorFieldErrors.liabilities = liabilityErrors;
+      // Validate email format if provided
+      if (guarantor.email && guarantor.email.trim()) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(guarantor.email)) {
+          guarantorFieldErrors.email = 'Please enter a valid email address';
         }
       }
       
@@ -218,34 +98,20 @@ export function validateApplicationPayload(applicationData) {
     }
   }
   
-  // Validate security properties if present
+  // Validate security properties format if present
   if (applicationData.security_properties && applicationData.security_properties.length > 0) {
     const propertyErrors = [];
     
     applicationData.security_properties.forEach((property, index) => {
       const propertyFieldErrors = {};
       
-      // Check for required address fields
-      const addressFields = [
-        { field: 'address_street_no', label: 'Street number' },
-        { field: 'address_street_name', label: 'Street name' },
-        { field: 'address_suburb', label: 'Suburb' },
-        { field: 'address_state', label: 'State' },
-        { field: 'address_postcode', label: 'Postcode' }
-      ];
-      
-      addressFields.forEach(({ field, label }) => {
-        if (!property[field]) {
-          propertyFieldErrors[field] = `${label} is required`;
-        }
-      });
-
-      if (!property.property_type) {
-        propertyFieldErrors.property_type = 'Property type is required';
+      // Validate numeric fields format if provided
+      if (property.estimated_value && isNaN(parseFloat(property.estimated_value))) {
+        propertyFieldErrors.estimated_value = 'Please enter a valid number';
       }
-
-      if (!property.estimated_value) {
-        propertyFieldErrors.estimated_value = 'Estimated value is required';
+      
+      if (property.purchase_price && isNaN(parseFloat(property.purchase_price))) {
+        propertyFieldErrors.purchase_price = 'Please enter a valid number';
       }
       
       if (Object.keys(propertyFieldErrors).length > 0) {
@@ -258,19 +124,16 @@ export function validateApplicationPayload(applicationData) {
     }
   }
 
-  // Validate loan requirements if present
+  // Validate loan requirements format if present
   if (applicationData.loan_requirements && applicationData.loan_requirements.length > 0) {
     const requirementErrors = [];
     
     applicationData.loan_requirements.forEach((requirement, index) => {
       const requirementFieldErrors = {};
       
-      if (!requirement.description) {
-        requirementFieldErrors.description = 'Description is required';
-      }
-      
-      if (!requirement.amount) {
-        requirementFieldErrors.amount = 'Amount is required';
+      // Validate amount format if provided
+      if (requirement.amount && isNaN(parseFloat(requirement.amount))) {
+        requirementFieldErrors.amount = 'Please enter a valid number';
       }
       
       if (Object.keys(requirementFieldErrors).length > 0) {
@@ -283,42 +146,23 @@ export function validateApplicationPayload(applicationData) {
     }
   }
 
-  // Validate funding calculation input if present
+  // Validate funding calculation input format if present
   if (applicationData.funding_calculation_input) {
     const fundingErrors = {};
     const input = applicationData.funding_calculation_input;
     
-    if (!input.establishment_fee_rate) {
-      fundingErrors.establishment_fee_rate = 'Establishment fee rate is required';
-    }
+    // Validate numeric formats if provided
+    const numericFields = [
+      'establishment_fee_rate', 'monthly_line_fee_rate', 'brokerage_fee_rate',
+      'application_fee', 'due_diligence_fee', 'legal_fee_before_gst',
+      'valuation_fee', 'monthly_account_fee'
+    ];
     
-    if (!input.monthly_line_fee_rate) {
-      fundingErrors.monthly_line_fee_rate = 'Monthly line fee rate is required';
-    }
-    
-    if (!input.brokerage_fee_rate) {
-      fundingErrors.brokerage_fee_rate = 'Brokerage fee rate is required';
-    }
-    
-    if (!input.application_fee) {
-      fundingErrors.application_fee = 'Application fee is required';
-    }
-    
-    if (!input.due_diligence_fee) {
-      fundingErrors.due_diligence_fee = 'Due diligence fee is required';
-    }
-    
-    if (!input.legal_fee_before_gst) {
-      fundingErrors.legal_fee_before_gst = 'Legal fee is required';
-    }
-    
-    if (!input.valuation_fee) {
-      fundingErrors.valuation_fee = 'Valuation fee is required';
-    }
-    
-    if (!input.monthly_account_fee) {
-      fundingErrors.monthly_account_fee = 'Monthly account fee is required';
-    }
+    numericFields.forEach(field => {
+      if (input[field] && isNaN(parseFloat(input[field]))) {
+        fundingErrors[field] = 'Please enter a valid number';
+      }
+    });
     
     if (Object.keys(fundingErrors).length > 0) {
       errors.funding_calculation_input = fundingErrors;

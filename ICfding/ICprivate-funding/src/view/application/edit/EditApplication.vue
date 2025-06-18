@@ -259,75 +259,50 @@ onMounted(async () => {
     }
 });
 
-// Computed properties for validation
+// Computed properties for validation - all fields are now optional
 const isCompanyValid = computed(() => {
-    if (!application.value?.company_borrowers?.[0]) return false;
-    const company = application.value.company_borrowers[0];
-    return company.company_name && company.company_abn && company.industry_type;
+    // All fields are now optional - always return true
+    return true;
 });
 
 const isCompanyAssetValid = computed(() => {
-    if (!application.value?.company_borrowers?.[0]?.assets) return false;
-    const assets = application.value.company_borrowers[0].assets;
-    return assets.length > 0 && assets.every(asset => asset.asset_type && asset.value);
+    // All fields are now optional - always return true
+    return true;
 });
 
 const isEnquiryValid = computed(() => {
-    return application.value.has_pending_litigation !== null &&
-           application.value.has_unsatisfied_judgements !== null &&
-           application.value.has_been_bankrupt !== null &&
-           application.value.has_been_refused_credit !== null;
+    // All fields are now optional - always return true
+    return true;
 });
 
 const isIndividualValid = computed(() => {
-    if (!application.value?.borrowers) return false;
-    return application.value.borrowers.length > 0 && 
-           application.value.borrowers.every(borrower => 
-               borrower.first_name && borrower.last_name && borrower.email
-           );
+    // All fields are now optional - always return true
+    return true;
 });
 
 const isGuarantorAssetValid = computed(() => {
-    const ga = guarantorAsset.value;
-    return ga && (
-        (ga.address1 && (ga.address1G1 || ga.address1G2)) ||
-        (ga.address2 && (ga.address2G1 || ga.address2G2)) ||
-        (ga.address3 && (ga.address3G1 || ga.address3G2)) ||
-        (ga.address4 && (ga.address4G1 || ga.address4G2)) ||
-        (ga.vehicleValue && (ga.vehicleG1 || ga.vehicleG2)) ||
-        (ga.savingValue && (ga.savingG1 || ga.savingG2)) ||
-        (ga.shareValue && (ga.shareG1 || ga.shareG2)) ||
-        (ga.cardValue && (ga.cardG1 || ga.cardG2)) ||
-        (ga.creditorValue && (ga.creditorG1 || ga.creditorG2)) ||
-        (ga.otherValue && (ga.otherG1 || ga.otherG2))
-    );
+    // All fields are now optional - always return true
+    return true;
 });
 
 const isSecurityValid = computed(() => {
-    if (!application.value?.security_properties) return false;
-    return application.value.security_properties.length > 0 && 
-           application.value.security_properties.every(property => 
-               property.address_street_name && property.address_suburb && 
-               property.address_state && property.address_postcode
-           );
+    // All fields are now optional - always return true
+    return true;
 });
 
 const isLoanDetailValid = computed(() => {
-    return application.value.loan_amount && 
-           application.value.repayment_frequency && 
-           application.value.application_type && 
-           application.value.product_id;
+    // All fields are now optional - always return true
+    return true;
 });
 
 const isRequirementValid = computed(() => {
-    if (!application.value?.loan_requirements) return false;
-    return application.value.loan_requirements.length > 0 && 
-           application.value.loan_requirements.every(req => req.description && req.amount);
+    // All fields are now optional - always return true
+    return true;
 });
 
 const isExitValid = computed(() => {
-    return application.value.exit_strategy && 
-           (application.value.exit_strategy !== 'other' || application.value.exit_strategy_details);
+    // All fields are now optional - always return true
+    return true;
 });
 
 // Event handlers

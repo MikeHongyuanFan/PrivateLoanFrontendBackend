@@ -5,22 +5,22 @@
         </div>
         <div v-for="(item, index) in company" :key="index" class="company">
             <div class="item">
-                <p>Company Name <span class="required">*</span></p >
+                <p>Company Name <span class="optional">(optional)</span></p >
                 <el-input v-model="item.company_name" placeholder="Enter company name" />
                 <span class="hint">Legal registered name of the company</span>
             </div>
             <div class="item">
-                <p>ABN <span class="required">*</span></p >
+                <p>ABN <span class="optional">(optional)</span></p >
                 <el-input v-model="item.company_abn" placeholder="e.g. 12 345 678 901" maxlength="14" />
                 <span class="hint">Australian Business Number (11 digits)</span>
             </div>
             <div class="item">
-                <p>ACN</p >
+                <p>ACN <span class="optional">(optional)</span></p >
                 <el-input v-model="item.company_acn" placeholder="e.g. 123 456 789" maxlength="9" />
                 <span class="hint">Australian Company Number (9 digits)</span>
             </div>
             <div class="item">
-                <p>Industry Type <span class="required">*</span></p >
+                <p>Industry Type <span class="optional">(optional)</span></p >
                 <el-select v-model="item.industry_type" placeholder="Select industry">
                     <el-option value="agriculture" label="Agriculture" />
                     <el-option value="mining" label="Mining" />
@@ -40,12 +40,12 @@
                 <span class="hint">Primary industry of the company</span>
             </div>
             <div class="item">
-                <p>Contact Number <span class="required">*</span></p >
+                <p>Contact Number <span class="optional">(optional)</span></p >
                 <el-input v-model="item.contact_number" placeholder="e.g. +61 2 1234 5678" />
                 <span class="hint">Primary contact number for the company</span>
             </div>
             <div class="item">
-                <p>Annual Company Income ($) <span class="required">*</span></p >
+                <p>Annual Company Income ($) <span class="optional">(optional)</span></p >
                 <el-input v-model="item.annual_company_income" type="number" placeholder="e.g. 1000000" />
                 <span class="hint">Annual income in dollars (max 10 digits)</span>
             </div>
@@ -71,22 +71,22 @@
                 <span class="hint">Unit or suite number if applicable</span>
             </div>
             <div class="item">
-                <p>Street No <span class="required">*</span></p >
+                <p>Street No <span class="optional">(optional)</span></p >
                 <el-input v-model="item.registered_address_street_no" placeholder="e.g. 123" />
                 <span class="hint">Street number</span>
             </div>
             <div class="item">
-                <p>Street Name <span class="required">*</span></p >
+                <p>Street Name <span class="optional">(optional)</span></p >
                 <el-input v-model="item.registered_address_street_name" placeholder="e.g. Main Street" />
                 <span class="hint">Street name</span>
             </div>
             <div class="item">
-                <p>Suburb <span class="required">*</span></p >
+                <p>Suburb <span class="optional">(optional)</span></p >
                 <el-input v-model="item.registered_address_suburb" placeholder="e.g. Richmond" />
                 <span class="hint">Suburb name</span>
             </div>
             <div class="item">
-                <p>State <span class="required">*</span></p >
+                <p>State <span class="optional">(optional)</span></p >
                 <el-select v-model="item.registered_address_state" placeholder="Select state">
                     <el-option value="NSW" label="NSW" />
                     <el-option value="VIC" label="VIC" />
@@ -100,7 +100,7 @@
                 <span class="hint">Australian state or territory</span>
             </div>
             <div class="item">
-                <p>Postcode <span class="required">*</span></p >
+                <p>Postcode <span class="optional">(optional)</span></p >
                 <el-input v-model="item.registered_address_postcode" placeholder="e.g. 3000" maxlength="4" />
                 <span class="hint">4-digit postcode</span>
             </div>
@@ -109,12 +109,12 @@
             </div>
             <div v-for="(director, idx) in item.directors" :key="idx" class="director">
                 <div class="item">
-                    <p>Director Name <span class="required">*</span></p >
+                    <p>Director Name <span class="optional">(optional)</span></p >
                     <el-input v-model="director.name" placeholder="Enter director's full name" />
                     <span class="hint">Full legal name of the director</span>
                 </div>
                 <div class="item">
-                    <p>Roles <span class="required">*</span></p >
+                    <p>Roles <span class="optional">(optional)</span></p >
                     <el-select v-model="director.selectedRoles" multiple placeholder="Select roles" @change="updateRoles(director)">
                         <el-option value="director" label="Director" />
                         <el-option value="secretary" label="Secretary" />
@@ -124,7 +124,7 @@
                     <span class="hint">Select one or more roles</span>
                 </div>
                 <div class="item">
-                    <p>Director ID</p >
+                    <p>Director ID <span class="optional">(optional)</span></p >
                     <el-input v-model="director.director_id" placeholder="e.g. D12345678" />
                     <span class="hint">Official director identification number</span>
                 </div>
@@ -268,6 +268,13 @@
     }
     .required {
         color: #f56c6c;
+        margin-left: 2px;
+    }
+    
+    .optional {
+        color: #909399;
+        font-weight: normal;
+        font-style: italic;
         margin-left: 2px;
     }
 </style>

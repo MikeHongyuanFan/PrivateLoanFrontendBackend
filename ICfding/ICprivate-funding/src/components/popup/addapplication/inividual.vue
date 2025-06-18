@@ -2,27 +2,27 @@
     <div class="form">
         <div v-for="(item, index) in borrowers" :key="index" class="borrower">
             <div class="item">
-                <p>First Name <span class="required">*</span></p>
+                <p>First Name <span class="optional">(optional)</span></p>
                 <el-input v-model="item.first_name" placeholder="Enter first name" />
                 <span class="hint">Legal first name</span>
             </div>
             <div class="item">
-                <p>Last Name <span class="required">*</span></p>
+                <p>Last Name <span class="optional">(optional)</span></p>
                 <el-input v-model="item.last_name" placeholder="Enter last name" />
                 <span class="hint">Legal last name</span>
             </div>
             <div class="item">
-                <p>Email <span class="required">*</span></p>
+                <p>Email <span class="optional">(optional)</span></p>
                 <el-input v-model="item.email" type="email" placeholder="example@domain.com" />
                 <span class="hint">Valid email address</span>
             </div>
             <div class="item">
-                <p>Phone <span class="required">*</span></p>
+                <p>Phone <span class="optional">(optional)</span></p>
                 <el-input v-model="item.phone" placeholder="e.g. +61 4XX XXX XXX" />
                 <span class="hint">Contact phone number</span>
             </div>
             <div class="item">
-                <p>Date of Birth <span class="required">*</span></p>
+                <p>Date of Birth <span class="optional">(optional)</span></p>
                 <el-date-picker 
                     v-model="item.date_of_birth" 
                     type="date" 
@@ -32,12 +32,12 @@
                 <span class="hint">Date must be in YYYY-MM-DD format</span>
             </div>
             <div class="item">
-                <p>Tax ID (TFN)</p>
+                <p>Tax ID (TFN) <span class="optional">(optional)</span></p>
                 <el-input v-model="item.tax_id" placeholder="e.g. 123 456 789" maxlength="11" />
-                <span class="hint">Tax File Number (optional)</span>
+                <span class="hint">Tax File Number</span>
             </div>
             <div class="item">
-                <p>Marital Status</p>
+                <p>Marital Status <span class="optional">(optional)</span></p>
                 <el-select v-model="item.marital_status" placeholder="Select status">
                     <el-option value="single" label="Single" />
                     <el-option value="married" label="Married" />
@@ -48,7 +48,7 @@
                 <span class="hint">Current marital status</span>
             </div>
             <div class="item">
-                <p>Residency Status</p>
+                <p>Residency Status <span class="optional">(optional)</span></p>
                 <el-select v-model="item.residency_status" placeholder="Select status">
                     <el-option value="citizen" label="Citizen" />
                     <el-option value="permanent_resident" label="Permanent Resident" />
@@ -58,12 +58,12 @@
                 <span class="hint">Current Australian residency status</span>
             </div>
             <div class="item">
-                <p>Referral Source</p>
+                <p>Referral Source <span class="optional">(optional)</span></p>
                 <el-input v-model="item.referral_source" placeholder="How did you hear about us?" />
                 <span class="hint">How the borrower was referred</span>
             </div>
             <div class="item">
-                <p>Tags</p>
+                <p>Tags <span class="optional">(optional)</span></p>
                 <el-input v-model="item.tags" placeholder="e.g. VIP, Repeat Customer" />
                 <span class="hint">Comma-separated tags for categorization</span>
             </div>
@@ -138,6 +138,13 @@
     }
     .required {
         color: #f56c6c;
+        margin-left: 2px;
+    }
+    
+    .optional {
+        color: #909399;
+        font-weight: normal;
+        font-style: italic;
         margin-left: 2px;
     }
 </style>

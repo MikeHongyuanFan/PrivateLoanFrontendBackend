@@ -5,8 +5,8 @@ services:
       - postgres_data:/var/lib/postgresql/data/
     environment:
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=crm_loan_db
+      - POSTGRES_PASSWORD=bL&%t+GBx!5ti350
+      - POSTGRES_DB=crm_db
     ports:
       - "5433:5432"
     healthcheck:
@@ -45,10 +45,16 @@ services:
         condition: service_healthy
     environment:
       - DEBUG=1
-      - POSTGRES_DB=crm_loan_db
+      - POSTGRES_DB=crm_db
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=bL&%t+GBx!5ti350
       - POSTGRES_HOST=db
+      - DB_NAME=crm_db
+      - DB_USER=postgres
+      - DB_PASSWORD=bL&%t+GBx!5ti350
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DATABASE_URL=postgres://postgres:bL&%t+GBx!5ti350@db:5432/crm_db
       - CELERY_BROKER_URL=redis://redis:6379/0
       - PYTHONUNBUFFERED=1
       - EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
@@ -71,10 +77,16 @@ services:
       - redis
     environment:
       - DEBUG=1
-      - POSTGRES_DB=crm_loan_db
+      - POSTGRES_DB=crm_db
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=bL&%t+GBx!5ti350
       - POSTGRES_HOST=db
+      - DB_NAME=crm_db
+      - DB_USER=postgres
+      - DB_PASSWORD=bL&%t+GBx!5ti350
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DATABASE_URL=postgres://postgres:bL&%t+GBx!5ti350@db:5432/crm_db
       - CELERY_BROKER_URL=redis://redis:6379/0
       - PYTHONUNBUFFERED=1
 
@@ -90,10 +102,16 @@ services:
       - redis
     environment:
       - DEBUG=1
-      - POSTGRES_DB=crm_loan_db
+      - POSTGRES_DB=crm_db
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_PASSWORD=bL&%t+GBx!5ti350
       - POSTGRES_HOST=db
+      - DB_NAME=crm_db
+      - DB_USER=postgres
+      - DB_PASSWORD=bL&%t+GBx!5ti350
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DATABASE_URL=postgres://postgres:bL&%t+GBx!5ti350@db:5432/crm_db
       - CELERY_BROKER_URL=redis://redis:6379/0
       - PYTHONUNBUFFERED=1
 

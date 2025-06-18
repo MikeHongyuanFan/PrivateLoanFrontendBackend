@@ -8311,6 +8311,8 @@
                     },
                     "loan_term": {
                         "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
                         "nullable": true,
                         "description": "Loan term in months"
                     },
@@ -8484,30 +8486,37 @@
                     },
                     "has_pending_litigation": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Do the Borrower(s) and the Guarantor(s) have any pending or past litigation matters (within the last 2 years)?"
                     },
                     "has_unsatisfied_judgements": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Are there any unsatisfied judgements against the Borrower(s) and the Guarantor(s)?"
                     },
                     "has_been_bankrupt": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Have the Borrower(s) and the Guarantor(s) been bankrupt or insolvent in the past 5 years?"
                     },
                     "has_been_refused_credit": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Has the Borrower(s) and the Guarantor(s) been refused credit by a credit provider in the last 1 year?"
                     },
                     "has_outstanding_ato_debt": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Are there any outstanding debts current or otherwise due to the ATO by the Borrower(s) and the Guarantor(s)?"
                     },
                     "has_outstanding_tax_returns": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Does the Borrower(s) and the Guarantor(s) have outstanding Tax or BAS returns due to be lodged with the ATO?"
                     },
                     "has_payment_arrangements": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Has the Borrower(s) and the Guarantor(s) made payment arrangements with a creditor to payout debt that is still current?"
                     },
                     "solvency_enquiries_details": {
@@ -8538,6 +8547,8 @@
                     },
                     "loan_term": {
                         "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
                         "nullable": true,
                         "description": "Loan term in months"
                     },
@@ -8701,30 +8712,37 @@
                     },
                     "has_pending_litigation": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Do the Borrower(s) and the Guarantor(s) have any pending or past litigation matters (within the last 2 years)?"
                     },
                     "has_unsatisfied_judgements": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Are there any unsatisfied judgements against the Borrower(s) and the Guarantor(s)?"
                     },
                     "has_been_bankrupt": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Have the Borrower(s) and the Guarantor(s) been bankrupt or insolvent in the past 5 years?"
                     },
                     "has_been_refused_credit": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Has the Borrower(s) and the Guarantor(s) been refused credit by a credit provider in the last 1 year?"
                     },
                     "has_outstanding_ato_debt": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Are there any outstanding debts current or otherwise due to the ATO by the Borrower(s) and the Guarantor(s)?"
                     },
                     "has_outstanding_tax_returns": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Does the Borrower(s) and the Guarantor(s) have outstanding Tax or BAS returns due to be lodged with the ATO?"
                     },
                     "has_payment_arrangements": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Has the Borrower(s) and the Guarantor(s) made payment arrangements with a creditor to payout debt that is still current?"
                     },
                     "solvency_enquiries_details": {
@@ -8753,6 +8771,8 @@
                     },
                     "loan_term": {
                         "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
                         "nullable": true,
                         "description": "Loan term in months"
                     },
@@ -8855,30 +8875,37 @@
                     },
                     "has_pending_litigation": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Do the Borrower(s) and the Guarantor(s) have any pending or past litigation matters (within the last 2 years)?"
                     },
                     "has_unsatisfied_judgements": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Are there any unsatisfied judgements against the Borrower(s) and the Guarantor(s)?"
                     },
                     "has_been_bankrupt": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Have the Borrower(s) and the Guarantor(s) been bankrupt or insolvent in the past 5 years?"
                     },
                     "has_been_refused_credit": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Has the Borrower(s) and the Guarantor(s) been refused credit by a credit provider in the last 1 year?"
                     },
                     "has_outstanding_ato_debt": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Are there any outstanding debts current or otherwise due to the ATO by the Borrower(s) and the Guarantor(s)?"
                     },
                     "has_outstanding_tax_returns": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Does the Borrower(s) and the Guarantor(s) have outstanding Tax or BAS returns due to be lodged with the ATO?"
                     },
                     "has_payment_arrangements": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Has the Borrower(s) and the Guarantor(s) made payment arrangements with a creditor to payout debt that is still current?"
                     },
                     "solvency_enquiries_details": {
@@ -9802,6 +9829,8 @@
                     },
                     "employment_duration": {
                         "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
                         "nullable": true,
                         "description": "Duration in months"
                     },
@@ -10069,6 +10098,8 @@
                     },
                     "employment_duration": {
                         "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
                         "nullable": true,
                         "description": "Duration in months"
                     },
@@ -11748,17 +11779,7 @@
                         "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
                         "default": "0.00"
                     }
-                },
-                "required": [
-                    "application_fee",
-                    "brokerage_fee_rate",
-                    "due_diligence_fee",
-                    "establishment_fee_rate",
-                    "legal_fee_before_gst",
-                    "monthly_account_fee",
-                    "monthly_line_fee_rate",
-                    "valuation_fee"
-                ]
+                }
             },
             "FundingCalculationInputRequest": {
                 "type": "object",
@@ -11815,17 +11836,7 @@
                         "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
                         "default": "0.00"
                     }
-                },
-                "required": [
-                    "application_fee",
-                    "brokerage_fee_rate",
-                    "due_diligence_fee",
-                    "establishment_fee_rate",
-                    "legal_fee_before_gst",
-                    "monthly_account_fee",
-                    "monthly_line_fee_rate",
-                    "valuation_fee"
-                ]
+                }
             },
             "GeneratePDF": {
                 "type": "object",
@@ -12504,17 +12515,17 @@
                     },
                     "description": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 255
                     },
                     "amount": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     }
                 },
                 "required": [
-                    "amount",
-                    "description",
                     "id"
                 ]
             },
@@ -12524,19 +12535,16 @@
                 "properties": {
                     "description": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 255
                     },
                     "amount": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     }
-                },
-                "required": [
-                    "amount",
-                    "description"
-                ]
+                }
             },
             "LogoutRequest": {
                 "type": "object",
@@ -12836,6 +12844,8 @@
                     },
                     "related_object_id": {
                         "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": -2147483648,
                         "nullable": true
                     },
                     "related_object_type": {
@@ -13038,6 +13048,8 @@
                     },
                     "related_object_id": {
                         "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": -2147483648,
                         "nullable": true
                     },
                     "related_object_type": {
@@ -13782,6 +13794,8 @@
                     },
                     "employment_duration": {
                         "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
                         "nullable": true,
                         "description": "Duration in months"
                     },
@@ -15026,14 +15040,20 @@
                     },
                     "bedrooms": {
                         "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
                         "nullable": true
                     },
                     "bathrooms": {
                         "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
                         "nullable": true
                     },
                     "car_spaces": {
                         "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
                         "nullable": true
                     },
                     "building_size": {
@@ -15164,14 +15184,20 @@
                     },
                     "bedrooms": {
                         "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
                         "nullable": true
                     },
                     "bathrooms": {
                         "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
                         "nullable": true
                     },
                     "car_spaces": {
                         "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
                         "nullable": true
                     },
                     "building_size": {
