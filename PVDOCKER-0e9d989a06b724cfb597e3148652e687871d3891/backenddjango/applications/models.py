@@ -40,12 +40,13 @@ class Application(models.Model):
     ]
     
     APPLICATION_TYPE_CHOICES = [
-        ('residential', 'Residential'),
-        ('commercial', 'Commercial'),
-        ('construction', 'Construction'),
+        ('acquisition', 'Acquisition'),
         ('refinance', 'Refinance'),
-        ('investment', 'Investment'),
-        ('smsf', 'SMSF'),
+        ('equity_release', 'Equity Release'),
+        ('refinance_equity_release', 'Refinance & Equity Release'),
+        ('second_mortgage', '2nd Mortgage'),
+        ('caveat', 'Caveat'),
+        ('other', 'Other'),
     ]
     
     REPAYMENT_FREQUENCY_CHOICES = [
@@ -78,12 +79,14 @@ class Application(models.Model):
     reference_number = models.CharField(max_length=20, unique=True, default=generate_reference_number)
     stage = models.CharField(max_length=25, choices=STAGE_CHOICES, default='inquiry')
     stage_last_updated = models.DateTimeField(default=timezone.now)  # Track when stage was last updated
-    application_type = models.CharField(max_length=20, choices=APPLICATION_TYPE_CHOICES, null=True, blank=True)
+    application_type = models.CharField(max_length=30, choices=APPLICATION_TYPE_CHOICES, null=True, blank=True)
+    application_type_other = models.TextField(null=True, blank=True, help_text="Details for 'Other' application type")
     purpose = models.TextField(null=True, blank=True, default='')
     
     # Loan details
     loan_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     loan_term = models.PositiveIntegerField(help_text="Loan term in months", null=True, blank=True)
+    capitalised_interest_term = models.PositiveIntegerField(null=True, blank=True, help_text="Capitalised Interest Term in months")
     interest_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     repayment_frequency = models.CharField(max_length=20, choices=REPAYMENT_FREQUENCY_CHOICES, default='monthly')
     product_id = models.CharField(max_length=50, null=True, blank=True)

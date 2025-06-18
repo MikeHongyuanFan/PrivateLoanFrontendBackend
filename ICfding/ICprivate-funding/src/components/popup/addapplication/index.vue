@@ -339,6 +339,7 @@
         purpose: "",
         repayment_frequency: "",
         application_type: "",
+        application_type_other: "",
         product_id: "",
         estimated_settlement_date: "",
         stage: "inquiry",
@@ -632,9 +633,14 @@
         }
         
         // Validate application_type against schema choices
-        const validApplicationTypes = ["residential", "commercial", "construction", "refinance", "investment", "smsf"];
+        const validApplicationTypes = ["acquisition", "refinance", "equity_release", "refinance_equity_release", "second_mortgage", "caveat", "other"];
         if (application.value.application_type && !validApplicationTypes.includes(application.value.application_type)) {
-            application.value.application_type = "residential"; // Default to residential
+            application.value.application_type = "acquisition"; // Default to acquisition
+        }
+        
+        // Validate application_type_other field - clear if not needed
+        if (application.value.application_type !== 'other') {
+            application.value.application_type_other = null;
         }
         
         // Validate exit_strategy against schema choices

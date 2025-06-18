@@ -10,12 +10,20 @@
                 <p>{{ detail.loan_term || '-' }}</p>
             </div>
             <div class="item">
+                <p class="title">Capitalised Interest Term (Months)</p>
+                <p>{{ detail.capitalised_interest_term || '-' }}</p>
+            </div>
+            <div class="item">
                 <p class="title">Proposed Settlement Date</p>
                 <p>{{ detail.estimated_settlement_date || '-' }}</p>
             </div>
             <div class="item">
                 <p class="title">Expected Rate (p.a) (%)</p>
                 <p>{{ detail.interest_rate || '-' }}</p>
+            </div>
+            <div class="item">
+                <p class="title">Application Type</p>
+                <p>{{ formatApplicationType(detail.application_type, detail.application_type_other) }}</p>
             </div>
             <div class="item">
                 <p class="title">Loan Purpose</p>
@@ -35,6 +43,27 @@
     const { detail } = defineProps({
         detail: Object
     })
+
+    const formatApplicationType = (applicationType, applicationTypeOther) => {
+        if (!applicationType) return '-';
+        
+        // Map the values to display labels
+        const typeLabels = {
+            'acquisition': 'Acquisition',
+            'refinance': 'Refinance',
+            'equity_release': 'Equity Release',
+            'refinance_equity_release': 'Refinance & Equity Release',
+            'second_mortgage': '2nd Mortgage',
+            'caveat': 'Caveat',
+            'other': 'Other'
+        };
+        
+        if (applicationType === 'other' && applicationTypeOther) {
+            return `Other: ${applicationTypeOther}`;
+        }
+        
+        return typeLabels[applicationType] || applicationType;
+    };
 </script>
 
 <style scoped>

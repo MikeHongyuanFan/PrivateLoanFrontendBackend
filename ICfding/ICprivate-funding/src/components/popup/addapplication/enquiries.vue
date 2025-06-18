@@ -1,11 +1,11 @@
 <template>
     <div class="form">
         <div class="long_item">
-            <h1>General Solvency Enquiries <span class="required">*</span></h1>
+            <h1>General Solvency Enquiries</h1>
             <span class="hint">Information about the financial standing of borrowers and guarantors</span>
         </div>
         <div class="enquiry">
-            <p>Do the Borrower(s) and the Guarantor(s) have any pending or past litigation matters (within the last 2 years)? <span class="required">*</span></p>
+            <p>Do the Borrower(s) and the Guarantor(s) have any pending or past litigation matters (within the last 2 years)?</p>
             <el-radio-group v-model="enquiry.has_pending_litigation">
                 <el-radio :value="true">Yes</el-radio>
                 <el-radio :value="false">No</el-radio>
@@ -13,7 +13,7 @@
             <span class="hint">Select Yes if there are any pending or past litigation matters</span>
         </div>
         <div class="enquiry">
-            <p>Are there any unsatisfied judgements against the Borrower(s) and the Guarantor(s)? <span class="required">*</span></p>
+            <p>Are there any unsatisfied judgements against the Borrower(s) and the Guarantor(s)?</p>
             <el-radio-group v-model="enquiry.has_unsatisfied_judgements">
                 <el-radio :value="true">Yes</el-radio>
                 <el-radio :value="false">No</el-radio>
@@ -21,7 +21,7 @@
             <span class="hint">Select Yes if there are any unsatisfied judgements</span>
         </div>
         <div class="enquiry">
-            <p>Have the Borrower(s) and the Guarantor(s) been bankrupt or insolvent in the past 5 years? <span class="required">*</span></p>
+            <p>Have the Borrower(s) and the Guarantor(s) been bankrupt or insolvent in the past 5 years?</p>
             <el-radio-group v-model="enquiry.has_been_bankrupt">
                 <el-radio :value="true">Yes</el-radio>
                 <el-radio :value="false">No</el-radio>
@@ -29,7 +29,7 @@
             <span class="hint">Select Yes if there has been bankruptcy or insolvency</span>
         </div>
         <div class="enquiry">
-            <p>Has the Borrower(s) and the Guarantor(s) been refused credit by a credit provider in the last 1 year? <span class="required">*</span></p>
+            <p>Has the Borrower(s) and the Guarantor(s) been refused credit by a credit provider in the last 1 year?</p>
             <el-radio-group v-model="enquiry.has_been_refused_credit">
                 <el-radio :value="true">Yes</el-radio>
                 <el-radio :value="false">No</el-radio>
@@ -37,7 +37,7 @@
             <span class="hint">Select Yes if credit has been refused in the last year</span>
         </div>
         <div class="enquiry">
-            <p>Are there any outstanding debts current or otherwise due to the ATO by the Borrower(s) and the Guarantor(s)? <span class="required">*</span></p>
+            <p>Are there any outstanding debts current or otherwise due to the ATO by the Borrower(s) and the Guarantor(s)?</p>
             <el-radio-group v-model="enquiry.has_outstanding_ato_debt">
                 <el-radio :value="true">Yes</el-radio>
                 <el-radio :value="false">No</el-radio>
@@ -45,7 +45,7 @@
             <span class="hint">Select Yes if there are outstanding ATO debts</span>
         </div>
         <div class="enquiry">
-            <p>Does the Borrower(s) and the Guarantor(s) have outstanding Tax or BAS returns due to be lodged with the ATO? <span class="required">*</span></p>
+            <p>Does the Borrower(s) and the Guarantor(s) have outstanding Tax or BAS returns due to be lodged with the ATO?</p>
             <el-radio-group v-model="enquiry.has_outstanding_tax_returns">
                 <el-radio :value="true">Yes</el-radio>
                 <el-radio :value="false">No</el-radio>
@@ -53,7 +53,7 @@
             <span class="hint">Select Yes if there are outstanding tax returns</span>
         </div>
         <div class="enquiry">
-            <p>Has the Borrower(s) and the Guarantor(s) made payment arrangements with a creditor to payout debt that is still current? <span class="required">*</span></p>
+            <p>Has the Borrower(s) and the Guarantor(s) made payment arrangements with a creditor to payout debt that is still current?</p>
             <el-radio-group v-model="enquiry.has_payment_arrangements">
                 <el-radio :value="true">Yes</el-radio>
                 <el-radio :value="false">No</el-radio>
@@ -74,22 +74,10 @@
 </template>
 
 <script setup>
-    import { computed, onMounted } from 'vue';
+    import { computed } from 'vue';
 
     const props = defineProps({
         enquiry: Object
-    });
-
-    // Initialize default values
-    onMounted(() => {
-        // Set default values to false if null
-        if (props.enquiry.has_pending_litigation === null) props.enquiry.has_pending_litigation = false;
-        if (props.enquiry.has_unsatisfied_judgements === null) props.enquiry.has_unsatisfied_judgements = false;
-        if (props.enquiry.has_been_bankrupt === null) props.enquiry.has_been_bankrupt = false;
-        if (props.enquiry.has_been_refused_credit === null) props.enquiry.has_been_refused_credit = false;
-        if (props.enquiry.has_outstanding_ato_debt === null) props.enquiry.has_outstanding_ato_debt = false;
-        if (props.enquiry.has_outstanding_tax_returns === null) props.enquiry.has_outstanding_tax_returns = false;
-        if (props.enquiry.has_payment_arrangements === null) props.enquiry.has_payment_arrangements = false;
     });
 
     // Check if any question has a "Yes" answer

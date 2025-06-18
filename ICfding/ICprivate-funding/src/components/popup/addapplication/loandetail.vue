@@ -4,16 +4,22 @@
             <h1>Loan Details</h1>
         </div>
         <div class="item">
-            <p>Application Type <span class="required">*</span></p>
+            <p>Application Type</p>
             <el-select v-model="detail.application_type" placeholder="Select application type">
-                <el-option value="residential" label="Residential" />
-                <el-option value="commercial" label="Commercial" />
-                <el-option value="construction" label="Construction" />
+                <el-option value="acquisition" label="Acquisition" />
                 <el-option value="refinance" label="Refinance" />
-                <el-option value="investment" label="Investment" />
-                <el-option value="smsf" label="SMSF" />
+                <el-option value="equity_release" label="Equity Release" />
+                <el-option value="refinance_equity_release" label="Refinance & Equity Release" />
+                <el-option value="second_mortgage" label="2nd Mortgage" />
+                <el-option value="caveat" label="Caveat" />
+                <el-option value="other" label="Other" />
             </el-select>
             <span class="hint">Select the type of loan application</span>
+        </div>
+        <div class="item" v-if="detail.application_type === 'other'">
+            <p>Other Application Type <span class="required">*</span></p>
+            <el-input v-model="detail.application_type_other" placeholder="Specify other application type" />
+            <span class="hint">Required if 'Other' is selected</span>
         </div>
         <div class="item">
             <p>Estimated Settlement Date <span class="required">*</span></p>
@@ -34,6 +40,11 @@
             <p>Term Required (months)</p>
             <el-input v-model="detail.loan_term" type="number" placeholder="e.g. 12" />
             <span class="hint">Enter the loan term in months</span>
+        </div>
+        <div class="item">
+            <p>Capitalised Interest Term (months)</p>
+            <el-input v-model="detail.capitalised_interest_term" type="number" placeholder="e.g. 6" />
+            <span class="hint">Enter the capitalised interest term in months</span>
         </div>
         <div class="item">
             <p>Expected Repayment Frequency <span class="required">*</span></p>
@@ -191,6 +202,14 @@
         if (newVal !== 'other') {
             // Reset the other purpose input when a predefined purpose is selected
             otherPurpose.value = "";
+        }
+    });
+
+    // Watch for changes in the application type
+    watch(() => props.detail.application_type, (newVal) => {
+        if (newVal !== 'other') {
+            // Reset the other application type input when a predefined type is selected
+            props.detail.application_type_other = "";
         }
     });
 </script>

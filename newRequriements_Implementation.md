@@ -263,35 +263,6 @@ This document outlines the detailed implementation plan for the 18 new requireme
 #### Implementation Priority: **HIGH** ⚡
 #### Estimated Effort: **3-4 days**
 
----
-
-### **Requirement 12: Template Auto-fill/Mail Merge**
-> *"Is there a way for us to autofill/mail merge information we've filled in the application into preset templates?"*
-
-#### Backend Changes:
-- **New App**: Create `templates` Django app
-- **Models**: 
-  ```python
-  class DocumentTemplate(models.Model):
-      name = models.CharField(max_length=255)
-      template_file = models.FileField(upload_to='templates/')
-      merge_fields = JSONField()  # Store available merge fields
-      
-  class GeneratedDocument(models.Model):
-      application = models.ForeignKey(Application)
-      template = models.ForeignKey(DocumentTemplate)
-      generated_file = models.FileField(upload_to='generated_docs/')
-  ```
-- **API**: Endpoints for template management and document generation
-- **Service**: Document generation service using python-docx or similar
-
-#### Frontend Changes:
-- **New Views**: Template management interface
-- **Application Detail**: Add "Generate Documents" section
-- **Components**: Template selection and preview components
-
-#### Implementation Priority: **MEDIUM** 🔶
-#### Estimated Effort: **5-7 days**
 
 ---
 
