@@ -7,6 +7,17 @@
                 <el-icon :size="20" style="cursor: pointer; color: #7A858E;" @click="handleClose"><Close /></el-icon>                    
             </div>
         </div>
+        <div class="step-indicator">
+            <div class="step-progress">
+                <span class="step-text">Step {{ currentStep }} of {{ totalSteps }}: {{ currentStepName }}</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" :style="{ width: (currentStep / totalSteps * 100) + '%' }"></div>
+                </div>
+                <div class="keyboard-hint">
+                    <small>Tip: Use Ctrl + ← → arrows for quick navigation</small>
+                </div>
+            </div>
+        </div>
         <el-scrollbar>
             <div class="popup_content">
                 <el-collapse v-model="activeNames" accordion style="--el-collapse-border-color: none;">
@@ -123,14 +134,20 @@
             </div>
         </el-scrollbar>
         <div class="buttons">
-            <Cancel @click="handleClose"></Cancel>
-            <Save @click="handleSave" :loading="isSubmitting" text="Save"></Save>
+            <div class="navigation-buttons">
+                <Previous @click="goToPreviousStep" :disabled="isFirstStep"></Previous>
+                <Next @click="goToNextStep" :disabled="isLastStep" :text="isLastStep ? 'Finish' : 'Next'"></Next>
+            </div>
+            <div class="action-buttons">
+                <Cancel @click="handleClose"></Cancel>
+                <Save @click="handleSave" :loading="isSubmitting" text="Save"></Save>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
-    import { ref, computed, watch, onMounted } from 'vue';
+    import { ref, computed, watch, onMounted, onUnmounted } from 'vue';
     import { ElMessage } from 'element-plus';
     import { api } from '@/api';
     import { transformGuarantorAssets } from '@/utils/guarantorAssetTransformer';
@@ -147,6 +164,8 @@
     import Exit from './exit.vue';
     import Cancel from '@/components/buttons/cancel.vue';
     import Save from '@/components/buttons/save.vue';
+    import Next from '@/components/buttons/next.vue';
+    import Previous from '@/components/buttons/previous.vue';
 
     const props = defineProps({
         action: String
@@ -156,6 +175,29 @@
     
     const activeNames = ref("1")
     const isSubmitting = ref(false)
+    
+    // Step navigation logic
+    const totalSteps = 11
+    const currentStep = computed(() => parseInt(activeNames.value) || 1)
+    const isFirstStep = computed(() => currentStep.value === 1)
+    const isLastStep = computed(() => currentStep.value === totalSteps)
+    
+    // Step names for better UX
+    const stepNames = [
+        'Company Details',
+        'Company Assets',
+        'Company Liabilities', 
+        'General Solvency',
+        'Guarantor Details',
+        'Guarantor Assets',
+        'Security Properties',
+        'Loan Details',
+        'Loan Requirements',
+        'Funding Calculation',
+        'Exit Strategy'
+    ]
+    
+    const currentStepName = computed(() => stepNames[currentStep.value - 1] || 'Unknown Step')
     
     const createDirector = () => {
         return {
@@ -472,80 +514,49 @@
         application.value.loan_requirements.pop()
     }
     const isCompanyValid = computed(() => {
-        if (!application.value?.company_borrowers?.[0]) return false;
-        
-        const company = application.value.company_borrowers[0];
-        return company.company_name && company.company_abn && company.industry_type;
+        // All fields are now optional - always return true if section has any data
+        if (!application.value?.company_borrowers?.[0]) return true;
+        return true; // Company section is always valid since all fields are optional
     })
     
     const isCompanyAssetValid = computed(() => {
-        if (!application.value?.company_borrowers?.[0]?.assets) return false;
-        
-        const assets = application.value.company_borrowers[0].assets;
-        return assets.length > 0 && assets.every(asset => asset.asset_type && asset.value);
+        // All fields are now optional - always return true
+        return true; // Company asset section is always valid since all fields are optional
     })
     
     const isEnquiryValid = computed(() => {
-        // Check if all required solvency fields are filled
-        return application.value.has_pending_litigation !== null &&
-               application.value.has_unsatisfied_judgements !== null &&
-               application.value.has_been_bankrupt !== null &&
-               application.value.has_been_refused_credit !== null;
+        // All fields are now optional - always return true
+        return true; // Enquiry section is always valid since all fields are optional
     })
     
     const isIndividualValid = computed(() => {
-        if (!application.value?.borrowers) return false;
-        
-        return application.value.borrowers.length > 0 && 
-               application.value.borrowers.every(borrower => 
-                   borrower.first_name && borrower.last_name && borrower.email
-               );
+        // All fields are now optional - always return true
+        return true; // Individual section is always valid since all fields are optional
     })
     
     const isGuarantorAssetValid = computed(() => {
-        // Check if at least one guarantor asset is defined
-        const ga = guarantorAsset.value;
-        return ga && (
-            (ga.address1 && (ga.address1G1 || ga.address1G2)) ||
-            (ga.address2 && (ga.address2G1 || ga.address2G2)) ||
-            (ga.address3 && (ga.address3G1 || ga.address3G2)) ||
-            (ga.address4 && (ga.address4G1 || ga.address4G2)) ||
-            (ga.vehicleValue && (ga.vehicleG1 || ga.vehicleG2)) ||
-            (ga.savingValue && (ga.savingG1 || ga.savingG2)) ||
-            (ga.shareValue && (ga.shareG1 || ga.shareG2)) ||
-            (ga.cardValue && (ga.cardG1 || ga.cardG2)) ||
-            (ga.creditorValue && (ga.creditorG1 || ga.creditorG2)) ||
-            (ga.otherValue && (ga.otherG1 || ga.otherG2))
-        );
+        // All fields are now optional - always return true
+        return true; // Guarantor asset section is always valid since all fields are optional
     })
     
     const isSecurityValid = computed(() => {
-        if (!application.value?.security_properties) return false;
-        
-        return application.value.security_properties.length > 0 && 
-               application.value.security_properties.every(property => 
-                   property.address_street_name && property.address_suburb && 
-                   property.address_state && property.address_postcode
-               );
+        // All fields are now optional - always return true
+        return true; // Security section is always valid since all fields are optional
     })
     
     const isLoanDetailValid = computed(() => {
-        return application.value.loan_amount && 
-               application.value.repayment_frequency && 
-               application.value.application_type && 
-               application.value.product_id;
+        // All fields are now optional - always return true
+        return true; // Loan detail section is always valid since all fields are optional
     })
     
     const isRequirementValid = computed(() => {
-        if (!application.value?.loan_requirements) return false;
-        
-        return application.value.loan_requirements.length > 0 && 
-               application.value.loan_requirements.every(req => req.description && req.amount);
+        // All fields are now optional - always return true
+        return true; // Loan requirement section is always valid since all fields are optional
     })
     
     const isExitValid = computed(() => {
-        return application.value.exit_strategy && 
-               (application.value.exit_strategy !== 'other' || application.value.exit_strategy_details);
+        // All fields are now optional - always return true
+        return true; // Exit strategy section is always valid since all fields are optional
     })
     
     // Format date to YYYY-MM-DD
@@ -605,22 +616,8 @@
     
     // Validate and format application data
     const validateAndFormatApplication = () => {
-        // Required fields validation based on schema
-        const requiredFields = [
-            'reference_number',
-            'loan_amount',
-            'repayment_frequency',
-            'application_type',
-            'product_id',
-            'stage'
-        ];
-        
-        const missingFields = requiredFields.filter(field => !application.value[field]);
-        
-        if (missingFields.length > 0) {
-            ElMessage.warning(`Please fill in all required fields: ${missingFields.join(', ')}`);
-            return false;
-        }
+        // All fields are now optional - no blocking validation
+        // Only validate data format and types when values are provided
         
         // Format dates using the utility function
         application.value = formatDates(application.value);
@@ -826,7 +823,50 @@
     // Initialize data when component mounts
     onMounted(() => {
         console.log("AddApplication component mounted");
+        
+        // Add keyboard navigation
+        const handleKeydown = (event) => {
+            if (event.ctrlKey && event.key === 'ArrowRight') {
+                event.preventDefault();
+                goToNextStep();
+            } else if (event.ctrlKey && event.key === 'ArrowLeft') {
+                event.preventDefault();
+                goToPreviousStep();
+            }
+        };
+        
+        document.addEventListener('keydown', handleKeydown);
+        
+        // Cleanup on unmount
+        onUnmounted(() => {
+            document.removeEventListener('keydown', handleKeydown);
+        });
     });
+
+    // Step navigation functions
+    const goToNextStep = () => {
+        if (!isLastStep.value) {
+            const nextStep = currentStep.value + 1;
+            activeNames.value = nextStep.toString();
+            console.log(`Navigated to step ${nextStep}`);
+        }
+    };
+
+    const goToPreviousStep = () => {
+        if (!isFirstStep.value) {
+            const prevStep = currentStep.value - 1;
+            activeNames.value = prevStep.toString();
+            console.log(`Navigated to step ${prevStep}`);
+        }
+    };
+
+    // Optional: Auto-advance to next step when current section is valid
+    const goToStep = (stepNumber) => {
+        if (stepNumber >= 1 && stepNumber <= totalSteps) {
+            activeNames.value = stepNumber.toString();
+            console.log(`Navigated to step ${stepNumber}`);
+        }
+    };
 
     const handleSave = async () => {
         try {
@@ -993,9 +1033,68 @@
         margin-top: auto;
         display: flex;
         flex-direction: row;
-        justify-content: end;
+        justify-content: space-between;
         align-items: center;
         border-top: 1.5px solid #E1E1E1;
         gap: 10px;
+    }
+    
+    .navigation-buttons {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
+        align-items: center;
+    }
+    
+    .step-indicator {
+        width: 100%;
+        padding: 15px 10px;
+        border-bottom: 1.5px solid #E1E1E1;
+        background-color: #f8f9fa;
+    }
+    
+    .step-progress {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .step-text {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #384144;
+        text-align: center;
+    }
+    
+    .progress-bar {
+        width: 100%;
+        height: 6px;
+        background-color: #E1E1E1;
+        border-radius: 3px;
+        overflow: hidden;
+    }
+    
+    .progress-fill {
+        height: 100%;
+        background-color: #2984DE;
+        border-radius: 3px;
+        transition: width 0.3s ease;
+    }
+    
+    .keyboard-hint {
+        text-align: center;
+        margin-top: 5px;
+    }
+    
+    .keyboard-hint small {
+        color: #6c757d;
+        font-size: 0.75rem;
     }
 </style>

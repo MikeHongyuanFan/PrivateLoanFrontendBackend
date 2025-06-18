@@ -100,13 +100,13 @@ class Application(models.Model):
     exit_strategy_details = models.TextField(null=True, blank=True)
     
     # General Solvency Enquiries
-    has_pending_litigation = models.BooleanField(default=False, help_text="Do the Borrower(s) and the Guarantor(s) have any pending or past litigation matters (within the last 2 years)?")
-    has_unsatisfied_judgements = models.BooleanField(default=False, help_text="Are there any unsatisfied judgements against the Borrower(s) and the Guarantor(s)?")
-    has_been_bankrupt = models.BooleanField(default=False, help_text="Have the Borrower(s) and the Guarantor(s) been bankrupt or insolvent in the past 5 years?")
-    has_been_refused_credit = models.BooleanField(default=False, help_text="Has the Borrower(s) and the Guarantor(s) been refused credit by a credit provider in the last 1 year?")
-    has_outstanding_ato_debt = models.BooleanField(default=False, help_text="Are there any outstanding debts current or otherwise due to the ATO by the Borrower(s) and the Guarantor(s)?")
-    has_outstanding_tax_returns = models.BooleanField(default=False, help_text="Does the Borrower(s) and the Guarantor(s) have outstanding Tax or BAS returns due to be lodged with the ATO?")
-    has_payment_arrangements = models.BooleanField(default=False, help_text="Has the Borrower(s) and the Guarantor(s) made payment arrangements with a creditor to payout debt that is still current?")
+    has_pending_litigation = models.BooleanField(null=True, blank=True, default=None, help_text="Do the Borrower(s) and the Guarantor(s) have any pending or past litigation matters (within the last 2 years)?")
+    has_unsatisfied_judgements = models.BooleanField(null=True, blank=True, default=None, help_text="Are there any unsatisfied judgements against the Borrower(s) and the Guarantor(s)?")
+    has_been_bankrupt = models.BooleanField(null=True, blank=True, default=None, help_text="Have the Borrower(s) and the Guarantor(s) been bankrupt or insolvent in the past 5 years?")
+    has_been_refused_credit = models.BooleanField(null=True, blank=True, default=None, help_text="Has the Borrower(s) and the Guarantor(s) been refused credit by a credit provider in the last 1 year?")
+    has_outstanding_ato_debt = models.BooleanField(null=True, blank=True, default=None, help_text="Are there any outstanding debts current or otherwise due to the ATO by the Borrower(s) and the Guarantor(s)?")
+    has_outstanding_tax_returns = models.BooleanField(null=True, blank=True, default=None, help_text="Does the Borrower(s) and the Guarantor(s) have outstanding Tax or BAS returns due to be lodged with the ATO?")
+    has_payment_arrangements = models.BooleanField(null=True, blank=True, default=None, help_text="Has the Borrower(s) and the Guarantor(s) made payment arrangements with a creditor to payout debt that is still current?")
     solvency_enquiries_details = models.TextField(null=True, blank=True, help_text="Additional details for any 'Yes' answers to solvency enquiries")
     
     # Funding calculation result
@@ -252,8 +252,8 @@ class LoanRequirement(models.Model):
     Model for loan requirements
     """
     application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name='loan_requirements')
-    description = models.CharField(max_length=255)
-    amount = models.DecimalField(max_digits=12, decimal_places=2)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     
     # Metadata
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)

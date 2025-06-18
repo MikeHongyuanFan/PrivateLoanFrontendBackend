@@ -85,12 +85,9 @@ def validate_company_borrower(company_data):
     return errors
 
 def _validate_required_fields(company_data):
-    """Validate required company fields"""
+    """Validate optional company fields - no fields are required anymore"""
     errors = {}
-    required_fields = ['company_name', 'company_abn', 'company_acn', 'industry_type']
-    for field in required_fields:
-        if not company_data.get(field):
-            errors[field] = f'{field.replace("_", " ").title()} is required'
+    # All fields are now optional - no validation needed
     return errors
 
 def _validate_identifiers(company_data):
@@ -208,12 +205,9 @@ def validate_security_property(property_data):
     return errors
 
 def _validate_property_required_fields(property_data):
-    """Validate required property fields"""
+    """Validate optional property fields - no fields are required anymore"""
     errors = {}
-    required_fields = ['address_street_name', 'address_suburb', 'address_state', 'address_postcode']
-    for field in required_fields:
-        if not property_data.get(field):
-            errors[field] = f'{field.replace("address_", "").replace("_", " ").title()} is required'
+    # All fields are now optional - no validation needed
     return errors
 
 def _validate_property_type(property_data):
@@ -251,24 +245,18 @@ def _validate_property_numeric_fields(property_data):
 
 def validate_loan_requirement(requirement_data):
     """
-    Validate loan requirement information
+    Validate loan requirement information - all fields are now optional
     """
     errors = {}
     
-    # Validate required fields
-    if not requirement_data.get('description'):
-        errors['description'] = 'Description is required'
-    
-    # Validate amount
-    if 'amount' in requirement_data:
+    # Validate amount if provided
+    if 'amount' in requirement_data and requirement_data['amount']:
         try:
             amount = float(requirement_data['amount'])
             if amount <= 0:
                 errors['amount'] = 'Amount must be greater than 0'
         except (ValueError, TypeError):
             errors['amount'] = 'Amount must be a number'
-    else:
-        errors['amount'] = 'Amount is required'
     
     return errors
 
@@ -290,20 +278,9 @@ def validate_guarantor(guarantor_data):
     return errors
 
 def _validate_guarantor_required_fields(guarantor_data):
-    """Validate required guarantor fields"""
+    """Validate optional guarantor fields - no fields are required anymore"""
     errors = {}
-    
-    if guarantor_data.get('guarantor_type') == 'individual':
-        required_fields = ['first_name', 'last_name', 'date_of_birth']
-        for field in required_fields:
-            if not guarantor_data.get(field):
-                errors[field] = f'{field.replace("_", " ").title()} is required'
-    else:  # company
-        required_fields = ['company_name', 'company_abn', 'company_acn']
-        for field in required_fields:
-            if not guarantor_data.get(field):
-                errors[field] = f'{field.replace("_", " ").title()} is required'
-    
+    # All fields are now optional - no validation needed
     return errors
 
 def _validate_guarantor_type(guarantor_data):
