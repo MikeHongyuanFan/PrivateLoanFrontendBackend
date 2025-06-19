@@ -174,6 +174,84 @@ export function assignBd(params, data) {
     })
 }
 
+// Valuer API functions
+export function valuers(params) {
+    return sendRequest({
+        url: '/api/applications/valuers/',
+        method: 'get',
+        params: params,
+    });
+}
+
+export function addValuer(params) {
+    return sendRequest({
+        url: '/api/applications/valuers/',
+        method: 'post',
+        data: params,
+    });
+}
+
+export function updateValuer(id, params) {
+    return sendRequest({
+        url: `/api/applications/valuers/${id}/`,
+        method: 'put',
+        data: params,
+    });
+}
+
+export function deactivateValuer(id) {
+    return sendRequest({
+        url: `/api/applications/valuers/${id}/deactivate/`,
+        method: 'post',
+    });
+}
+
+export function activateValuer(id) {
+    return sendRequest({
+        url: `/api/applications/valuers/${id}/activate/`,
+        method: 'post',
+    });
+}
+
+// Quantity Surveyor API functions
+export function quantitySurveyors(params) {
+    return sendRequest({
+        url: '/api/applications/quantity-surveyors/',
+        method: 'get',
+        params: params,
+    });
+}
+
+export function addQuantitySurveyor(params) {
+    return sendRequest({
+        url: '/api/applications/quantity-surveyors/',
+        method: 'post',
+        data: params,
+    });
+}
+
+export function updateQuantitySurveyor(id, params) {
+    return sendRequest({
+        url: `/api/applications/quantity-surveyors/${id}/`,
+        method: 'put',
+        data: params,
+    });
+}
+
+export function deactivateQuantitySurveyor(id) {
+    return sendRequest({
+        url: `/api/applications/quantity-surveyors/${id}/deactivate/`,
+        method: 'post',
+    });
+}
+
+export function activateQuantitySurveyor(id) {
+    return sendRequest({
+        url: `/api/applications/quantity-surveyors/${id}/activate/`,
+        method: 'post',
+    });
+}
+
 export const applicationApi = {
     applications,
     application,
@@ -187,5 +265,17 @@ export const applicationApi = {
     updateApplication,
     generatePdf,
     fees,
-    assignBd
+    assignBd,
+    // Valuer functions
+    valuers,
+    addValuer,
+    updateValuer,
+    deactivateValuer,
+    activateValuer,
+    // Quantity Surveyor functions
+    quantitySurveyors,
+    addQuantitySurveyor,
+    updateQuantitySurveyor,
+    deactivateQuantitySurveyor,
+    activateQuantitySurveyor,
 }

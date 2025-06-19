@@ -33,6 +33,31 @@
                 <p class="title">Additional Comments</p>
                 <p>{{ detail.additional_comments || '-' }}</p>
             </div>
+            <!-- Valuer Information -->
+            <div class="item">
+                <p class="title">Valuer</p>
+                <div v-if="detail.valuer" class="entity-info">
+                    <p class="entity-name">{{ detail.valuer.company_name }}</p>
+                    <p class="entity-details">{{ detail.valuer.contact_name }} - {{ detail.valuer.phone }}</p>
+                    <p class="entity-email">{{ detail.valuer.email }}</p>
+                </div>
+                <p v-else>Not assigned</p>
+            </div>
+            <!-- Quantity Surveyor Information -->
+            <div class="item">
+                <p class="title">Quantity Surveyor</p>
+                <div v-if="detail.quantity_surveyor" class="entity-info">
+                    <p class="entity-name">{{ detail.quantity_surveyor.company_name }}</p>
+                    <p class="entity-details">{{ detail.quantity_surveyor.contact_name }} - {{ detail.quantity_surveyor.phone }}</p>
+                    <p class="entity-email">{{ detail.quantity_surveyor.email }}</p>
+                </div>
+                <p v-else>Not assigned</p>
+            </div>
+            <!-- Prior Application Info -->
+            <div class="item" v-if="detail.prior_application">
+                <p class="title">Prior Application</p>
+                <p>{{ detail.prior_application_details || 'Yes' }}</p>
+            </div>
         </div>
     </div>
 </template>
@@ -94,5 +119,24 @@
     }
     .title {
         color: #7A858E;
+    }
+    .entity-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .entity-name {
+        font-weight: 700;
+        color: #2984DE;
+    }
+    .entity-details {
+        font-size: 0.7rem;
+        color: #666;
+        font-weight: 500;
+    }
+    .entity-email {
+        font-size: 0.7rem;
+        color: #666;
+        font-weight: 500;
     }
 </style>

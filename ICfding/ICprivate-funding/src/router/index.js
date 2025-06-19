@@ -442,6 +442,43 @@ export const constantRoutes = [
       },
     ],
   },
+  //management
+  {
+    path: '/management',
+    component: Layout,
+    redirect: '/management/valuers',
+    meta: {
+      hidden: false,
+      title: 'Management',
+      icon: setting,
+      i18nTitle: 'system.management',
+      isTop: false,
+    },
+    children: [
+      {
+        path: '/management/valuers',
+        component: () => import('@/view/valuer-management.vue'),
+        meta: {
+          title: 'Valuer Management',
+          breadcrumb: [
+            { label: 'Management', path: '/management' },
+            { label: 'Valuers' },
+          ],
+        },
+      },
+      {
+        path: '/management/quantity-surveyors',
+        component: () => import('@/view/quantity-surveyor-management.vue'),
+        meta: {
+          title: 'Quantity Surveyor Management',
+          breadcrumb: [
+            { label: 'Management', path: '/management' },
+            { label: 'Quantity Surveyors' },
+          ],
+        },
+      },
+    ],
+  },
 ]
 
 const router = createRouter({
