@@ -152,6 +152,42 @@ export function updateApplication(id, params) {
         ];
     });
 }
+
+/**
+ * Updates an existing application with all related entities using partial update with cascade
+ * @param {number} id - The application ID
+ * @param {Object} params - The updated application data
+ * @returns {Promise} - Promise that resolves to [error, data]
+ */
+export function updateApplicationWithCascade(id, params) {
+    console.log("API call: updateApplicationWithCascade() with id:", id);
+    console.log("Update data:", params);
+    
+    return sendRequest({
+        url: `/api/applications/${id}/partial-update-cascade/`,
+        method: "patch",
+        data: params,
+    }).then(([err, res]) => {
+        if (err) {
+            console.error("Error updating application with cascade:", err);
+        } else {
+            console.log("Application updated successfully with cascade:", res);
+        }
+        return [err, res];
+    }).catch(error => {
+        console.error("Exception in updateApplicationWithCascade:", error);
+        const formattedErrors = error.response?.data?.errors || { general: "An unexpected error occurred" };
+        return [
+            { 
+                status: error.response?.status || 500,
+                detail: error.response?.data?.detail || "Server error",
+                errors: formattedErrors
+            }, 
+            null
+        ];
+    });
+}
+
 export function generatePdf(params) {
     return sendRequest({
         url: `/api/applications/${params}/generate-pdf/`,
@@ -263,6 +299,7 @@ export const applicationApi = {
     createApplicationWithCascade,
     deleteApplication,
     updateApplication,
+    updateApplicationWithCascade,
     generatePdf,
     fees,
     assignBd,

@@ -101,6 +101,150 @@
                 }
             }
         },
+        "/api/applications/{id}/assign-bd/": {
+            "post": {
+                "operationId": "applications_assign_bd_create",
+                "description": "Manage BD assignment for an application\n\nMethods:\n- POST: Assign a BD to an application that doesn't have one\n- PUT: Update/reassign the BD for an application\n- DELETE: Remove the BD assignment from an application",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApplicationListRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApplicationListRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApplicationListRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApplicationList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "applications_assign_bd_update",
+                "description": "Manage BD assignment for an application\n\nMethods:\n- POST: Assign a BD to an application that doesn't have one\n- PUT: Update/reassign the BD for an application\n- DELETE: Remove the BD assignment from an application",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApplicationListRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApplicationListRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApplicationListRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApplicationList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "applications_assign_bd_destroy",
+                "description": "Manage BD assignment for an application\n\nMethods:\n- POST: Assign a BD to an application that doesn't have one\n- PUT: Update/reassign the BD for an application\n- DELETE: Remove the BD assignment from an application",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
         "/api/applications/{id}/borrowers/": {
             "put": {
                 "operationId": "applications_borrowers_update",
@@ -292,6 +436,64 @@
                 "tags": [
                     "applications"
                 ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApplicationList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/applications/{id}/partial-update-cascade/": {
+            "patch": {
+                "operationId": "applications_partial_update_cascade_partial_update",
+                "description": "Partial update application with cascade support for related objects.\n\nThis endpoint allows updating the application and its nested related objects:\n- Borrowers (create/update/remove)\n- Guarantors (create/update/remove)\n- Company Borrowers (create/update/remove)\n- Security Properties (replace all)\n- Loan Requirements (replace all)\n- Funding Calculation (trigger new calculation)\n\nThe endpoint supports both updating existing related objects (by providing ID)\nand creating new ones (without ID).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedApplicationListRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedApplicationListRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedApplicationListRequest"
+                            }
+                        }
+                    }
+                },
                 "security": [
                     {
                         "jwtAuth": []
@@ -603,7 +805,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this application.",
+                        "description": "A unique integer value identifying this Application.",
                         "required": true
                     }
                 ],
@@ -641,7 +843,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this application.",
+                        "description": "A unique integer value identifying this Application.",
                         "required": true
                     }
                 ],
@@ -698,7 +900,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this application.",
+                        "description": "A unique integer value identifying this Application.",
                         "required": true
                     }
                 ],
@@ -755,7 +957,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this application.",
+                        "description": "A unique integer value identifying this Application.",
                         "required": true
                     }
                 ],
@@ -788,7 +990,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this application.",
+                        "description": "A unique integer value identifying this Application.",
                         "required": true
                     }
                 ],
@@ -845,7 +1047,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this application.",
+                        "description": "A unique integer value identifying this Application.",
                         "required": true
                     }
                 ],
@@ -902,7 +1104,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this application.",
+                        "description": "A unique integer value identifying this Application.",
                         "required": true
                     }
                 ],
@@ -935,7 +1137,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this application.",
+                        "description": "A unique integer value identifying this Application.",
                         "required": true
                     }
                 ],
@@ -994,7 +1196,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this application.",
+                        "description": "A unique integer value identifying this Application.",
                         "required": true
                     }
                 ],
@@ -1053,7 +1255,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this application.",
+                        "description": "A unique integer value identifying this Application.",
                         "required": true
                     }
                 ],
@@ -1112,13 +1314,72 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this application.",
+                        "description": "A unique integer value identifying this Application.",
                         "required": true
                     }
                 ],
                 "tags": [
                     "applications"
                 ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApplicationList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/applications/applications/{id}/partial_update_with_cascade/": {
+            "patch": {
+                "operationId": "applications_applications_partial_update_with_cascade_partial_update",
+                "description": "Partial update application with cascade support for related objects.\n\nThis endpoint allows updating the application and its nested related objects:\n- Borrowers (create/update/remove)\n- Guarantors (create/update/remove)\n- Company Borrowers (create/update/remove)\n- Security Properties (replace all)\n- Loan Requirements (replace all)\n- Funding Calculation (trigger new calculation)\n\nThe endpoint supports both updating existing related objects (by providing ID)\nand creating new ones (without ID).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "A unique integer value identifying this Application.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedApplicationListRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedApplicationListRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedApplicationListRequest"
+                            }
+                        }
+                    }
+                },
                 "security": [
                     {
                         "jwtAuth": []
@@ -1152,7 +1413,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this application.",
+                        "description": "A unique integer value identifying this Application.",
                         "required": true
                     }
                 ],
@@ -1211,7 +1472,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this application.",
+                        "description": "A unique integer value identifying this Application.",
                         "required": true
                     }
                 ],
@@ -1270,7 +1531,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this application.",
+                        "description": "A unique integer value identifying this Application.",
                         "required": true
                     }
                 ],
@@ -1329,7 +1590,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this application.",
+                        "description": "A unique integer value identifying this Application.",
                         "required": true
                     }
                 ],
@@ -1487,6 +1748,35 @@
             "get": {
                 "operationId": "applications_enhanced_applications_retrieve",
                 "description": "Enhanced list view with additional fields for the application dashboard",
+                "tags": [
+                    "applications"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApplicationList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/applications/enhanced-applications-alt/": {
+            "get": {
+                "operationId": "applications_enhanced_applications_alt_retrieve",
+                "description": "Enhanced list view with additional fields for the application dashboard\nwith advanced filtering capabilities",
                 "tags": [
                     "applications"
                 ],
@@ -9194,8 +9484,80 @@
     },
     "components": {
         "schemas": {
+            "Address": {
+                "type": "object",
+                "description": "Serializer for address information",
+                "properties": {
+                    "street": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "city": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "state": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "postal_code": {
+                        "type": "string",
+                        "maxLength": 20
+                    },
+                    "country": {
+                        "type": "string",
+                        "maxLength": 100
+                    }
+                },
+                "required": [
+                    "city",
+                    "country",
+                    "postal_code",
+                    "state",
+                    "street"
+                ]
+            },
+            "AddressRequest": {
+                "type": "object",
+                "description": "Serializer for address information",
+                "properties": {
+                    "street": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                    },
+                    "city": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "state": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "postal_code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 20
+                    },
+                    "country": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    }
+                },
+                "required": [
+                    "city",
+                    "country",
+                    "postal_code",
+                    "state",
+                    "street"
+                ]
+            },
             "ApplicationCreate": {
                 "type": "object",
+                "description": "Serializer for creating new applications",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -9203,13 +9565,15 @@
                     },
                     "reference_number": {
                         "type": "string",
+                        "description": "Unique reference number for this application",
                         "maxLength": 20
                     },
                     "loan_amount": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Requested loan amount"
                     },
                     "loan_term": {
                         "type": "integer",
@@ -9223,23 +9587,31 @@
                         "maximum": 2147483647,
                         "minimum": 0,
                         "nullable": true,
-                        "description": "Capitalised Interest Term in months"
+                        "description": "Capitalised interest term in months"
                     },
                     "interest_rate": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Interest rate as percentage"
                     },
                     "purpose": {
                         "type": "string",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "General purpose of the application"
                     },
                     "repayment_frequency": {
-                        "$ref": "#/components/schemas/RepaymentFrequencyEnum"
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RepaymentFrequencyEnum"
+                            }
+                        ],
+                        "description": "How often repayments are made\n\n* `weekly` - Weekly\n* `fortnightly` - Fortnightly\n* `monthly` - Monthly\n* `quarterly` - Quarterly\n* `annually` - Annually"
                     },
                     "application_type": {
                         "nullable": true,
+                        "description": "Type of loan application\n\n* `acquisition` - Acquisition\n* `refinance` - Refinance\n* `equity_release` - Equity Release\n* `refinance_equity_release` - Refinance & Equity Release\n* `second_mortgage` - 2nd Mortgage\n* `caveat` - Caveat\n* `other` - Other",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/ApplicationTypeEnum"
@@ -9260,24 +9632,33 @@
                     "product_id": {
                         "type": "string",
                         "nullable": true,
+                        "description": "Product identifier",
                         "maxLength": 50
                     },
                     "estimated_settlement_date": {
                         "type": "string",
                         "format": "date",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Expected settlement date"
                     },
                     "stage": {
-                        "$ref": "#/components/schemas/StageEnum"
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/StageEnum"
+                            }
+                        ],
+                        "description": "Current stage of the application\n\n* `inquiry` - Inquiry\n* `sent_to_lender` - Sent to Lender\n* `funding_table_issued` - Funding Table Issued\n* `iloo_issued` - ILOO Issued\n* `iloo_signed` - ILOO Signed\n* `commitment_fee_paid` - Commitment Fee Paid\n* `app_submitted` - App Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Info Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Docs Instructed\n* `loan_docs_issued` - Loan Docs Issued\n* `loan_docs_signed` - Loan Docs Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `declined` - Declined\n* `withdrawn` - Withdrawn"
                     },
                     "branch_id": {
                         "type": "integer",
                         "nullable": true,
+                        "description": "Branch associated with this application",
                         "readOnly": true
                     },
                     "bd_id": {
                         "type": "integer",
                         "nullable": true,
+                        "description": "Business Development Manager for this application",
                         "readOnly": true
                     },
                     "valuer": {
@@ -9322,6 +9703,7 @@
                     },
                     "loan_purpose": {
                         "nullable": true,
+                        "description": "Specific purpose of the loan\n\n* `purchase` - Purchase\n* `refinance` - Refinance\n* `construction` - Construction\n* `equity_release` - Equity Release\n* `debt_consolidation` - Debt Consolidation\n* `business_expansion` - Business Expansion\n* `working_capital` - Working Capital\n* `other` - Other",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/LoanPurposeEnum"
@@ -9336,17 +9718,21 @@
                     },
                     "additional_comments": {
                         "type": "string",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Additional comments about the loan"
                     },
                     "prior_application": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Whether there was a prior application"
                     },
                     "prior_application_details": {
                         "type": "string",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Details about prior applications"
                     },
                     "exit_strategy": {
                         "nullable": true,
+                        "description": "Planned exit strategy for the loan\n\n* `sale` - Sale of Property\n* `refinance` - Refinance\n* `income` - Income/Cash Flow\n* `other` - Other",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/ExitStrategyEnum"
@@ -9361,48 +9747,57 @@
                     },
                     "exit_strategy_details": {
                         "type": "string",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Additional details about exit strategy"
                     },
                     "valuer_company_name": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] Valuer company name",
                         "maxLength": 255
                     },
                     "valuer_contact_name": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] Valuer contact person name",
                         "maxLength": 255
                     },
                     "valuer_phone": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] Valuer phone number",
                         "maxLength": 20
                     },
                     "valuer_email": {
                         "type": "string",
                         "format": "email",
                         "nullable": true,
+                        "description": "[Legacy] Valuer email address",
                         "maxLength": 254
                     },
                     "qs_company_name": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] QS company name",
                         "maxLength": 255
                     },
                     "qs_contact_name": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] QS contact person name",
                         "maxLength": 255
                     },
                     "qs_phone": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] QS phone number",
                         "maxLength": 20
                     },
                     "qs_email": {
                         "type": "string",
                         "format": "email",
                         "nullable": true,
+                        "description": "[Legacy] QS email address",
                         "maxLength": 254
                     },
                     "funding_calculation_input": {
@@ -9411,37 +9806,37 @@
                     "has_pending_litigation": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Do the Borrower(s) and the Guarantor(s) have any pending or past litigation matters (within the last 2 years)?"
+                        "description": "Do the Borrower(s) and Guarantor(s) have any pending or past litigation matters (within the last 2 years)?"
                     },
                     "has_unsatisfied_judgements": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Are there any unsatisfied judgements against the Borrower(s) and the Guarantor(s)?"
+                        "description": "Are there any unsatisfied judgements against the Borrower(s) and Guarantor(s)?"
                     },
                     "has_been_bankrupt": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Have the Borrower(s) and the Guarantor(s) been bankrupt or insolvent in the past 5 years?"
+                        "description": "Have the Borrower(s) and Guarantor(s) been bankrupt or insolvent in the past 5 years?"
                     },
                     "has_been_refused_credit": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Has the Borrower(s) and the Guarantor(s) been refused credit by a credit provider in the last 1 year?"
+                        "description": "Has the Borrower(s) and Guarantor(s) been refused credit by a credit provider in the last 1 year?"
                     },
                     "has_outstanding_ato_debt": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Are there any outstanding debts current or otherwise due to the ATO by the Borrower(s) and the Guarantor(s)?"
+                        "description": "Are there any outstanding debts current or otherwise due to the ATO by the Borrower(s) and Guarantor(s)?"
                     },
                     "has_outstanding_tax_returns": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Does the Borrower(s) and the Guarantor(s) have outstanding Tax or BAS returns due to be lodged with the ATO?"
+                        "description": "Does the Borrower(s) and Guarantor(s) have outstanding Tax or BAS returns due to be lodged with the ATO?"
                     },
                     "has_payment_arrangements": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Has the Borrower(s) and the Guarantor(s) made payment arrangements with a creditor to payout debt that is still current?"
+                        "description": "Has the Borrower(s) and Guarantor(s) made payment arrangements with a creditor to payout debt that is still current?"
                     },
                     "solvency_enquiries_details": {
                         "type": "string",
@@ -9457,17 +9852,20 @@
             },
             "ApplicationCreateRequest": {
                 "type": "object",
+                "description": "Serializer for creating new applications",
                 "properties": {
                     "reference_number": {
                         "type": "string",
                         "minLength": 1,
+                        "description": "Unique reference number for this application",
                         "maxLength": 20
                     },
                     "loan_amount": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Requested loan amount"
                     },
                     "loan_term": {
                         "type": "integer",
@@ -9481,23 +9879,31 @@
                         "maximum": 2147483647,
                         "minimum": 0,
                         "nullable": true,
-                        "description": "Capitalised Interest Term in months"
+                        "description": "Capitalised interest term in months"
                     },
                     "interest_rate": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Interest rate as percentage"
                     },
                     "purpose": {
                         "type": "string",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "General purpose of the application"
                     },
                     "repayment_frequency": {
-                        "$ref": "#/components/schemas/RepaymentFrequencyEnum"
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RepaymentFrequencyEnum"
+                            }
+                        ],
+                        "description": "How often repayments are made\n\n* `weekly` - Weekly\n* `fortnightly` - Fortnightly\n* `monthly` - Monthly\n* `quarterly` - Quarterly\n* `annually` - Annually"
                     },
                     "application_type": {
                         "nullable": true,
+                        "description": "Type of loan application\n\n* `acquisition` - Acquisition\n* `refinance` - Refinance\n* `equity_release` - Equity Release\n* `refinance_equity_release` - Refinance & Equity Release\n* `second_mortgage` - 2nd Mortgage\n* `caveat` - Caveat\n* `other` - Other",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/ApplicationTypeEnum"
@@ -9518,15 +9924,22 @@
                     "product_id": {
                         "type": "string",
                         "nullable": true,
+                        "description": "Product identifier",
                         "maxLength": 50
                     },
                     "estimated_settlement_date": {
                         "type": "string",
                         "format": "date",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Expected settlement date"
                     },
                     "stage": {
-                        "$ref": "#/components/schemas/StageEnum"
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/StageEnum"
+                            }
+                        ],
+                        "description": "Current stage of the application\n\n* `inquiry` - Inquiry\n* `sent_to_lender` - Sent to Lender\n* `funding_table_issued` - Funding Table Issued\n* `iloo_issued` - ILOO Issued\n* `iloo_signed` - ILOO Signed\n* `commitment_fee_paid` - Commitment Fee Paid\n* `app_submitted` - App Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Info Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Docs Instructed\n* `loan_docs_issued` - Loan Docs Issued\n* `loan_docs_signed` - Loan Docs Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `declined` - Declined\n* `withdrawn` - Withdrawn"
                     },
                     "valuer": {
                         "type": "integer",
@@ -9570,6 +9983,7 @@
                     },
                     "loan_purpose": {
                         "nullable": true,
+                        "description": "Specific purpose of the loan\n\n* `purchase` - Purchase\n* `refinance` - Refinance\n* `construction` - Construction\n* `equity_release` - Equity Release\n* `debt_consolidation` - Debt Consolidation\n* `business_expansion` - Business Expansion\n* `working_capital` - Working Capital\n* `other` - Other",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/LoanPurposeEnum"
@@ -9584,17 +9998,21 @@
                     },
                     "additional_comments": {
                         "type": "string",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Additional comments about the loan"
                     },
                     "prior_application": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Whether there was a prior application"
                     },
                     "prior_application_details": {
                         "type": "string",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Details about prior applications"
                     },
                     "exit_strategy": {
                         "nullable": true,
+                        "description": "Planned exit strategy for the loan\n\n* `sale` - Sale of Property\n* `refinance` - Refinance\n* `income` - Income/Cash Flow\n* `other` - Other",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/ExitStrategyEnum"
@@ -9609,48 +10027,57 @@
                     },
                     "exit_strategy_details": {
                         "type": "string",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Additional details about exit strategy"
                     },
                     "valuer_company_name": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] Valuer company name",
                         "maxLength": 255
                     },
                     "valuer_contact_name": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] Valuer contact person name",
                         "maxLength": 255
                     },
                     "valuer_phone": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] Valuer phone number",
                         "maxLength": 20
                     },
                     "valuer_email": {
                         "type": "string",
                         "format": "email",
                         "nullable": true,
+                        "description": "[Legacy] Valuer email address",
                         "maxLength": 254
                     },
                     "qs_company_name": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] QS company name",
                         "maxLength": 255
                     },
                     "qs_contact_name": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] QS contact person name",
                         "maxLength": 255
                     },
                     "qs_phone": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] QS phone number",
                         "maxLength": 20
                     },
                     "qs_email": {
                         "type": "string",
                         "format": "email",
                         "nullable": true,
+                        "description": "[Legacy] QS email address",
                         "maxLength": 254
                     },
                     "funding_calculation_input": {
@@ -9659,37 +10086,37 @@
                     "has_pending_litigation": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Do the Borrower(s) and the Guarantor(s) have any pending or past litigation matters (within the last 2 years)?"
+                        "description": "Do the Borrower(s) and Guarantor(s) have any pending or past litigation matters (within the last 2 years)?"
                     },
                     "has_unsatisfied_judgements": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Are there any unsatisfied judgements against the Borrower(s) and the Guarantor(s)?"
+                        "description": "Are there any unsatisfied judgements against the Borrower(s) and Guarantor(s)?"
                     },
                     "has_been_bankrupt": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Have the Borrower(s) and the Guarantor(s) been bankrupt or insolvent in the past 5 years?"
+                        "description": "Have the Borrower(s) and Guarantor(s) been bankrupt or insolvent in the past 5 years?"
                     },
                     "has_been_refused_credit": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Has the Borrower(s) and the Guarantor(s) been refused credit by a credit provider in the last 1 year?"
+                        "description": "Has the Borrower(s) and Guarantor(s) been refused credit by a credit provider in the last 1 year?"
                     },
                     "has_outstanding_ato_debt": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Are there any outstanding debts current or otherwise due to the ATO by the Borrower(s) and the Guarantor(s)?"
+                        "description": "Are there any outstanding debts current or otherwise due to the ATO by the Borrower(s) and Guarantor(s)?"
                     },
                     "has_outstanding_tax_returns": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Does the Borrower(s) and the Guarantor(s) have outstanding Tax or BAS returns due to be lodged with the ATO?"
+                        "description": "Does the Borrower(s) and Guarantor(s) have outstanding Tax or BAS returns due to be lodged with the ATO?"
                     },
                     "has_payment_arrangements": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Has the Borrower(s) and the Guarantor(s) made payment arrangements with a creditor to payout debt that is still current?"
+                        "description": "Has the Borrower(s) and Guarantor(s) made payment arrangements with a creditor to payout debt that is still current?"
                     },
                     "solvency_enquiries_details": {
                         "type": "string",
@@ -9700,6 +10127,7 @@
             },
             "ApplicationDetail": {
                 "type": "object",
+                "description": "Comprehensive serializer for application details",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -9707,13 +10135,15 @@
                     },
                     "reference_number": {
                         "type": "string",
+                        "description": "Unique reference number for this application",
                         "maxLength": 20
                     },
                     "loan_amount": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Requested loan amount"
                     },
                     "loan_term": {
                         "type": "integer",
@@ -9727,23 +10157,31 @@
                         "maximum": 2147483647,
                         "minimum": 0,
                         "nullable": true,
-                        "description": "Capitalised Interest Term in months"
+                        "description": "Capitalised interest term in months"
                     },
                     "interest_rate": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Interest rate as percentage"
                     },
                     "purpose": {
                         "type": "string",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "General purpose of the application"
                     },
                     "repayment_frequency": {
-                        "$ref": "#/components/schemas/RepaymentFrequencyEnum"
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RepaymentFrequencyEnum"
+                            }
+                        ],
+                        "description": "How often repayments are made\n\n* `weekly` - Weekly\n* `fortnightly` - Fortnightly\n* `monthly` - Monthly\n* `quarterly` - Quarterly\n* `annually` - Annually"
                     },
                     "application_type": {
                         "nullable": true,
+                        "description": "Type of loan application\n\n* `acquisition` - Acquisition\n* `refinance` - Refinance\n* `equity_release` - Equity Release\n* `refinance_equity_release` - Refinance & Equity Release\n* `second_mortgage` - 2nd Mortgage\n* `caveat` - Caveat\n* `other` - Other",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/ApplicationTypeEnum"
@@ -9764,15 +10202,22 @@
                     "product_id": {
                         "type": "string",
                         "nullable": true,
+                        "description": "Product identifier",
                         "maxLength": 50
                     },
                     "estimated_settlement_date": {
                         "type": "string",
                         "format": "date",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Expected settlement date"
                     },
                     "stage": {
-                        "$ref": "#/components/schemas/StageEnum"
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/StageEnum"
+                            }
+                        ],
+                        "description": "Current stage of the application\n\n* `inquiry` - Inquiry\n* `sent_to_lender` - Sent to Lender\n* `funding_table_issued` - Funding Table Issued\n* `iloo_issued` - ILOO Issued\n* `iloo_signed` - ILOO Signed\n* `commitment_fee_paid` - Commitment Fee Paid\n* `app_submitted` - App Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Info Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Docs Instructed\n* `loan_docs_issued` - Loan Docs Issued\n* `loan_docs_signed` - Loan Docs Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `declined` - Declined\n* `withdrawn` - Withdrawn"
                     },
                     "stage_display": {
                         "type": "string",
@@ -9781,15 +10226,17 @@
                     "created_at": {
                         "type": "string",
                         "format": "date-time",
-                        "readOnly": true
+                        "description": "When this record was created"
                     },
                     "updated_at": {
                         "type": "string",
                         "format": "date-time",
-                        "readOnly": true
+                        "readOnly": true,
+                        "description": "When this record was last updated"
                     },
                     "loan_purpose": {
                         "nullable": true,
+                        "description": "Specific purpose of the loan\n\n* `purchase` - Purchase\n* `refinance` - Refinance\n* `construction` - Construction\n* `equity_release` - Equity Release\n* `debt_consolidation` - Debt Consolidation\n* `business_expansion` - Business Expansion\n* `working_capital` - Working Capital\n* `other` - Other",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/LoanPurposeEnum"
@@ -9804,17 +10251,21 @@
                     },
                     "additional_comments": {
                         "type": "string",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Additional comments about the loan"
                     },
                     "prior_application": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "description": "Whether there was a prior application"
                     },
                     "prior_application_details": {
                         "type": "string",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Details about prior applications"
                     },
                     "exit_strategy": {
                         "nullable": true,
+                        "description": "Planned exit strategy for the loan\n\n* `sale` - Sale of Property\n* `refinance` - Refinance\n* `income` - Income/Cash Flow\n* `other` - Other",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/ExitStrategyEnum"
@@ -9829,42 +10280,43 @@
                     },
                     "exit_strategy_details": {
                         "type": "string",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Additional details about exit strategy"
                     },
                     "has_pending_litigation": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Do the Borrower(s) and the Guarantor(s) have any pending or past litigation matters (within the last 2 years)?"
+                        "description": "Do the Borrower(s) and Guarantor(s) have any pending or past litigation matters (within the last 2 years)?"
                     },
                     "has_unsatisfied_judgements": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Are there any unsatisfied judgements against the Borrower(s) and the Guarantor(s)?"
+                        "description": "Are there any unsatisfied judgements against the Borrower(s) and Guarantor(s)?"
                     },
                     "has_been_bankrupt": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Have the Borrower(s) and the Guarantor(s) been bankrupt or insolvent in the past 5 years?"
+                        "description": "Have the Borrower(s) and Guarantor(s) been bankrupt or insolvent in the past 5 years?"
                     },
                     "has_been_refused_credit": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Has the Borrower(s) and the Guarantor(s) been refused credit by a credit provider in the last 1 year?"
+                        "description": "Has the Borrower(s) and Guarantor(s) been refused credit by a credit provider in the last 1 year?"
                     },
                     "has_outstanding_ato_debt": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Are there any outstanding debts current or otherwise due to the ATO by the Borrower(s) and the Guarantor(s)?"
+                        "description": "Are there any outstanding debts current or otherwise due to the ATO by the Borrower(s) and Guarantor(s)?"
                     },
                     "has_outstanding_tax_returns": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Does the Borrower(s) and the Guarantor(s) have outstanding Tax or BAS returns due to be lodged with the ATO?"
+                        "description": "Does the Borrower(s) and Guarantor(s) have outstanding Tax or BAS returns due to be lodged with the ATO?"
                     },
                     "has_payment_arrangements": {
                         "type": "boolean",
                         "nullable": true,
-                        "description": "Has the Borrower(s) and the Guarantor(s) made payment arrangements with a creditor to payout debt that is still current?"
+                        "description": "Has the Borrower(s) and Guarantor(s) made payment arrangements with a creditor to payout debt that is still current?"
                     },
                     "solvency_enquiries_details": {
                         "type": "string",
@@ -9966,91 +10418,108 @@
                     },
                     "security_address": {
                         "type": "string",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "[Legacy] Security property address"
                     },
                     "security_type": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] Security property type",
                         "maxLength": 50
                     },
                     "security_value": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "[Legacy] Security property value"
                     },
                     "valuer_company_name": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] Valuer company name",
                         "maxLength": 255
                     },
                     "valuer_contact_name": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] Valuer contact person name",
                         "maxLength": 255
                     },
                     "valuer_phone": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] Valuer phone number",
                         "maxLength": 20
                     },
                     "valuer_email": {
                         "type": "string",
                         "format": "email",
                         "nullable": true,
+                        "description": "[Legacy] Valuer email address",
                         "maxLength": 254
                     },
                     "valuation_date": {
                         "type": "string",
                         "format": "date",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Date of property valuation"
                     },
                     "valuation_amount": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Valuation amount"
                     },
                     "qs_company_name": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] QS company name",
                         "maxLength": 255
                     },
                     "qs_contact_name": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] QS contact person name",
                         "maxLength": 255
                     },
                     "qs_phone": {
                         "type": "string",
                         "nullable": true,
+                        "description": "[Legacy] QS phone number",
                         "maxLength": 20
                     },
                     "qs_email": {
                         "type": "string",
                         "format": "email",
                         "nullable": true,
+                        "description": "[Legacy] QS email address",
                         "maxLength": 254
                     },
                     "qs_report_date": {
                         "type": "string",
                         "format": "date",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Date of QS report"
                     },
                     "signed_by": {
                         "type": "string",
                         "nullable": true,
+                        "description": "Name of person who signed the application",
                         "maxLength": 255
                     },
                     "signature_date": {
                         "type": "string",
                         "format": "date",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Date the application was signed"
                     },
                     "uploaded_pdf_path": {
                         "type": "string",
                         "format": "uri",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Uploaded signed application form"
                     },
                     "funding_result": {
                         "type": "object",
@@ -10072,7 +10541,6 @@
                     "borrowers",
                     "branch",
                     "broker",
-                    "created_at",
                     "created_by_details",
                     "documents",
                     "fees",
@@ -10130,7 +10598,7 @@
             },
             "ApplicationLiability": {
                 "type": "object",
-                "description": "Liability serializer specifically for application context",
+                "description": "Serializer for application-specific liability information",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -10156,7 +10624,7 @@
                     "bg_type": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/BgType856Enum"
+                                "$ref": "#/components/schemas/ApplicationLiabilityBgTypeEnum"
                             }
                         ],
                         "description": "Indicates if this liability belongs to B/G1 or B/G2\n\n* `bg1` - B/G1\n* `bg2` - B/G2"
@@ -10169,9 +10637,17 @@
                     "liability_type"
                 ]
             },
+            "ApplicationLiabilityBgTypeEnum": {
+                "enum": [
+                    "bg1",
+                    "bg2"
+                ],
+                "type": "string",
+                "description": "* `bg1` - B/G1\n* `bg2` - B/G2"
+            },
             "ApplicationLiabilityRequest": {
                 "type": "object",
-                "description": "Liability serializer specifically for application context",
+                "description": "Serializer for application-specific liability information",
                 "properties": {
                     "liability_type": {
                         "$ref": "#/components/schemas/LiabilityTypeEnum"
@@ -10194,7 +10670,7 @@
                     "bg_type": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/BgType856Enum"
+                                "$ref": "#/components/schemas/ApplicationLiabilityBgTypeEnum"
                             }
                         ],
                         "description": "Indicates if this liability belongs to B/G1 or B/G2\n\n* `bg1` - B/G1\n* `bg2` - B/G2"
@@ -10216,6 +10692,7 @@
                     },
                     "reference_number": {
                         "type": "string",
+                        "description": "Unique reference number for this application",
                         "maxLength": 20
                     },
                     "borrower_name": {
@@ -10224,7 +10701,12 @@
                         "readOnly": true
                     },
                     "stage": {
-                        "$ref": "#/components/schemas/StageEnum"
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/StageEnum"
+                            }
+                        ],
+                        "description": "Current stage of the application\n\n* `inquiry` - Inquiry\n* `sent_to_lender` - Sent to Lender\n* `funding_table_issued` - Funding Table Issued\n* `iloo_issued` - ILOO Issued\n* `iloo_signed` - ILOO Signed\n* `commitment_fee_paid` - Commitment Fee Paid\n* `app_submitted` - App Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Info Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Docs Instructed\n* `loan_docs_issued` - Loan Docs Issued\n* `loan_docs_signed` - Loan Docs Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `declined` - Declined\n* `withdrawn` - Withdrawn"
                     },
                     "stage_display": {
                         "type": "string",
@@ -10258,7 +10740,8 @@
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Requested loan amount"
                     },
                     "loan_term": {
                         "type": "integer",
@@ -10272,12 +10755,13 @@
                         "maximum": 2147483647,
                         "minimum": 0,
                         "nullable": true,
-                        "description": "Capitalised Interest Term in months"
+                        "description": "Capitalised interest term in months"
                     },
                     "estimated_settlement_date": {
                         "type": "string",
                         "format": "date",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Expected settlement date"
                     },
                     "updated_at": {
                         "type": "string",
@@ -10287,10 +10771,11 @@
                     "created_at": {
                         "type": "string",
                         "format": "date-time",
-                        "readOnly": true
+                        "description": "When this record was created"
                     },
                     "application_type": {
                         "nullable": true,
+                        "description": "Type of loan application\n\n* `acquisition` - Acquisition\n* `refinance` - Refinance\n* `equity_release` - Equity Release\n* `refinance_equity_release` - Refinance & Equity Release\n* `second_mortgage` - 2nd Mortgage\n* `caveat` - Caveat\n* `other` - Other",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/ApplicationTypeEnum"
@@ -10318,7 +10803,6 @@
                     "bdm_name",
                     "borrower_count",
                     "borrower_name",
-                    "created_at",
                     "guarantor_name",
                     "id",
                     "product_name",
@@ -10336,16 +10820,23 @@
                     "reference_number": {
                         "type": "string",
                         "minLength": 1,
+                        "description": "Unique reference number for this application",
                         "maxLength": 20
                     },
                     "stage": {
-                        "$ref": "#/components/schemas/StageEnum"
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/StageEnum"
+                            }
+                        ],
+                        "description": "Current stage of the application\n\n* `inquiry` - Inquiry\n* `sent_to_lender` - Sent to Lender\n* `funding_table_issued` - Funding Table Issued\n* `iloo_issued` - ILOO Issued\n* `iloo_signed` - ILOO Signed\n* `commitment_fee_paid` - Commitment Fee Paid\n* `app_submitted` - App Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Info Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Docs Instructed\n* `loan_docs_issued` - Loan Docs Issued\n* `loan_docs_signed` - Loan Docs Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `declined` - Declined\n* `withdrawn` - Withdrawn"
                     },
                     "loan_amount": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Requested loan amount"
                     },
                     "loan_term": {
                         "type": "integer",
@@ -10359,15 +10850,22 @@
                         "maximum": 2147483647,
                         "minimum": 0,
                         "nullable": true,
-                        "description": "Capitalised Interest Term in months"
+                        "description": "Capitalised interest term in months"
                     },
                     "estimated_settlement_date": {
                         "type": "string",
                         "format": "date",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Expected settlement date"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When this record was created"
                     },
                     "application_type": {
                         "nullable": true,
+                        "description": "Type of loan application\n\n* `acquisition` - Acquisition\n* `refinance` - Refinance\n* `equity_release` - Equity Release\n* `refinance_equity_release` - Refinance & Equity Release\n* `second_mortgage` - 2nd Mortgage\n* `caveat` - Caveat\n* `other` - Other",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/ApplicationTypeEnum"
@@ -10605,14 +11103,6 @@
                     "name"
                 ]
             },
-            "BgType856Enum": {
-                "enum": [
-                    "bg1",
-                    "bg2"
-                ],
-                "type": "string",
-                "description": "* `bg1` - B/G1\n* `bg2` - B/G2"
-            },
             "BgTypeEnum": {
                 "enum": [
                     "BG1",
@@ -10628,6 +11118,7 @@
             },
             "Borrower": {
                 "type": "object",
+                "description": "Serializer for individual borrowers",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -11646,6 +12137,7 @@
             },
             "BorrowerRequest": {
                 "type": "object",
+                "description": "Serializer for individual borrowers",
                 "properties": {
                     "first_name": {
                         "type": "string",
@@ -12050,6 +12542,7 @@
             },
             "CompanyBorrower": {
                 "type": "object",
+                "description": "Serializer for company borrower",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -12084,27 +12577,11 @@
                             }
                         ]
                     },
-                    "contact_number": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
                     "annual_company_income": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
                         "nullable": true
-                    },
-                    "is_trustee": {
-                        "type": "boolean"
-                    },
-                    "is_smsf_trustee": {
-                        "type": "boolean"
-                    },
-                    "trustee_name": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 255
                     },
                     "registered_address_unit": {
                         "type": "string",
@@ -12142,19 +12619,13 @@
                             "$ref": "#/components/schemas/Director"
                         }
                     },
-                    "financial_info": {
-                        "$ref": "#/components/schemas/FinancialInfo"
+                    "address": {
+                        "$ref": "#/components/schemas/Address"
                     },
                     "assets": {
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/CompanyAsset"
-                        }
-                    },
-                    "liabilities": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/Liability"
                         }
                     }
                 },
@@ -12164,6 +12635,7 @@
             },
             "CompanyBorrowerRequest": {
                 "type": "object",
+                "description": "Serializer for company borrower",
                 "properties": {
                     "company_name": {
                         "type": "string",
@@ -12194,27 +12666,11 @@
                             }
                         ]
                     },
-                    "contact_number": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
                     "annual_company_income": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
                         "nullable": true
-                    },
-                    "is_trustee": {
-                        "type": "boolean"
-                    },
-                    "is_smsf_trustee": {
-                        "type": "boolean"
-                    },
-                    "trustee_name": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 255
                     },
                     "registered_address_unit": {
                         "type": "string",
@@ -12252,19 +12708,13 @@
                             "$ref": "#/components/schemas/DirectorRequest"
                         }
                     },
-                    "financial_info": {
-                        "$ref": "#/components/schemas/FinancialInfoRequest"
+                    "address": {
+                        "$ref": "#/components/schemas/AddressRequest"
                     },
                     "assets": {
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/CompanyAssetRequest"
-                        }
-                    },
-                    "liabilities": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/LiabilityRequest"
                         }
                     }
                 }
@@ -12507,6 +12957,68 @@
                     "template"
                 ]
             },
+            "EmploymentInfo": {
+                "type": "object",
+                "description": "Serializer for employment information",
+                "properties": {
+                    "employer": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "position": {
+                        "type": "string",
+                        "maxLength": 100
+                    },
+                    "income": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+                    },
+                    "years_employed": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    }
+                },
+                "required": [
+                    "employer",
+                    "income",
+                    "position",
+                    "years_employed"
+                ]
+            },
+            "EmploymentInfoRequest": {
+                "type": "object",
+                "description": "Serializer for employment information",
+                "properties": {
+                    "employer": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                    },
+                    "position": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                    },
+                    "income": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+                    },
+                    "years_employed": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    }
+                },
+                "required": [
+                    "employer",
+                    "income",
+                    "position",
+                    "years_employed"
+                ]
+            },
             "EmploymentTypeEnum": {
                 "enum": [
                     "full_time",
@@ -12669,65 +13181,58 @@
             },
             "FinancialInfo": {
                 "type": "object",
+                "description": "Serializer for borrower financial information",
                 "properties": {
-                    "annual_revenue": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "annual_income": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
                     },
-                    "net_profit": {
+                    "monthly_expenses": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
                     },
-                    "assets": {
+                    "employment_status": {
                         "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+                        "maxLength": 100
                     },
-                    "liabilities": {
+                    "employment_start_date": {
                         "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+                        "format": "date"
                     }
-                },
-                "required": [
-                    "annual_revenue",
-                    "assets",
-                    "liabilities",
-                    "net_profit"
-                ]
+                }
             },
             "FinancialInfoRequest": {
                 "type": "object",
+                "description": "Serializer for borrower financial information",
                 "properties": {
-                    "annual_revenue": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "annual_income": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
                     },
-                    "net_profit": {
+                    "monthly_expenses": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
                     },
-                    "assets": {
+                    "employment_status": {
                         "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+                        "minLength": 1,
+                        "maxLength": 100
                     },
-                    "liabilities": {
+                    "employment_start_date": {
                         "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+                        "format": "date"
                     }
-                },
-                "required": [
-                    "annual_revenue",
-                    "assets",
-                    "liabilities",
-                    "net_profit"
-                ]
+                }
             },
             "FundingCalculationInput": {
                 "type": "object",
@@ -12880,27 +13385,11 @@
             },
             "Guarantor": {
                 "type": "object",
+                "description": "Serializer for guarantor",
                 "properties": {
                     "id": {
                         "type": "integer",
                         "readOnly": true
-                    },
-                    "guarantor_type": {
-                        "$ref": "#/components/schemas/GuarantorTypeEnum"
-                    },
-                    "title": {
-                        "nullable": true,
-                        "oneOf": [
-                            {
-                                "$ref": "#/components/schemas/TitleEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/BlankEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/NullEnum"
-                            }
-                        ]
                     },
                     "first_name": {
                         "type": "string",
@@ -12912,114 +13401,29 @@
                         "nullable": true,
                         "maxLength": 100
                     },
-                    "date_of_birth": {
-                        "type": "string",
-                        "format": "date",
-                        "nullable": true
-                    },
-                    "drivers_licence_no": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 50
-                    },
-                    "home_phone": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
-                    "mobile": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
                     "email": {
                         "type": "string",
                         "format": "email",
                         "nullable": true,
                         "maxLength": 254
                     },
-                    "address_unit": {
+                    "mobile": {
                         "type": "string",
                         "nullable": true,
                         "maxLength": 20
                     },
-                    "address_street_no": {
+                    "home_phone": {
                         "type": "string",
                         "nullable": true,
                         "maxLength": 20
                     },
-                    "address_street_name": {
+                    "date_of_birth": {
                         "type": "string",
-                        "nullable": true,
-                        "maxLength": 100
-                    },
-                    "address_suburb": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 100
-                    },
-                    "address_state": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 50
-                    },
-                    "address_postcode": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 10
-                    },
-                    "occupation": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 100
-                    },
-                    "employer_name": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 255
-                    },
-                    "employment_type": {
-                        "nullable": true,
-                        "oneOf": [
-                            {
-                                "$ref": "#/components/schemas/GuarantorEmploymentTypeEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/BlankEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/NullEnum"
-                            }
-                        ]
-                    },
-                    "annual_income": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "format": "date",
                         "nullable": true
                     },
-                    "company_name": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 255
-                    },
-                    "company_abn": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
-                    "company_acn": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
-                    "borrower": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "application": {
-                        "type": "integer",
-                        "nullable": true
+                    "address": {
+                        "$ref": "#/components/schemas/Address"
                     },
                     "assets": {
                         "type": "array",
@@ -13034,6 +13438,12 @@
                             "$ref": "#/components/schemas/ApplicationLiability"
                         },
                         "readOnly": true
+                    },
+                    "employment_info": {
+                        "$ref": "#/components/schemas/EmploymentInfo"
+                    },
+                    "financial_info": {
+                        "$ref": "#/components/schemas/FinancialInfo"
                     }
                 },
                 "required": [
@@ -13153,24 +13563,8 @@
             },
             "GuarantorRequest": {
                 "type": "object",
+                "description": "Serializer for guarantor",
                 "properties": {
-                    "guarantor_type": {
-                        "$ref": "#/components/schemas/GuarantorTypeEnum"
-                    },
-                    "title": {
-                        "nullable": true,
-                        "oneOf": [
-                            {
-                                "$ref": "#/components/schemas/TitleEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/BlankEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/NullEnum"
-                            }
-                        ]
-                    },
                     "first_name": {
                         "type": "string",
                         "nullable": true,
@@ -13181,114 +13575,35 @@
                         "nullable": true,
                         "maxLength": 100
                     },
-                    "date_of_birth": {
-                        "type": "string",
-                        "format": "date",
-                        "nullable": true
-                    },
-                    "drivers_licence_no": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 50
-                    },
-                    "home_phone": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
-                    "mobile": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
                     "email": {
                         "type": "string",
                         "format": "email",
                         "nullable": true,
                         "maxLength": 254
                     },
-                    "address_unit": {
+                    "mobile": {
                         "type": "string",
                         "nullable": true,
                         "maxLength": 20
                     },
-                    "address_street_no": {
+                    "home_phone": {
                         "type": "string",
                         "nullable": true,
                         "maxLength": 20
                     },
-                    "address_street_name": {
+                    "date_of_birth": {
                         "type": "string",
-                        "nullable": true,
-                        "maxLength": 100
-                    },
-                    "address_suburb": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 100
-                    },
-                    "address_state": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 50
-                    },
-                    "address_postcode": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 10
-                    },
-                    "occupation": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 100
-                    },
-                    "employer_name": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 255
-                    },
-                    "employment_type": {
-                        "nullable": true,
-                        "oneOf": [
-                            {
-                                "$ref": "#/components/schemas/GuarantorEmploymentTypeEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/BlankEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/NullEnum"
-                            }
-                        ]
-                    },
-                    "annual_income": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "format": "date",
                         "nullable": true
                     },
-                    "company_name": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 255
+                    "address": {
+                        "$ref": "#/components/schemas/AddressRequest"
                     },
-                    "company_abn": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
+                    "employment_info": {
+                        "$ref": "#/components/schemas/EmploymentInfoRequest"
                     },
-                    "company_acn": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
-                    "borrower": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "application": {
-                        "type": "integer",
-                        "nullable": true
+                    "financial_info": {
+                        "$ref": "#/components/schemas/FinancialInfoRequest"
                     }
                 }
             },
@@ -13389,100 +13704,6 @@
                     "transaction_type_display"
                 ]
             },
-            "Liability": {
-                "type": "object",
-                "description": "Serializer for liabilities",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "readOnly": true
-                    },
-                    "liability_type": {
-                        "$ref": "#/components/schemas/LiabilityTypeEnum"
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "amount": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
-                    },
-                    "lender": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 100
-                    },
-                    "monthly_payment": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "to_be_refinanced": {
-                        "type": "boolean"
-                    },
-                    "bg_type": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/BgType856Enum"
-                            }
-                        ],
-                        "description": "Indicates if this liability belongs to B/G1 or B/G2\n\n* `bg1` - B/G1\n* `bg2` - B/G2"
-                    }
-                },
-                "required": [
-                    "amount",
-                    "description",
-                    "id",
-                    "liability_type"
-                ]
-            },
-            "LiabilityRequest": {
-                "type": "object",
-                "description": "Serializer for liabilities",
-                "properties": {
-                    "liability_type": {
-                        "$ref": "#/components/schemas/LiabilityTypeEnum"
-                    },
-                    "description": {
-                        "type": "string",
-                        "minLength": 1
-                    },
-                    "amount": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
-                    },
-                    "lender": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 100
-                    },
-                    "monthly_payment": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "to_be_refinanced": {
-                        "type": "boolean"
-                    },
-                    "bg_type": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/BgType856Enum"
-                            }
-                        ],
-                        "description": "Indicates if this liability belongs to B/G1 or B/G2\n\n* `bg1` - B/G1\n* `bg2` - B/G2"
-                    }
-                },
-                "required": [
-                    "amount",
-                    "description",
-                    "liability_type"
-                ]
-            },
             "LiabilityTypeEnum": {
                 "enum": [
                     "mortgage",
@@ -13521,13 +13742,15 @@
                     "description": {
                         "type": "string",
                         "nullable": true,
+                        "description": "Description of what this requirement covers",
                         "maxLength": 255
                     },
                     "amount": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Amount required for this specific purpose"
                     }
                 },
                 "required": [
@@ -13541,13 +13764,15 @@
                     "description": {
                         "type": "string",
                         "nullable": true,
+                        "description": "Description of what this requirement covers",
                         "maxLength": 255
                     },
                     "amount": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Amount required for this specific purpose"
                     }
                 }
             },
@@ -14098,14 +14323,6 @@
                 "enum": [
                     null
                 ]
-            },
-            "OccupancyEnum": {
-                "enum": [
-                    "owner_occupied",
-                    "investment"
-                ],
-                "type": "string",
-                "description": "* `owner_occupied` - Owner Occupied\n* `investment` - Investment Property"
             },
             "OutputFormatEnum": {
                 "enum": [
@@ -14672,16 +14889,23 @@
                     "reference_number": {
                         "type": "string",
                         "minLength": 1,
+                        "description": "Unique reference number for this application",
                         "maxLength": 20
                     },
                     "stage": {
-                        "$ref": "#/components/schemas/StageEnum"
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/StageEnum"
+                            }
+                        ],
+                        "description": "Current stage of the application\n\n* `inquiry` - Inquiry\n* `sent_to_lender` - Sent to Lender\n* `funding_table_issued` - Funding Table Issued\n* `iloo_issued` - ILOO Issued\n* `iloo_signed` - ILOO Signed\n* `commitment_fee_paid` - Commitment Fee Paid\n* `app_submitted` - App Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Info Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Docs Instructed\n* `loan_docs_issued` - Loan Docs Issued\n* `loan_docs_signed` - Loan Docs Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `declined` - Declined\n* `withdrawn` - Withdrawn"
                     },
                     "loan_amount": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Requested loan amount"
                     },
                     "loan_term": {
                         "type": "integer",
@@ -14695,15 +14919,22 @@
                         "maximum": 2147483647,
                         "minimum": 0,
                         "nullable": true,
-                        "description": "Capitalised Interest Term in months"
+                        "description": "Capitalised interest term in months"
                     },
                     "estimated_settlement_date": {
                         "type": "string",
                         "format": "date",
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Expected settlement date"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "When this record was created"
                     },
                     "application_type": {
                         "nullable": true,
+                        "description": "Type of loan application\n\n* `acquisition` - Acquisition\n* `refinance` - Refinance\n* `equity_release` - Equity Release\n* `refinance_equity_release` - Refinance & Equity Release\n* `second_mortgage` - 2nd Mortgage\n* `caveat` - Caveat\n* `other` - Other",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/ApplicationTypeEnum"
@@ -15472,41 +15703,41 @@
                     "company_name": {
                         "type": "string",
                         "minLength": 1,
-                        "description": "Name of the QS company",
+                        "description": "Name of the company/firm",
                         "maxLength": 255
                     },
                     "contact_name": {
                         "type": "string",
                         "minLength": 1,
-                        "description": "Name of the contact person",
+                        "description": "Name of the primary contact person",
                         "maxLength": 255
                     },
                     "phone": {
                         "type": "string",
                         "minLength": 1,
-                        "description": "Contact phone number",
+                        "description": "Primary contact phone number",
                         "maxLength": 20
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
                         "minLength": 1,
-                        "description": "Contact email address",
+                        "description": "Primary contact email address",
                         "maxLength": 254
                     },
                     "address": {
                         "type": "string",
                         "nullable": true,
-                        "description": "Company address"
+                        "description": "Business address"
                     },
                     "notes": {
                         "type": "string",
                         "nullable": true,
-                        "description": "Additional notes about this QS"
+                        "description": "Additional notes about this contact"
                     },
                     "is_active": {
                         "type": "boolean",
-                        "description": "Whether this QS is active"
+                        "description": "Whether this contact is currently active"
                     }
                 }
             },
@@ -15619,41 +15850,41 @@
                     "company_name": {
                         "type": "string",
                         "minLength": 1,
-                        "description": "Name of the valuation company",
+                        "description": "Name of the company/firm",
                         "maxLength": 255
                     },
                     "contact_name": {
                         "type": "string",
                         "minLength": 1,
-                        "description": "Name of the contact person",
+                        "description": "Name of the primary contact person",
                         "maxLength": 255
                     },
                     "phone": {
                         "type": "string",
                         "minLength": 1,
-                        "description": "Contact phone number",
+                        "description": "Primary contact phone number",
                         "maxLength": 20
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
                         "minLength": 1,
-                        "description": "Contact email address",
+                        "description": "Primary contact email address",
                         "maxLength": 254
                     },
                     "address": {
                         "type": "string",
                         "nullable": true,
-                        "description": "Company address"
+                        "description": "Business address"
                     },
                     "notes": {
                         "type": "string",
                         "nullable": true,
-                        "description": "Additional notes about this valuer"
+                        "description": "Additional notes about this contact"
                     },
                     "is_active": {
                         "type": "boolean",
-                        "description": "Whether this valuer is active"
+                        "description": "Whether this contact is currently active"
                     }
                 }
             },
@@ -15760,43 +15991,44 @@
                     },
                     "company_name": {
                         "type": "string",
-                        "description": "Name of the QS company",
+                        "description": "Name of the company/firm",
                         "maxLength": 255
                     },
                     "contact_name": {
                         "type": "string",
-                        "description": "Name of the contact person",
+                        "description": "Name of the primary contact person",
                         "maxLength": 255
                     },
                     "phone": {
                         "type": "string",
-                        "description": "Contact phone number",
+                        "description": "Primary contact phone number",
                         "maxLength": 20
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
-                        "description": "Contact email address",
+                        "description": "Primary contact email address",
                         "maxLength": 254
                     },
                     "address": {
                         "type": "string",
                         "nullable": true,
-                        "description": "Company address"
+                        "description": "Business address"
                     },
                     "notes": {
                         "type": "string",
                         "nullable": true,
-                        "description": "Additional notes about this QS"
+                        "description": "Additional notes about this contact"
                     },
                     "is_active": {
                         "type": "boolean",
-                        "description": "Whether this QS is active"
+                        "description": "Whether this contact is currently active"
                     },
                     "created_by": {
                         "type": "integer",
                         "readOnly": true,
-                        "nullable": true
+                        "nullable": true,
+                        "description": "User who created this record"
                     },
                     "created_by_details": {
                         "allOf": [
@@ -15809,12 +16041,14 @@
                     "created_at": {
                         "type": "string",
                         "format": "date-time",
-                        "readOnly": true
+                        "readOnly": true,
+                        "description": "When this record was created"
                     },
                     "updated_at": {
                         "type": "string",
                         "format": "date-time",
-                        "readOnly": true
+                        "readOnly": true,
+                        "description": "When this record was last updated"
                     },
                     "application_count": {
                         "type": "string",
@@ -15844,23 +16078,23 @@
                     },
                     "company_name": {
                         "type": "string",
-                        "description": "Name of the QS company",
+                        "description": "Name of the company/firm",
                         "maxLength": 255
                     },
                     "contact_name": {
                         "type": "string",
-                        "description": "Name of the contact person",
+                        "description": "Name of the primary contact person",
                         "maxLength": 255
                     },
                     "phone": {
                         "type": "string",
-                        "description": "Contact phone number",
+                        "description": "Primary contact phone number",
                         "maxLength": 20
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
-                        "description": "Contact email address",
+                        "description": "Primary contact email address",
                         "maxLength": 254
                     },
                     "display_name": {
@@ -15869,7 +16103,7 @@
                     },
                     "is_active": {
                         "type": "boolean",
-                        "description": "Whether this QS is active"
+                        "description": "Whether this contact is currently active"
                     }
                 },
                 "required": [
@@ -15888,41 +16122,41 @@
                     "company_name": {
                         "type": "string",
                         "minLength": 1,
-                        "description": "Name of the QS company",
+                        "description": "Name of the company/firm",
                         "maxLength": 255
                     },
                     "contact_name": {
                         "type": "string",
                         "minLength": 1,
-                        "description": "Name of the contact person",
+                        "description": "Name of the primary contact person",
                         "maxLength": 255
                     },
                     "phone": {
                         "type": "string",
                         "minLength": 1,
-                        "description": "Contact phone number",
+                        "description": "Primary contact phone number",
                         "maxLength": 20
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
                         "minLength": 1,
-                        "description": "Contact email address",
+                        "description": "Primary contact email address",
                         "maxLength": 254
                     },
                     "address": {
                         "type": "string",
                         "nullable": true,
-                        "description": "Company address"
+                        "description": "Business address"
                     },
                     "notes": {
                         "type": "string",
                         "nullable": true,
-                        "description": "Additional notes about this QS"
+                        "description": "Additional notes about this contact"
                     },
                     "is_active": {
                         "type": "boolean",
-                        "description": "Whether this QS is active"
+                        "description": "Whether this contact is currently active"
                     }
                 },
                 "required": [
@@ -16318,59 +16552,9 @@
                         "type": "integer",
                         "readOnly": true
                     },
-                    "address_unit": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
-                    "address_street_no": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
-                    "address_street_name": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 100
-                    },
-                    "address_suburb": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 100
-                    },
-                    "address_state": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 50
-                    },
-                    "address_postcode": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 10
-                    },
-                    "current_mortgagee": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 255
-                    },
-                    "first_mortgage": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 255
-                    },
-                    "second_mortgage": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 255
-                    },
-                    "current_debt_position": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
                     "property_type": {
                         "nullable": true,
+                        "description": "Type of property\n\n* `residential` - Residential\n* `commercial` - Commercial\n* `industrial` - Industrial\n* `retail` - Retail\n* `land` - Land\n* `rural` - Rural\n* `other` - Other",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/PropertyTypeEnum"
@@ -16383,75 +16567,115 @@
                             }
                         ]
                     },
+                    "address_unit": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Unit/apartment number",
+                        "maxLength": 20
+                    },
+                    "address_street_no": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Street number",
+                        "maxLength": 20
+                    },
+                    "address_street_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Street name",
+                        "maxLength": 100
+                    },
+                    "address_suburb": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Suburb/city",
+                        "maxLength": 100
+                    },
+                    "address_state": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "State/territory",
+                        "maxLength": 50
+                    },
+                    "address_postcode": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Postal code",
+                        "maxLength": 10
+                    },
+                    "estimated_value": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
+                        "description": "Estimated property value"
+                    },
+                    "purchase_price": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
+                        "description": "Property purchase price"
+                    },
+                    "current_debt_position": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
+                        "description": "Current outstanding debt amount"
+                    },
+                    "current_mortgagee": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Current mortgage holder",
+                        "maxLength": 255
+                    },
+                    "first_mortgage": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "First mortgage details",
+                        "maxLength": 255
+                    },
+                    "second_mortgage": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Second mortgage details",
+                        "maxLength": 255
+                    },
                     "bedrooms": {
                         "type": "integer",
                         "maximum": 2147483647,
                         "minimum": 0,
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Number of bedrooms"
                     },
                     "bathrooms": {
                         "type": "integer",
                         "maximum": 2147483647,
                         "minimum": 0,
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Number of bathrooms"
                     },
                     "car_spaces": {
                         "type": "integer",
                         "maximum": 2147483647,
                         "minimum": 0,
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Number of car spaces"
                     },
                     "building_size": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
                         "nullable": true,
-                        "description": "Size in square meters"
+                        "description": "Building size in square meters"
                     },
                     "land_size": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
                         "nullable": true,
-                        "description": "Size in square meters"
-                    },
-                    "is_single_story": {
-                        "type": "boolean"
-                    },
-                    "has_garage": {
-                        "type": "boolean"
-                    },
-                    "has_carport": {
-                        "type": "boolean"
-                    },
-                    "has_off_street_parking": {
-                        "type": "boolean"
-                    },
-                    "occupancy": {
-                        "nullable": true,
-                        "oneOf": [
-                            {
-                                "$ref": "#/components/schemas/OccupancyEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/BlankEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/NullEnum"
-                            }
-                        ]
-                    },
-                    "estimated_value": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "purchase_price": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
+                        "description": "Land size in square meters"
                     }
                 },
                 "required": [
@@ -16462,59 +16686,9 @@
                 "type": "object",
                 "description": "Serializer for security properties",
                 "properties": {
-                    "address_unit": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
-                    "address_street_no": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
-                    "address_street_name": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 100
-                    },
-                    "address_suburb": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 100
-                    },
-                    "address_state": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 50
-                    },
-                    "address_postcode": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 10
-                    },
-                    "current_mortgagee": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 255
-                    },
-                    "first_mortgage": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 255
-                    },
-                    "second_mortgage": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 255
-                    },
-                    "current_debt_position": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
                     "property_type": {
                         "nullable": true,
+                        "description": "Type of property\n\n* `residential` - Residential\n* `commercial` - Commercial\n* `industrial` - Industrial\n* `retail` - Retail\n* `land` - Land\n* `rural` - Rural\n* `other` - Other",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/PropertyTypeEnum"
@@ -16527,75 +16701,115 @@
                             }
                         ]
                     },
+                    "address_unit": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Unit/apartment number",
+                        "maxLength": 20
+                    },
+                    "address_street_no": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Street number",
+                        "maxLength": 20
+                    },
+                    "address_street_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Street name",
+                        "maxLength": 100
+                    },
+                    "address_suburb": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Suburb/city",
+                        "maxLength": 100
+                    },
+                    "address_state": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "State/territory",
+                        "maxLength": 50
+                    },
+                    "address_postcode": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Postal code",
+                        "maxLength": 10
+                    },
+                    "estimated_value": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
+                        "description": "Estimated property value"
+                    },
+                    "purchase_price": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
+                        "description": "Property purchase price"
+                    },
+                    "current_debt_position": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
+                        "description": "Current outstanding debt amount"
+                    },
+                    "current_mortgagee": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Current mortgage holder",
+                        "maxLength": 255
+                    },
+                    "first_mortgage": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "First mortgage details",
+                        "maxLength": 255
+                    },
+                    "second_mortgage": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Second mortgage details",
+                        "maxLength": 255
+                    },
                     "bedrooms": {
                         "type": "integer",
                         "maximum": 2147483647,
                         "minimum": 0,
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Number of bedrooms"
                     },
                     "bathrooms": {
                         "type": "integer",
                         "maximum": 2147483647,
                         "minimum": 0,
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Number of bathrooms"
                     },
                     "car_spaces": {
                         "type": "integer",
                         "maximum": 2147483647,
                         "minimum": 0,
-                        "nullable": true
+                        "nullable": true,
+                        "description": "Number of car spaces"
                     },
                     "building_size": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
                         "nullable": true,
-                        "description": "Size in square meters"
+                        "description": "Building size in square meters"
                     },
                     "land_size": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
                         "nullable": true,
-                        "description": "Size in square meters"
-                    },
-                    "is_single_story": {
-                        "type": "boolean"
-                    },
-                    "has_garage": {
-                        "type": "boolean"
-                    },
-                    "has_carport": {
-                        "type": "boolean"
-                    },
-                    "has_off_street_parking": {
-                        "type": "boolean"
-                    },
-                    "occupancy": {
-                        "nullable": true,
-                        "oneOf": [
-                            {
-                                "$ref": "#/components/schemas/OccupancyEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/BlankEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/NullEnum"
-                            }
-                        ]
-                    },
-                    "estimated_value": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "purchase_price": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
+                        "description": "Land size in square meters"
                     }
                 }
             },
@@ -16854,43 +17068,44 @@
                     },
                     "company_name": {
                         "type": "string",
-                        "description": "Name of the valuation company",
+                        "description": "Name of the company/firm",
                         "maxLength": 255
                     },
                     "contact_name": {
                         "type": "string",
-                        "description": "Name of the contact person",
+                        "description": "Name of the primary contact person",
                         "maxLength": 255
                     },
                     "phone": {
                         "type": "string",
-                        "description": "Contact phone number",
+                        "description": "Primary contact phone number",
                         "maxLength": 20
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
-                        "description": "Contact email address",
+                        "description": "Primary contact email address",
                         "maxLength": 254
                     },
                     "address": {
                         "type": "string",
                         "nullable": true,
-                        "description": "Company address"
+                        "description": "Business address"
                     },
                     "notes": {
                         "type": "string",
                         "nullable": true,
-                        "description": "Additional notes about this valuer"
+                        "description": "Additional notes about this contact"
                     },
                     "is_active": {
                         "type": "boolean",
-                        "description": "Whether this valuer is active"
+                        "description": "Whether this contact is currently active"
                     },
                     "created_by": {
                         "type": "integer",
                         "readOnly": true,
-                        "nullable": true
+                        "nullable": true,
+                        "description": "User who created this record"
                     },
                     "created_by_details": {
                         "allOf": [
@@ -16903,12 +17118,14 @@
                     "created_at": {
                         "type": "string",
                         "format": "date-time",
-                        "readOnly": true
+                        "readOnly": true,
+                        "description": "When this record was created"
                     },
                     "updated_at": {
                         "type": "string",
                         "format": "date-time",
-                        "readOnly": true
+                        "readOnly": true,
+                        "description": "When this record was last updated"
                     },
                     "application_count": {
                         "type": "string",
@@ -16938,23 +17155,23 @@
                     },
                     "company_name": {
                         "type": "string",
-                        "description": "Name of the valuation company",
+                        "description": "Name of the company/firm",
                         "maxLength": 255
                     },
                     "contact_name": {
                         "type": "string",
-                        "description": "Name of the contact person",
+                        "description": "Name of the primary contact person",
                         "maxLength": 255
                     },
                     "phone": {
                         "type": "string",
-                        "description": "Contact phone number",
+                        "description": "Primary contact phone number",
                         "maxLength": 20
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
-                        "description": "Contact email address",
+                        "description": "Primary contact email address",
                         "maxLength": 254
                     },
                     "display_name": {
@@ -16963,7 +17180,7 @@
                     },
                     "is_active": {
                         "type": "boolean",
-                        "description": "Whether this valuer is active"
+                        "description": "Whether this contact is currently active"
                     }
                 },
                 "required": [
@@ -16982,41 +17199,41 @@
                     "company_name": {
                         "type": "string",
                         "minLength": 1,
-                        "description": "Name of the valuation company",
+                        "description": "Name of the company/firm",
                         "maxLength": 255
                     },
                     "contact_name": {
                         "type": "string",
                         "minLength": 1,
-                        "description": "Name of the contact person",
+                        "description": "Name of the primary contact person",
                         "maxLength": 255
                     },
                     "phone": {
                         "type": "string",
                         "minLength": 1,
-                        "description": "Contact phone number",
+                        "description": "Primary contact phone number",
                         "maxLength": 20
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
                         "minLength": 1,
-                        "description": "Contact email address",
+                        "description": "Primary contact email address",
                         "maxLength": 254
                     },
                     "address": {
                         "type": "string",
                         "nullable": true,
-                        "description": "Company address"
+                        "description": "Business address"
                     },
                     "notes": {
                         "type": "string",
                         "nullable": true,
-                        "description": "Additional notes about this valuer"
+                        "description": "Additional notes about this contact"
                     },
                     "is_active": {
                         "type": "boolean",
-                        "description": "Whether this valuer is active"
+                        "description": "Whether this contact is currently active"
                     }
                 },
                 "required": [

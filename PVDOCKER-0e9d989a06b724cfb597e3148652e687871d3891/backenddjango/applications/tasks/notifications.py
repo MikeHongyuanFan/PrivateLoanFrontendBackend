@@ -1,9 +1,17 @@
+"""
+Notification Tasks
+
+This module contains Celery tasks related to notifications for loan applications,
+including stagnant application alerts, note reminders, and repayment notifications.
+"""
+
 from celery import shared_task
 from django.utils import timezone
 from django.core.mail import send_mail
 from django.conf import settings
 from datetime import timedelta
-from .models import Application
+
+from ..models import Application
 from documents.models import Note, Repayment
 from users.services import create_notification
 
@@ -202,11 +210,11 @@ def check_repayment_reminders():
                     fail_silently=True,
                 )
         
-        # Mark as notified
+        # Mark as 3 day overdue notification sent
         repayment.overdue_3_day_sent = True
         repayment.save()
     
-    # 7 days overdue - notify borrowers again
+    # 7 days overdue - notify borrowers and BD
     overdue_7_date = today - timedelta(days=7)
     overdue_7_repayments = Repayment.objects.filter(
         due_date=overdue_7_date,
@@ -220,51 +228,39 @@ def check_repayment_reminders():
         for borrower in borrowers:
             if hasattr(borrower, 'user') and borrower.user and borrower.user.email:
                 send_mail(
-                    subject=f'URGENT: 7 Days OVERDUE Repayment',
+                    subject=f'URGENT: Severely Overdue Repayment',
                     message=f'''
                     URGENT: Your repayment of ${repayment.amount} was due on {repayment.due_date.strftime('%d/%m/%Y')} and is now 7 days overdue.
                     
                     Application Reference: {repayment.application.reference_number}
                     
-                    This is your final notice before this matter is escalated. Please make this payment immediately.
+                    This is a serious matter. Please contact us immediately to discuss payment arrangements.
+                    Additional fees and legal action may be taken if payment is not received promptly.
                     ''',
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[borrower.user.email],
                     fail_silently=True,
                 )
         
-        # Mark as notified
-        repayment.overdue_7_day_sent = True
-        repayment.save()
-    
-    # 10 days overdue - notify BD
-    overdue_10_date = today - timedelta(days=10)
-    overdue_10_repayments = Repayment.objects.filter(
-        due_date=overdue_10_date,
-        paid_date__isnull=True,
-        overdue_10_day_sent=False
-    )
-    
-    for repayment in overdue_10_repayments:
         # Notify BD
         if repayment.application.bd and repayment.application.bd.user and repayment.application.bd.user.email:
-            borrowers_list = ", ".join([str(b) for b in repayment.application.borrowers.all()])
-            
             send_mail(
-                subject=f'ESCALATION: 10 Days Overdue Repayment',
+                subject=f'URGENT: Severely Overdue Repayment - {repayment.application.reference_number}',
                 message=f'''
-                A repayment of ${repayment.amount} for application {repayment.application.reference_number} is now 10 days overdue.
+                URGENT: Application {repayment.application.reference_number} has a severely overdue repayment.
                 
-                Borrowers: {borrowers_list}
-                Due Date: {repayment.due_date.strftime('%d/%m/%Y')}
+                Repayment Details:
+                - Amount: ${repayment.amount}
+                - Due Date: {repayment.due_date.strftime('%d/%m/%Y')}
+                - Days Overdue: 7
                 
-                This matter has been escalated to you for further action.
+                Please contact the borrower immediately and consider appropriate action.
                 ''',
                 from_email=settings.DEFAULT_FROM_EMAIL,
                 recipient_list=[repayment.application.bd.user.email],
                 fail_silently=True,
             )
         
-        # Mark as notified
-        repayment.overdue_10_day_sent = True
-        repayment.save()
+        # Mark as 7 day overdue notification sent
+        repayment.overdue_7_day_sent = True
+        repayment.save() 

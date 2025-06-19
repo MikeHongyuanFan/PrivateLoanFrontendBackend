@@ -1,1 +1,6 @@
-# This file makes the tests directory a Python package
+"""
+Applications test package.
+
+This package contains comprehensive tests for the applications API endpoints,
+organized into unit tests and integration tests.
+""" 

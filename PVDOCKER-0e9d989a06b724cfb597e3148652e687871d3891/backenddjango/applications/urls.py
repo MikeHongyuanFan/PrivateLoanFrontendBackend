@@ -18,6 +18,9 @@ urlpatterns = [
     # Enhanced application list endpoint
     path('enhanced-applications/', ApplicationViewSet.as_view({'get': 'enhanced_list'}), name='enhanced-application-list'),
     
+    # Enhanced applications endpoint (alternative list view)
+    path('enhanced-applications-alt/', ApplicationViewSet.as_view({'get': 'enhanced_applications'}), name='enhanced-applications-alt'),
+    
     # Application creation with cascade
     path('create-with-cascade/', ApplicationViewSet.as_view({'post': 'create'}), name='application-list-create'),
     
@@ -39,6 +42,9 @@ urlpatterns = [
     # Application loan extension
     path('<int:pk>/extend-loan/', ApplicationViewSet.as_view({'post': 'extend_loan'}), name='application-extend-loan'),
     
+    # BD assignment management
+    path('<int:pk>/assign-bd/', ApplicationViewSet.as_view({'post': 'assign_bd', 'put': 'assign_bd', 'delete': 'assign_bd'}), name='application-assign-bd'),
+    
     # Funding calculation
     path('<int:pk>/funding-calculation/', ApplicationViewSet.as_view({'post': 'funding_calculation'}), name='application-funding-calculation'),
     
@@ -50,4 +56,7 @@ urlpatterns = [
     
     # Manual funding calculator
     path('manual-funding-calculator/', ManualFundingCalculationView.as_view(), name='manual-funding-calculator'),
+    
+    # Application partial update with cascade
+    path('<int:pk>/partial-update-cascade/', ApplicationViewSet.as_view({'patch': 'partial_update_with_cascade'}), name='application-partial-update-cascade'),
 ]

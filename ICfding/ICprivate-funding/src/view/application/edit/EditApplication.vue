@@ -327,8 +327,8 @@ const handleSave = async () => {
             }
         }
         
-        // Update application
-        const [err, res] = await api.updateApplication(props.applicationId, applicationData);
+        // Update application using partial update with cascade
+        const [err, res] = await api.updateApplicationWithCascade(props.applicationId, applicationData);
         
         if (err) {
             throw new Error(err.message || 'Failed to update application');

@@ -1,3 +1,13 @@
+"""
+Utility Serializers
+
+This module contains utility and helper serializers that are used across
+different parts of the application.
+"""
+
+from rest_framework import serializers
+
+
 class SolvencyEnquiriesSerializer(serializers.Serializer):
     """
     Serializer for solvency enquiries summary
@@ -40,4 +50,4 @@ class SolvencyEnquiriesSerializer(serializers.Serializer):
             'has_solvency_issues': has_issues,
             'solvency_issues_count': issues_count,
             'solvency_issues_summary': summary
-        }
+        } 

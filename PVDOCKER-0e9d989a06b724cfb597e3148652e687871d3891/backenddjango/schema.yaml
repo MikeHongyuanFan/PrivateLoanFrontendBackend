@@ -75,6 +75,106 @@ paths:
               schema:
                 $ref: '#/components/schemas/GeneratePDF'
           description: ''
+  /api/applications/{id}/assign-bd/:
+    post:
+      operationId: applications_assign_bd_create
+      description: |-
+        Manage BD assignment for an application
+
+        Methods:
+        - POST: Assign a BD to an application that doesn't have one
+        - PUT: Update/reassign the BD for an application
+        - DELETE: Remove the BD assignment from an application
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationListRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ApplicationListRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApplicationListRequest'
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationList'
+          description: ''
+    put:
+      operationId: applications_assign_bd_update
+      description: |-
+        Manage BD assignment for an application
+
+        Methods:
+        - POST: Assign a BD to an application that doesn't have one
+        - PUT: Update/reassign the BD for an application
+        - DELETE: Remove the BD assignment from an application
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationListRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ApplicationListRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApplicationListRequest'
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationList'
+          description: ''
+    delete:
+      operationId: applications_assign_bd_destroy
+      description: |-
+        Manage BD assignment for an application
+
+        Methods:
+        - POST: Assign a BD to an application that doesn't have one
+        - PUT: Update/reassign the BD for an application
+        - DELETE: Remove the BD assignment from an application
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '204':
+          description: No response body
   /api/applications/{id}/borrowers/:
     put:
       operationId: applications_borrowers_update
@@ -186,6 +286,51 @@ paths:
         required: true
       tags:
       - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationList'
+          description: ''
+  /api/applications/{id}/partial-update-cascade/:
+    patch:
+      operationId: applications_partial_update_cascade_partial_update
+      description: |-
+        Partial update application with cascade support for related objects.
+
+        This endpoint allows updating the application and its nested related objects:
+        - Borrowers (create/update/remove)
+        - Guarantors (create/update/remove)
+        - Company Borrowers (create/update/remove)
+        - Security Properties (replace all)
+        - Loan Requirements (replace all)
+        - Funding Calculation (trigger new calculation)
+
+        The endpoint supports both updating existing related objects (by providing ID)
+        and creating new ones (without ID).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedApplicationListRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedApplicationListRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedApplicationListRequest'
       security:
       - jwtAuth: []
       - Bearer: []
@@ -365,7 +510,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this application.
+        description: A unique integer value identifying this Application.
         required: true
       tags:
       - applications
@@ -387,7 +532,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this application.
+        description: A unique integer value identifying this Application.
         required: true
       tags:
       - applications
@@ -420,7 +565,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this application.
+        description: A unique integer value identifying this Application.
         required: true
       tags:
       - applications
@@ -453,7 +598,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this application.
+        description: A unique integer value identifying this Application.
         required: true
       tags:
       - applications
@@ -478,7 +623,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this application.
+        description: A unique integer value identifying this Application.
         required: true
       tags:
       - applications
@@ -517,7 +662,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this application.
+        description: A unique integer value identifying this Application.
         required: true
       tags:
       - applications
@@ -556,7 +701,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this application.
+        description: A unique integer value identifying this Application.
         required: true
       tags:
       - applications
@@ -575,7 +720,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this application.
+        description: A unique integer value identifying this Application.
         required: true
       tags:
       - applications
@@ -609,7 +754,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this application.
+        description: A unique integer value identifying this Application.
         required: true
       tags:
       - applications
@@ -643,7 +788,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this application.
+        description: A unique integer value identifying this Application.
         required: true
       tags:
       - applications
@@ -677,10 +822,56 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this application.
+        description: A unique integer value identifying this Application.
         required: true
       tags:
       - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationList'
+          description: ''
+  /api/applications/applications/{id}/partial_update_with_cascade/:
+    patch:
+      operationId: applications_applications_partial_update_with_cascade_partial_update
+      description: |-
+        Partial update application with cascade support for related objects.
+
+        This endpoint allows updating the application and its nested related objects:
+        - Borrowers (create/update/remove)
+        - Guarantors (create/update/remove)
+        - Company Borrowers (create/update/remove)
+        - Security Properties (replace all)
+        - Loan Requirements (replace all)
+        - Funding Calculation (trigger new calculation)
+
+        The endpoint supports both updating existing related objects (by providing ID)
+        and creating new ones (without ID).
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Application.
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedApplicationListRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedApplicationListRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedApplicationListRequest'
       security:
       - jwtAuth: []
       - Bearer: []
@@ -700,7 +891,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this application.
+        description: A unique integer value identifying this Application.
         required: true
       tags:
       - applications
@@ -734,7 +925,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this application.
+        description: A unique integer value identifying this Application.
         required: true
       tags:
       - applications
@@ -768,7 +959,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this application.
+        description: A unique integer value identifying this Application.
         required: true
       tags:
       - applications
@@ -802,7 +993,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this application.
+        description: A unique integer value identifying this Application.
         required: true
       tags:
       - applications
@@ -892,6 +1083,24 @@ paths:
     get:
       operationId: applications_enhanced_applications_retrieve
       description: Enhanced list view with additional fields for the application dashboard
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationList'
+          description: ''
+  /api/applications/enhanced-applications-alt/:
+    get:
+      operationId: applications_enhanced_applications_alt_retrieve
+      description: |-
+        Enhanced list view with additional fields for the application dashboard
+        with advanced filtering capabilities
       tags:
       - applications
       security:
@@ -5436,20 +5645,78 @@ paths:
           description: ''
 components:
   schemas:
+    Address:
+      type: object
+      description: Serializer for address information
+      properties:
+        street:
+          type: string
+          maxLength: 255
+        city:
+          type: string
+          maxLength: 100
+        state:
+          type: string
+          maxLength: 100
+        postal_code:
+          type: string
+          maxLength: 20
+        country:
+          type: string
+          maxLength: 100
+      required:
+      - city
+      - country
+      - postal_code
+      - state
+      - street
+    AddressRequest:
+      type: object
+      description: Serializer for address information
+      properties:
+        street:
+          type: string
+          minLength: 1
+          maxLength: 255
+        city:
+          type: string
+          minLength: 1
+          maxLength: 100
+        state:
+          type: string
+          minLength: 1
+          maxLength: 100
+        postal_code:
+          type: string
+          minLength: 1
+          maxLength: 20
+        country:
+          type: string
+          minLength: 1
+          maxLength: 100
+      required:
+      - city
+      - country
+      - postal_code
+      - state
+      - street
     ApplicationCreate:
       type: object
+      description: Serializer for creating new applications
       properties:
         id:
           type: integer
           readOnly: true
         reference_number:
           type: string
+          description: Unique reference number for this application
           maxLength: 20
         loan_amount:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+          description: Requested loan amount
         loan_term:
           type: integer
           maximum: 2147483647
@@ -5461,19 +5728,40 @@ components:
           maximum: 2147483647
           minimum: 0
           nullable: true
-          description: Capitalised Interest Term in months
+          description: Capitalised interest term in months
         interest_rate:
           type: string
           format: decimal
           pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
           nullable: true
+          description: Interest rate as percentage
         purpose:
           type: string
           nullable: true
+          description: General purpose of the application
         repayment_frequency:
-          $ref: '#/components/schemas/RepaymentFrequencyEnum'
+          allOf:
+          - $ref: '#/components/schemas/RepaymentFrequencyEnum'
+          description: |-
+            How often repayments are made
+
+            * `weekly` - Weekly
+            * `fortnightly` - Fortnightly
+            * `monthly` - Monthly
+            * `quarterly` - Quarterly
+            * `annually` - Annually
         application_type:
           nullable: true
+          description: |-
+            Type of loan application
+
+            * `acquisition` - Acquisition
+            * `refinance` - Refinance
+            * `equity_release` - Equity Release
+            * `refinance_equity_release` - Refinance & Equity Release
+            * `second_mortgage` - 2nd Mortgage
+            * `caveat` - Caveat
+            * `other` - Other
           oneOf:
           - $ref: '#/components/schemas/ApplicationTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -5485,20 +5773,47 @@ components:
         product_id:
           type: string
           nullable: true
+          description: Product identifier
           maxLength: 50
         estimated_settlement_date:
           type: string
           format: date
           nullable: true
+          description: Expected settlement date
         stage:
-          $ref: '#/components/schemas/StageEnum'
+          allOf:
+          - $ref: '#/components/schemas/StageEnum'
+          description: |-
+            Current stage of the application
+
+            * `inquiry` - Inquiry
+            * `sent_to_lender` - Sent to Lender
+            * `funding_table_issued` - Funding Table Issued
+            * `iloo_issued` - ILOO Issued
+            * `iloo_signed` - ILOO Signed
+            * `commitment_fee_paid` - Commitment Fee Paid
+            * `app_submitted` - App Submitted
+            * `valuation_ordered` - Valuation Ordered
+            * `valuation_received` - Valuation Received
+            * `more_info_required` - More Info Required
+            * `formal_approval` - Formal Approval
+            * `loan_docs_instructed` - Loan Docs Instructed
+            * `loan_docs_issued` - Loan Docs Issued
+            * `loan_docs_signed` - Loan Docs Signed
+            * `settlement_conditions` - Settlement Conditions
+            * `settled` - Settled
+            * `closed` - Closed
+            * `declined` - Declined
+            * `withdrawn` - Withdrawn
         branch_id:
           type: integer
           nullable: true
+          description: Branch associated with this application
           readOnly: true
         bd_id:
           type: integer
           nullable: true
+          description: Business Development Manager for this application
           readOnly: true
         valuer:
           type: integer
@@ -5530,6 +5845,17 @@ components:
             $ref: '#/components/schemas/LoanRequirement'
         loan_purpose:
           nullable: true
+          description: |-
+            Specific purpose of the loan
+
+            * `purchase` - Purchase
+            * `refinance` - Refinance
+            * `construction` - Construction
+            * `equity_release` - Equity Release
+            * `debt_consolidation` - Debt Consolidation
+            * `business_expansion` - Business Expansion
+            * `working_capital` - Working Capital
+            * `other` - Other
           oneOf:
           - $ref: '#/components/schemas/LoanPurposeEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -5537,13 +5863,23 @@ components:
         additional_comments:
           type: string
           nullable: true
+          description: Additional comments about the loan
         prior_application:
           type: boolean
+          description: Whether there was a prior application
         prior_application_details:
           type: string
           nullable: true
+          description: Details about prior applications
         exit_strategy:
           nullable: true
+          description: |-
+            Planned exit strategy for the loan
+
+            * `sale` - Sale of Property
+            * `refinance` - Refinance
+            * `income` - Income/Cash Flow
+            * `other` - Other
           oneOf:
           - $ref: '#/components/schemas/ExitStrategyEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -5551,76 +5887,85 @@ components:
         exit_strategy_details:
           type: string
           nullable: true
+          description: Additional details about exit strategy
         valuer_company_name:
           type: string
           nullable: true
+          description: '[Legacy] Valuer company name'
           maxLength: 255
         valuer_contact_name:
           type: string
           nullable: true
+          description: '[Legacy] Valuer contact person name'
           maxLength: 255
         valuer_phone:
           type: string
           nullable: true
+          description: '[Legacy] Valuer phone number'
           maxLength: 20
         valuer_email:
           type: string
           format: email
           nullable: true
+          description: '[Legacy] Valuer email address'
           maxLength: 254
         qs_company_name:
           type: string
           nullable: true
+          description: '[Legacy] QS company name'
           maxLength: 255
         qs_contact_name:
           type: string
           nullable: true
+          description: '[Legacy] QS contact person name'
           maxLength: 255
         qs_phone:
           type: string
           nullable: true
+          description: '[Legacy] QS phone number'
           maxLength: 20
         qs_email:
           type: string
           format: email
           nullable: true
+          description: '[Legacy] QS email address'
           maxLength: 254
         funding_calculation_input:
           $ref: '#/components/schemas/FundingCalculationInput'
         has_pending_litigation:
           type: boolean
           nullable: true
-          description: Do the Borrower(s) and the Guarantor(s) have any pending or
-            past litigation matters (within the last 2 years)?
+          description: Do the Borrower(s) and Guarantor(s) have any pending or past
+            litigation matters (within the last 2 years)?
         has_unsatisfied_judgements:
           type: boolean
           nullable: true
           description: Are there any unsatisfied judgements against the Borrower(s)
-            and the Guarantor(s)?
+            and Guarantor(s)?
         has_been_bankrupt:
           type: boolean
           nullable: true
-          description: Have the Borrower(s) and the Guarantor(s) been bankrupt or
-            insolvent in the past 5 years?
+          description: Have the Borrower(s) and Guarantor(s) been bankrupt or insolvent
+            in the past 5 years?
         has_been_refused_credit:
           type: boolean
           nullable: true
-          description: Has the Borrower(s) and the Guarantor(s) been refused credit
-            by a credit provider in the last 1 year?
+          description: Has the Borrower(s) and Guarantor(s) been refused credit by
+            a credit provider in the last 1 year?
         has_outstanding_ato_debt:
           type: boolean
           nullable: true
           description: Are there any outstanding debts current or otherwise due to
-            the ATO by the Borrower(s) and the Guarantor(s)?
+            the ATO by the Borrower(s) and Guarantor(s)?
         has_outstanding_tax_returns:
           type: boolean
           nullable: true
-          description: Does the Borrower(s) and the Guarantor(s) have outstanding
-            Tax or BAS returns due to be lodged with the ATO?
+          description: Does the Borrower(s) and Guarantor(s) have outstanding Tax
+            or BAS returns due to be lodged with the ATO?
         has_payment_arrangements:
           type: boolean
           nullable: true
-          description: Has the Borrower(s) and the Guarantor(s) made payment arrangements
+          description: Has the Borrower(s) and Guarantor(s) made payment arrangements
             with a creditor to payout debt that is still current?
         solvency_enquiries_details:
           type: string
@@ -5632,16 +5977,19 @@ components:
       - id
     ApplicationCreateRequest:
       type: object
+      description: Serializer for creating new applications
       properties:
         reference_number:
           type: string
           minLength: 1
+          description: Unique reference number for this application
           maxLength: 20
         loan_amount:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+          description: Requested loan amount
         loan_term:
           type: integer
           maximum: 2147483647
@@ -5653,19 +6001,40 @@ components:
           maximum: 2147483647
           minimum: 0
           nullable: true
-          description: Capitalised Interest Term in months
+          description: Capitalised interest term in months
         interest_rate:
           type: string
           format: decimal
           pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
           nullable: true
+          description: Interest rate as percentage
         purpose:
           type: string
           nullable: true
+          description: General purpose of the application
         repayment_frequency:
-          $ref: '#/components/schemas/RepaymentFrequencyEnum'
+          allOf:
+          - $ref: '#/components/schemas/RepaymentFrequencyEnum'
+          description: |-
+            How often repayments are made
+
+            * `weekly` - Weekly
+            * `fortnightly` - Fortnightly
+            * `monthly` - Monthly
+            * `quarterly` - Quarterly
+            * `annually` - Annually
         application_type:
           nullable: true
+          description: |-
+            Type of loan application
+
+            * `acquisition` - Acquisition
+            * `refinance` - Refinance
+            * `equity_release` - Equity Release
+            * `refinance_equity_release` - Refinance & Equity Release
+            * `second_mortgage` - 2nd Mortgage
+            * `caveat` - Caveat
+            * `other` - Other
           oneOf:
           - $ref: '#/components/schemas/ApplicationTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -5677,13 +6046,38 @@ components:
         product_id:
           type: string
           nullable: true
+          description: Product identifier
           maxLength: 50
         estimated_settlement_date:
           type: string
           format: date
           nullable: true
+          description: Expected settlement date
         stage:
-          $ref: '#/components/schemas/StageEnum'
+          allOf:
+          - $ref: '#/components/schemas/StageEnum'
+          description: |-
+            Current stage of the application
+
+            * `inquiry` - Inquiry
+            * `sent_to_lender` - Sent to Lender
+            * `funding_table_issued` - Funding Table Issued
+            * `iloo_issued` - ILOO Issued
+            * `iloo_signed` - ILOO Signed
+            * `commitment_fee_paid` - Commitment Fee Paid
+            * `app_submitted` - App Submitted
+            * `valuation_ordered` - Valuation Ordered
+            * `valuation_received` - Valuation Received
+            * `more_info_required` - More Info Required
+            * `formal_approval` - Formal Approval
+            * `loan_docs_instructed` - Loan Docs Instructed
+            * `loan_docs_issued` - Loan Docs Issued
+            * `loan_docs_signed` - Loan Docs Signed
+            * `settlement_conditions` - Settlement Conditions
+            * `settled` - Settled
+            * `closed` - Closed
+            * `declined` - Declined
+            * `withdrawn` - Withdrawn
         valuer:
           type: integer
           nullable: true
@@ -5714,6 +6108,17 @@ components:
             $ref: '#/components/schemas/LoanRequirementRequest'
         loan_purpose:
           nullable: true
+          description: |-
+            Specific purpose of the loan
+
+            * `purchase` - Purchase
+            * `refinance` - Refinance
+            * `construction` - Construction
+            * `equity_release` - Equity Release
+            * `debt_consolidation` - Debt Consolidation
+            * `business_expansion` - Business Expansion
+            * `working_capital` - Working Capital
+            * `other` - Other
           oneOf:
           - $ref: '#/components/schemas/LoanPurposeEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -5721,13 +6126,23 @@ components:
         additional_comments:
           type: string
           nullable: true
+          description: Additional comments about the loan
         prior_application:
           type: boolean
+          description: Whether there was a prior application
         prior_application_details:
           type: string
           nullable: true
+          description: Details about prior applications
         exit_strategy:
           nullable: true
+          description: |-
+            Planned exit strategy for the loan
+
+            * `sale` - Sale of Property
+            * `refinance` - Refinance
+            * `income` - Income/Cash Flow
+            * `other` - Other
           oneOf:
           - $ref: '#/components/schemas/ExitStrategyEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -5735,76 +6150,85 @@ components:
         exit_strategy_details:
           type: string
           nullable: true
+          description: Additional details about exit strategy
         valuer_company_name:
           type: string
           nullable: true
+          description: '[Legacy] Valuer company name'
           maxLength: 255
         valuer_contact_name:
           type: string
           nullable: true
+          description: '[Legacy] Valuer contact person name'
           maxLength: 255
         valuer_phone:
           type: string
           nullable: true
+          description: '[Legacy] Valuer phone number'
           maxLength: 20
         valuer_email:
           type: string
           format: email
           nullable: true
+          description: '[Legacy] Valuer email address'
           maxLength: 254
         qs_company_name:
           type: string
           nullable: true
+          description: '[Legacy] QS company name'
           maxLength: 255
         qs_contact_name:
           type: string
           nullable: true
+          description: '[Legacy] QS contact person name'
           maxLength: 255
         qs_phone:
           type: string
           nullable: true
+          description: '[Legacy] QS phone number'
           maxLength: 20
         qs_email:
           type: string
           format: email
           nullable: true
+          description: '[Legacy] QS email address'
           maxLength: 254
         funding_calculation_input:
           $ref: '#/components/schemas/FundingCalculationInputRequest'
         has_pending_litigation:
           type: boolean
           nullable: true
-          description: Do the Borrower(s) and the Guarantor(s) have any pending or
-            past litigation matters (within the last 2 years)?
+          description: Do the Borrower(s) and Guarantor(s) have any pending or past
+            litigation matters (within the last 2 years)?
         has_unsatisfied_judgements:
           type: boolean
           nullable: true
           description: Are there any unsatisfied judgements against the Borrower(s)
-            and the Guarantor(s)?
+            and Guarantor(s)?
         has_been_bankrupt:
           type: boolean
           nullable: true
-          description: Have the Borrower(s) and the Guarantor(s) been bankrupt or
-            insolvent in the past 5 years?
+          description: Have the Borrower(s) and Guarantor(s) been bankrupt or insolvent
+            in the past 5 years?
         has_been_refused_credit:
           type: boolean
           nullable: true
-          description: Has the Borrower(s) and the Guarantor(s) been refused credit
-            by a credit provider in the last 1 year?
+          description: Has the Borrower(s) and Guarantor(s) been refused credit by
+            a credit provider in the last 1 year?
         has_outstanding_ato_debt:
           type: boolean
           nullable: true
           description: Are there any outstanding debts current or otherwise due to
-            the ATO by the Borrower(s) and the Guarantor(s)?
+            the ATO by the Borrower(s) and Guarantor(s)?
         has_outstanding_tax_returns:
           type: boolean
           nullable: true
-          description: Does the Borrower(s) and the Guarantor(s) have outstanding
-            Tax or BAS returns due to be lodged with the ATO?
+          description: Does the Borrower(s) and Guarantor(s) have outstanding Tax
+            or BAS returns due to be lodged with the ATO?
         has_payment_arrangements:
           type: boolean
           nullable: true
-          description: Has the Borrower(s) and the Guarantor(s) made payment arrangements
+          description: Has the Borrower(s) and Guarantor(s) made payment arrangements
             with a creditor to payout debt that is still current?
         solvency_enquiries_details:
           type: string
@@ -5812,18 +6236,21 @@ components:
           description: Additional details for any 'Yes' answers to solvency enquiries
     ApplicationDetail:
       type: object
+      description: Comprehensive serializer for application details
       properties:
         id:
           type: integer
           readOnly: true
         reference_number:
           type: string
+          description: Unique reference number for this application
           maxLength: 20
         loan_amount:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+          description: Requested loan amount
         loan_term:
           type: integer
           maximum: 2147483647
@@ -5835,19 +6262,40 @@ components:
           maximum: 2147483647
           minimum: 0
           nullable: true
-          description: Capitalised Interest Term in months
+          description: Capitalised interest term in months
         interest_rate:
           type: string
           format: decimal
           pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
           nullable: true
+          description: Interest rate as percentage
         purpose:
           type: string
           nullable: true
+          description: General purpose of the application
         repayment_frequency:
-          $ref: '#/components/schemas/RepaymentFrequencyEnum'
+          allOf:
+          - $ref: '#/components/schemas/RepaymentFrequencyEnum'
+          description: |-
+            How often repayments are made
+
+            * `weekly` - Weekly
+            * `fortnightly` - Fortnightly
+            * `monthly` - Monthly
+            * `quarterly` - Quarterly
+            * `annually` - Annually
         application_type:
           nullable: true
+          description: |-
+            Type of loan application
+
+            * `acquisition` - Acquisition
+            * `refinance` - Refinance
+            * `equity_release` - Equity Release
+            * `refinance_equity_release` - Refinance & Equity Release
+            * `second_mortgage` - 2nd Mortgage
+            * `caveat` - Caveat
+            * `other` - Other
           oneOf:
           - $ref: '#/components/schemas/ApplicationTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -5859,26 +6307,63 @@ components:
         product_id:
           type: string
           nullable: true
+          description: Product identifier
           maxLength: 50
         estimated_settlement_date:
           type: string
           format: date
           nullable: true
+          description: Expected settlement date
         stage:
-          $ref: '#/components/schemas/StageEnum'
+          allOf:
+          - $ref: '#/components/schemas/StageEnum'
+          description: |-
+            Current stage of the application
+
+            * `inquiry` - Inquiry
+            * `sent_to_lender` - Sent to Lender
+            * `funding_table_issued` - Funding Table Issued
+            * `iloo_issued` - ILOO Issued
+            * `iloo_signed` - ILOO Signed
+            * `commitment_fee_paid` - Commitment Fee Paid
+            * `app_submitted` - App Submitted
+            * `valuation_ordered` - Valuation Ordered
+            * `valuation_received` - Valuation Received
+            * `more_info_required` - More Info Required
+            * `formal_approval` - Formal Approval
+            * `loan_docs_instructed` - Loan Docs Instructed
+            * `loan_docs_issued` - Loan Docs Issued
+            * `loan_docs_signed` - Loan Docs Signed
+            * `settlement_conditions` - Settlement Conditions
+            * `settled` - Settled
+            * `closed` - Closed
+            * `declined` - Declined
+            * `withdrawn` - Withdrawn
         stage_display:
           type: string
           readOnly: true
         created_at:
           type: string
           format: date-time
-          readOnly: true
+          description: When this record was created
         updated_at:
           type: string
           format: date-time
           readOnly: true
+          description: When this record was last updated
         loan_purpose:
           nullable: true
+          description: |-
+            Specific purpose of the loan
+
+            * `purchase` - Purchase
+            * `refinance` - Refinance
+            * `construction` - Construction
+            * `equity_release` - Equity Release
+            * `debt_consolidation` - Debt Consolidation
+            * `business_expansion` - Business Expansion
+            * `working_capital` - Working Capital
+            * `other` - Other
           oneOf:
           - $ref: '#/components/schemas/LoanPurposeEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -5886,13 +6371,23 @@ components:
         additional_comments:
           type: string
           nullable: true
+          description: Additional comments about the loan
         prior_application:
           type: boolean
+          description: Whether there was a prior application
         prior_application_details:
           type: string
           nullable: true
+          description: Details about prior applications
         exit_strategy:
           nullable: true
+          description: |-
+            Planned exit strategy for the loan
+
+            * `sale` - Sale of Property
+            * `refinance` - Refinance
+            * `income` - Income/Cash Flow
+            * `other` - Other
           oneOf:
           - $ref: '#/components/schemas/ExitStrategyEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -5900,40 +6395,41 @@ components:
         exit_strategy_details:
           type: string
           nullable: true
+          description: Additional details about exit strategy
         has_pending_litigation:
           type: boolean
           nullable: true
-          description: Do the Borrower(s) and the Guarantor(s) have any pending or
-            past litigation matters (within the last 2 years)?
+          description: Do the Borrower(s) and Guarantor(s) have any pending or past
+            litigation matters (within the last 2 years)?
         has_unsatisfied_judgements:
           type: boolean
           nullable: true
           description: Are there any unsatisfied judgements against the Borrower(s)
-            and the Guarantor(s)?
+            and Guarantor(s)?
         has_been_bankrupt:
           type: boolean
           nullable: true
-          description: Have the Borrower(s) and the Guarantor(s) been bankrupt or
-            insolvent in the past 5 years?
+          description: Have the Borrower(s) and Guarantor(s) been bankrupt or insolvent
+            in the past 5 years?
         has_been_refused_credit:
           type: boolean
           nullable: true
-          description: Has the Borrower(s) and the Guarantor(s) been refused credit
-            by a credit provider in the last 1 year?
+          description: Has the Borrower(s) and Guarantor(s) been refused credit by
+            a credit provider in the last 1 year?
         has_outstanding_ato_debt:
           type: boolean
           nullable: true
           description: Are there any outstanding debts current or otherwise due to
-            the ATO by the Borrower(s) and the Guarantor(s)?
+            the ATO by the Borrower(s) and Guarantor(s)?
         has_outstanding_tax_returns:
           type: boolean
           nullable: true
-          description: Does the Borrower(s) and the Guarantor(s) have outstanding
-            Tax or BAS returns due to be lodged with the ATO?
+          description: Does the Borrower(s) and Guarantor(s) have outstanding Tax
+            or BAS returns due to be lodged with the ATO?
         has_payment_arrangements:
           type: boolean
           nullable: true
-          description: Has the Borrower(s) and the Guarantor(s) made payment arrangements
+          description: Has the Borrower(s) and Guarantor(s) made payment arrangements
             with a creditor to payout debt that is still current?
         solvency_enquiries_details:
           type: string
@@ -6002,74 +6498,91 @@ components:
         security_address:
           type: string
           nullable: true
+          description: '[Legacy] Security property address'
         security_type:
           type: string
           nullable: true
+          description: '[Legacy] Security property type'
           maxLength: 50
         security_value:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+          description: '[Legacy] Security property value'
         valuer_company_name:
           type: string
           nullable: true
+          description: '[Legacy] Valuer company name'
           maxLength: 255
         valuer_contact_name:
           type: string
           nullable: true
+          description: '[Legacy] Valuer contact person name'
           maxLength: 255
         valuer_phone:
           type: string
           nullable: true
+          description: '[Legacy] Valuer phone number'
           maxLength: 20
         valuer_email:
           type: string
           format: email
           nullable: true
+          description: '[Legacy] Valuer email address'
           maxLength: 254
         valuation_date:
           type: string
           format: date
           nullable: true
+          description: Date of property valuation
         valuation_amount:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+          description: Valuation amount
         qs_company_name:
           type: string
           nullable: true
+          description: '[Legacy] QS company name'
           maxLength: 255
         qs_contact_name:
           type: string
           nullable: true
+          description: '[Legacy] QS contact person name'
           maxLength: 255
         qs_phone:
           type: string
           nullable: true
+          description: '[Legacy] QS phone number'
           maxLength: 20
         qs_email:
           type: string
           format: email
           nullable: true
+          description: '[Legacy] QS email address'
           maxLength: 254
         qs_report_date:
           type: string
           format: date
           nullable: true
+          description: Date of QS report
         signed_by:
           type: string
           nullable: true
+          description: Name of person who signed the application
           maxLength: 255
         signature_date:
           type: string
           format: date
           nullable: true
+          description: Date the application was signed
         uploaded_pdf_path:
           type: string
           format: uri
           nullable: true
+          description: Uploaded signed application form
         funding_result:
           type: object
           additionalProperties: {}
@@ -6084,7 +6597,6 @@ components:
       - borrowers
       - branch
       - broker
-      - created_at
       - created_by_details
       - documents
       - fees
@@ -6131,7 +6643,7 @@ components:
       - total_repaid
     ApplicationLiability:
       type: object
-      description: Liability serializer specifically for application context
+      description: Serializer for application-specific liability information
       properties:
         id:
           type: integer
@@ -6151,7 +6663,7 @@ components:
           nullable: true
         bg_type:
           allOf:
-          - $ref: '#/components/schemas/BgType856Enum'
+          - $ref: '#/components/schemas/ApplicationLiabilityBgTypeEnum'
           description: |-
             Indicates if this liability belongs to B/G1 or B/G2
 
@@ -6162,9 +6674,17 @@ components:
       - description
       - id
       - liability_type
+    ApplicationLiabilityBgTypeEnum:
+      enum:
+      - bg1
+      - bg2
+      type: string
+      description: |-
+        * `bg1` - B/G1
+        * `bg2` - B/G2
     ApplicationLiabilityRequest:
       type: object
-      description: Liability serializer specifically for application context
+      description: Serializer for application-specific liability information
       properties:
         liability_type:
           $ref: '#/components/schemas/LiabilityTypeEnum'
@@ -6182,7 +6702,7 @@ components:
           nullable: true
         bg_type:
           allOf:
-          - $ref: '#/components/schemas/BgType856Enum'
+          - $ref: '#/components/schemas/ApplicationLiabilityBgTypeEnum'
           description: |-
             Indicates if this liability belongs to B/G1 or B/G2
 
@@ -6201,13 +6721,37 @@ components:
           readOnly: true
         reference_number:
           type: string
+          description: Unique reference number for this application
           maxLength: 20
         borrower_name:
           type: string
           description: Get the primary borrower name(s)
           readOnly: true
         stage:
-          $ref: '#/components/schemas/StageEnum'
+          allOf:
+          - $ref: '#/components/schemas/StageEnum'
+          description: |-
+            Current stage of the application
+
+            * `inquiry` - Inquiry
+            * `sent_to_lender` - Sent to Lender
+            * `funding_table_issued` - Funding Table Issued
+            * `iloo_issued` - ILOO Issued
+            * `iloo_signed` - ILOO Signed
+            * `commitment_fee_paid` - Commitment Fee Paid
+            * `app_submitted` - App Submitted
+            * `valuation_ordered` - Valuation Ordered
+            * `valuation_received` - Valuation Received
+            * `more_info_required` - More Info Required
+            * `formal_approval` - Formal Approval
+            * `loan_docs_instructed` - Loan Docs Instructed
+            * `loan_docs_issued` - Loan Docs Issued
+            * `loan_docs_signed` - Loan Docs Signed
+            * `settlement_conditions` - Settlement Conditions
+            * `settled` - Settled
+            * `closed` - Closed
+            * `declined` - Declined
+            * `withdrawn` - Withdrawn
         stage_display:
           type: string
           readOnly: true
@@ -6235,6 +6779,7 @@ components:
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+          description: Requested loan amount
         loan_term:
           type: integer
           maximum: 2147483647
@@ -6246,11 +6791,12 @@ components:
           maximum: 2147483647
           minimum: 0
           nullable: true
-          description: Capitalised Interest Term in months
+          description: Capitalised interest term in months
         estimated_settlement_date:
           type: string
           format: date
           nullable: true
+          description: Expected settlement date
         updated_at:
           type: string
           format: date-time
@@ -6258,9 +6804,19 @@ components:
         created_at:
           type: string
           format: date-time
-          readOnly: true
+          description: When this record was created
         application_type:
           nullable: true
+          description: |-
+            Type of loan application
+
+            * `acquisition` - Acquisition
+            * `refinance` - Refinance
+            * `equity_release` - Equity Release
+            * `refinance_equity_release` - Refinance & Equity Release
+            * `second_mortgage` - 2nd Mortgage
+            * `caveat` - Caveat
+            * `other` - Other
           oneOf:
           - $ref: '#/components/schemas/ApplicationTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -6277,7 +6833,6 @@ components:
       - bdm_name
       - borrower_count
       - borrower_name
-      - created_at
       - guarantor_name
       - id
       - product_name
@@ -6293,14 +6848,39 @@ components:
         reference_number:
           type: string
           minLength: 1
+          description: Unique reference number for this application
           maxLength: 20
         stage:
-          $ref: '#/components/schemas/StageEnum'
+          allOf:
+          - $ref: '#/components/schemas/StageEnum'
+          description: |-
+            Current stage of the application
+
+            * `inquiry` - Inquiry
+            * `sent_to_lender` - Sent to Lender
+            * `funding_table_issued` - Funding Table Issued
+            * `iloo_issued` - ILOO Issued
+            * `iloo_signed` - ILOO Signed
+            * `commitment_fee_paid` - Commitment Fee Paid
+            * `app_submitted` - App Submitted
+            * `valuation_ordered` - Valuation Ordered
+            * `valuation_received` - Valuation Received
+            * `more_info_required` - More Info Required
+            * `formal_approval` - Formal Approval
+            * `loan_docs_instructed` - Loan Docs Instructed
+            * `loan_docs_issued` - Loan Docs Issued
+            * `loan_docs_signed` - Loan Docs Signed
+            * `settlement_conditions` - Settlement Conditions
+            * `settled` - Settled
+            * `closed` - Closed
+            * `declined` - Declined
+            * `withdrawn` - Withdrawn
         loan_amount:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+          description: Requested loan amount
         loan_term:
           type: integer
           maximum: 2147483647
@@ -6312,13 +6892,28 @@ components:
           maximum: 2147483647
           minimum: 0
           nullable: true
-          description: Capitalised Interest Term in months
+          description: Capitalised interest term in months
         estimated_settlement_date:
           type: string
           format: date
           nullable: true
+          description: Expected settlement date
+        created_at:
+          type: string
+          format: date-time
+          description: When this record was created
         application_type:
           nullable: true
+          description: |-
+            Type of loan application
+
+            * `acquisition` - Acquisition
+            * `refinance` - Refinance
+            * `equity_release` - Equity Release
+            * `refinance_equity_release` - Refinance & Equity Release
+            * `second_mortgage` - 2nd Mortgage
+            * `caveat` - Caveat
+            * `other` - Other
           oneOf:
           - $ref: '#/components/schemas/ApplicationTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -6507,14 +7102,6 @@ components:
           minLength: 1
       required:
       - name
-    BgType856Enum:
-      enum:
-      - bg1
-      - bg2
-      type: string
-      description: |-
-        * `bg1` - B/G1
-        * `bg2` - B/G2
     BgTypeEnum:
       enum:
       - BG1
@@ -6528,6 +7115,7 @@ components:
       - ''
     Borrower:
       type: object
+      description: Serializer for individual borrowers
       properties:
         id:
           type: integer
@@ -7257,6 +7845,7 @@ components:
       - related_brokers
     BorrowerRequest:
       type: object
+      description: Serializer for individual borrowers
       properties:
         first_name:
           type: string
@@ -7554,6 +8143,7 @@ components:
       - asset_type
     CompanyBorrower:
       type: object
+      description: Serializer for company borrower
       properties:
         id:
           type: integer
@@ -7576,23 +8166,11 @@ components:
           - $ref: '#/components/schemas/IndustryTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
-        contact_number:
-          type: string
-          nullable: true
-          maxLength: 20
         annual_company_income:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
-        is_trustee:
-          type: boolean
-        is_smsf_trustee:
-          type: boolean
-        trustee_name:
-          type: string
-          nullable: true
-          maxLength: 255
         registered_address_unit:
           type: string
           nullable: true
@@ -7621,20 +8199,17 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Director'
-        financial_info:
-          $ref: '#/components/schemas/FinancialInfo'
+        address:
+          $ref: '#/components/schemas/Address'
         assets:
           type: array
           items:
             $ref: '#/components/schemas/CompanyAsset'
-        liabilities:
-          type: array
-          items:
-            $ref: '#/components/schemas/Liability'
       required:
       - id
     CompanyBorrowerRequest:
       type: object
+      description: Serializer for company borrower
       properties:
         company_name:
           type: string
@@ -7654,23 +8229,11 @@ components:
           - $ref: '#/components/schemas/IndustryTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
-        contact_number:
-          type: string
-          nullable: true
-          maxLength: 20
         annual_company_income:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
-        is_trustee:
-          type: boolean
-        is_smsf_trustee:
-          type: boolean
-        trustee_name:
-          type: string
-          nullable: true
-          maxLength: 255
         registered_address_unit:
           type: string
           nullable: true
@@ -7699,16 +8262,12 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/DirectorRequest'
-        financial_info:
-          $ref: '#/components/schemas/FinancialInfoRequest'
+        address:
+          $ref: '#/components/schemas/AddressRequest'
         assets:
           type: array
           items:
             $ref: '#/components/schemas/CompanyAssetRequest'
-        liabilities:
-          type: array
-          items:
-            $ref: '#/components/schemas/LiabilityRequest'
     Director:
       type: object
       description: Serializer for company directors
@@ -7903,6 +8462,54 @@ components:
           description: Template name to preview
       required:
       - template
+    EmploymentInfo:
+      type: object
+      description: Serializer for employment information
+      properties:
+        employer:
+          type: string
+          maxLength: 255
+        position:
+          type: string
+          maxLength: 100
+        income:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        years_employed:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+      required:
+      - employer
+      - income
+      - position
+      - years_employed
+    EmploymentInfoRequest:
+      type: object
+      description: Serializer for employment information
+      properties:
+        employer:
+          type: string
+          minLength: 1
+          maxLength: 255
+        position:
+          type: string
+          minLength: 1
+          maxLength: 100
+        income:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+        years_employed:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
+      required:
+      - employer
+      - income
+      - position
+      - years_employed
     EmploymentTypeEnum:
       enum:
       - full_time
@@ -8048,52 +8655,45 @@ components:
         * `other` - Other Fee
     FinancialInfo:
       type: object
+      description: Serializer for borrower financial information
       properties:
-        annual_revenue:
+        id:
+          type: integer
+        annual_income:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-        net_profit:
+        monthly_expenses:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-        assets:
+        employment_status:
           type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-        liabilities:
+          maxLength: 100
+        employment_start_date:
           type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-      required:
-      - annual_revenue
-      - assets
-      - liabilities
-      - net_profit
+          format: date
     FinancialInfoRequest:
       type: object
+      description: Serializer for borrower financial information
       properties:
-        annual_revenue:
+        id:
+          type: integer
+        annual_income:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-        net_profit:
+        monthly_expenses:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-        assets:
+        employment_status:
           type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-        liabilities:
+          minLength: 1
+          maxLength: 100
+        employment_start_date:
           type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-      required:
-      - annual_revenue
-      - assets
-      - liabilities
-      - net_profit
+          format: date
     FundingCalculationInput:
       type: object
       description: Serializer for funding calculation input fields
@@ -8207,18 +8807,11 @@ components:
           default: pdf
     Guarantor:
       type: object
+      description: Serializer for guarantor
       properties:
         id:
           type: integer
           readOnly: true
-        guarantor_type:
-          $ref: '#/components/schemas/GuarantorTypeEnum'
-        title:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/TitleEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
         first_name:
           type: string
           nullable: true
@@ -8227,88 +8820,25 @@ components:
           type: string
           nullable: true
           maxLength: 100
-        date_of_birth:
-          type: string
-          format: date
-          nullable: true
-        drivers_licence_no:
-          type: string
-          nullable: true
-          maxLength: 50
-        home_phone:
-          type: string
-          nullable: true
-          maxLength: 20
-        mobile:
-          type: string
-          nullable: true
-          maxLength: 20
         email:
           type: string
           format: email
           nullable: true
           maxLength: 254
-        address_unit:
+        mobile:
           type: string
           nullable: true
           maxLength: 20
-        address_street_no:
+        home_phone:
           type: string
           nullable: true
           maxLength: 20
-        address_street_name:
+        date_of_birth:
           type: string
+          format: date
           nullable: true
-          maxLength: 100
-        address_suburb:
-          type: string
-          nullable: true
-          maxLength: 100
-        address_state:
-          type: string
-          nullable: true
-          maxLength: 50
-        address_postcode:
-          type: string
-          nullable: true
-          maxLength: 10
-        occupation:
-          type: string
-          nullable: true
-          maxLength: 100
-        employer_name:
-          type: string
-          nullable: true
-          maxLength: 255
-        employment_type:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/GuarantorEmploymentTypeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
-        annual_income:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
-        company_name:
-          type: string
-          nullable: true
-          maxLength: 255
-        company_abn:
-          type: string
-          nullable: true
-          maxLength: 20
-        company_acn:
-          type: string
-          nullable: true
-          maxLength: 20
-        borrower:
-          type: integer
-          nullable: true
-        application:
-          type: integer
-          nullable: true
+        address:
+          $ref: '#/components/schemas/Address'
         assets:
           type: array
           items:
@@ -8319,6 +8849,10 @@ components:
           items:
             $ref: '#/components/schemas/ApplicationLiability'
           readOnly: true
+        employment_info:
+          $ref: '#/components/schemas/EmploymentInfo'
+        financial_info:
+          $ref: '#/components/schemas/FinancialInfo'
       required:
       - assets
       - id
@@ -8411,15 +8945,8 @@ components:
         * `contract` - Contract
     GuarantorRequest:
       type: object
+      description: Serializer for guarantor
       properties:
-        guarantor_type:
-          $ref: '#/components/schemas/GuarantorTypeEnum'
-        title:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/TitleEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
         first_name:
           type: string
           nullable: true
@@ -8428,88 +8955,29 @@ components:
           type: string
           nullable: true
           maxLength: 100
-        date_of_birth:
-          type: string
-          format: date
-          nullable: true
-        drivers_licence_no:
-          type: string
-          nullable: true
-          maxLength: 50
-        home_phone:
-          type: string
-          nullable: true
-          maxLength: 20
-        mobile:
-          type: string
-          nullable: true
-          maxLength: 20
         email:
           type: string
           format: email
           nullable: true
           maxLength: 254
-        address_unit:
+        mobile:
           type: string
           nullable: true
           maxLength: 20
-        address_street_no:
+        home_phone:
           type: string
           nullable: true
           maxLength: 20
-        address_street_name:
+        date_of_birth:
           type: string
+          format: date
           nullable: true
-          maxLength: 100
-        address_suburb:
-          type: string
-          nullable: true
-          maxLength: 100
-        address_state:
-          type: string
-          nullable: true
-          maxLength: 50
-        address_postcode:
-          type: string
-          nullable: true
-          maxLength: 10
-        occupation:
-          type: string
-          nullable: true
-          maxLength: 100
-        employer_name:
-          type: string
-          nullable: true
-          maxLength: 255
-        employment_type:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/GuarantorEmploymentTypeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
-        annual_income:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
-        company_name:
-          type: string
-          nullable: true
-          maxLength: 255
-        company_abn:
-          type: string
-          nullable: true
-          maxLength: 20
-        company_acn:
-          type: string
-          nullable: true
-          maxLength: 20
-        borrower:
-          type: integer
-          nullable: true
-        application:
-          type: integer
-          nullable: true
+        address:
+          $ref: '#/components/schemas/AddressRequest'
+        employment_info:
+          $ref: '#/components/schemas/EmploymentInfoRequest'
+        financial_info:
+          $ref: '#/components/schemas/FinancialInfoRequest'
     GuarantorTypeEnum:
       enum:
       - individual
@@ -8603,81 +9071,6 @@ components:
       - related_fee_type
       - transaction_type
       - transaction_type_display
-    Liability:
-      type: object
-      description: Serializer for liabilities
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        liability_type:
-          $ref: '#/components/schemas/LiabilityTypeEnum'
-        description:
-          type: string
-        amount:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-        lender:
-          type: string
-          nullable: true
-          maxLength: 100
-        monthly_payment:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-          nullable: true
-        to_be_refinanced:
-          type: boolean
-        bg_type:
-          allOf:
-          - $ref: '#/components/schemas/BgType856Enum'
-          description: |-
-            Indicates if this liability belongs to B/G1 or B/G2
-
-            * `bg1` - B/G1
-            * `bg2` - B/G2
-      required:
-      - amount
-      - description
-      - id
-      - liability_type
-    LiabilityRequest:
-      type: object
-      description: Serializer for liabilities
-      properties:
-        liability_type:
-          $ref: '#/components/schemas/LiabilityTypeEnum'
-        description:
-          type: string
-          minLength: 1
-        amount:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-        lender:
-          type: string
-          nullable: true
-          maxLength: 100
-        monthly_payment:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
-          nullable: true
-        to_be_refinanced:
-          type: boolean
-        bg_type:
-          allOf:
-          - $ref: '#/components/schemas/BgType856Enum'
-          description: |-
-            Indicates if this liability belongs to B/G1 or B/G2
-
-            * `bg1` - B/G1
-            * `bg2` - B/G2
-      required:
-      - amount
-      - description
-      - liability_type
     LiabilityTypeEnum:
       enum:
       - mortgage
@@ -8726,12 +9119,14 @@ components:
         description:
           type: string
           nullable: true
+          description: Description of what this requirement covers
           maxLength: 255
         amount:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+          description: Amount required for this specific purpose
       required:
       - id
     LoanRequirementRequest:
@@ -8741,12 +9136,14 @@ components:
         description:
           type: string
           nullable: true
+          description: Description of what this requirement covers
           maxLength: 255
         amount:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+          description: Amount required for this specific purpose
     LogoutRequest:
       type: object
       description: Serializer for user logout endpoint
@@ -9170,14 +9567,6 @@ components:
     NullEnum:
       enum:
       - null
-    OccupancyEnum:
-      enum:
-      - owner_occupied
-      - investment
-      type: string
-      description: |-
-        * `owner_occupied` - Owner Occupied
-        * `investment` - Investment Property
     OutputFormatEnum:
       enum:
       - pdf
@@ -9600,14 +9989,39 @@ components:
         reference_number:
           type: string
           minLength: 1
+          description: Unique reference number for this application
           maxLength: 20
         stage:
-          $ref: '#/components/schemas/StageEnum'
+          allOf:
+          - $ref: '#/components/schemas/StageEnum'
+          description: |-
+            Current stage of the application
+
+            * `inquiry` - Inquiry
+            * `sent_to_lender` - Sent to Lender
+            * `funding_table_issued` - Funding Table Issued
+            * `iloo_issued` - ILOO Issued
+            * `iloo_signed` - ILOO Signed
+            * `commitment_fee_paid` - Commitment Fee Paid
+            * `app_submitted` - App Submitted
+            * `valuation_ordered` - Valuation Ordered
+            * `valuation_received` - Valuation Received
+            * `more_info_required` - More Info Required
+            * `formal_approval` - Formal Approval
+            * `loan_docs_instructed` - Loan Docs Instructed
+            * `loan_docs_issued` - Loan Docs Issued
+            * `loan_docs_signed` - Loan Docs Signed
+            * `settlement_conditions` - Settlement Conditions
+            * `settled` - Settled
+            * `closed` - Closed
+            * `declined` - Declined
+            * `withdrawn` - Withdrawn
         loan_amount:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+          description: Requested loan amount
         loan_term:
           type: integer
           maximum: 2147483647
@@ -9619,13 +10033,28 @@ components:
           maximum: 2147483647
           minimum: 0
           nullable: true
-          description: Capitalised Interest Term in months
+          description: Capitalised interest term in months
         estimated_settlement_date:
           type: string
           format: date
           nullable: true
+          description: Expected settlement date
+        created_at:
+          type: string
+          format: date-time
+          description: When this record was created
         application_type:
           nullable: true
+          description: |-
+            Type of loan application
+
+            * `acquisition` - Acquisition
+            * `refinance` - Refinance
+            * `equity_release` - Equity Release
+            * `refinance_equity_release` - Refinance & Equity Release
+            * `second_mortgage` - 2nd Mortgage
+            * `caveat` - Caveat
+            * `other` - Other
           oneOf:
           - $ref: '#/components/schemas/ApplicationTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -10184,35 +10613,35 @@ components:
         company_name:
           type: string
           minLength: 1
-          description: Name of the QS company
+          description: Name of the company/firm
           maxLength: 255
         contact_name:
           type: string
           minLength: 1
-          description: Name of the contact person
+          description: Name of the primary contact person
           maxLength: 255
         phone:
           type: string
           minLength: 1
-          description: Contact phone number
+          description: Primary contact phone number
           maxLength: 20
         email:
           type: string
           format: email
           minLength: 1
-          description: Contact email address
+          description: Primary contact email address
           maxLength: 254
         address:
           type: string
           nullable: true
-          description: Company address
+          description: Business address
         notes:
           type: string
           nullable: true
-          description: Additional notes about this QS
+          description: Additional notes about this contact
         is_active:
           type: boolean
-          description: Whether this QS is active
+          description: Whether this contact is currently active
     PatchedReminderRequest:
       type: object
       description: Serializer for reminders
@@ -10297,35 +10726,35 @@ components:
         company_name:
           type: string
           minLength: 1
-          description: Name of the valuation company
+          description: Name of the company/firm
           maxLength: 255
         contact_name:
           type: string
           minLength: 1
-          description: Name of the contact person
+          description: Name of the primary contact person
           maxLength: 255
         phone:
           type: string
           minLength: 1
-          description: Contact phone number
+          description: Primary contact phone number
           maxLength: 20
         email:
           type: string
           format: email
           minLength: 1
-          description: Contact email address
+          description: Primary contact email address
           maxLength: 254
         address:
           type: string
           nullable: true
-          description: Company address
+          description: Business address
         notes:
           type: string
           nullable: true
-          description: Additional notes about this valuer
+          description: Additional notes about this contact
         is_active:
           type: boolean
-          description: Whether this valuer is active
+          description: Whether this contact is currently active
     Product:
       type: object
       description: Serializer for the Product model
@@ -10410,36 +10839,37 @@ components:
           readOnly: true
         company_name:
           type: string
-          description: Name of the QS company
+          description: Name of the company/firm
           maxLength: 255
         contact_name:
           type: string
-          description: Name of the contact person
+          description: Name of the primary contact person
           maxLength: 255
         phone:
           type: string
-          description: Contact phone number
+          description: Primary contact phone number
           maxLength: 20
         email:
           type: string
           format: email
-          description: Contact email address
+          description: Primary contact email address
           maxLength: 254
         address:
           type: string
           nullable: true
-          description: Company address
+          description: Business address
         notes:
           type: string
           nullable: true
-          description: Additional notes about this QS
+          description: Additional notes about this contact
         is_active:
           type: boolean
-          description: Whether this QS is active
+          description: Whether this contact is currently active
         created_by:
           type: integer
           readOnly: true
           nullable: true
+          description: User who created this record
         created_by_details:
           allOf:
           - $ref: '#/components/schemas/User'
@@ -10448,10 +10878,12 @@ components:
           type: string
           format: date-time
           readOnly: true
+          description: When this record was created
         updated_at:
           type: string
           format: date-time
           readOnly: true
+          description: When this record was last updated
         application_count:
           type: string
           readOnly: true
@@ -10475,27 +10907,27 @@ components:
           readOnly: true
         company_name:
           type: string
-          description: Name of the QS company
+          description: Name of the company/firm
           maxLength: 255
         contact_name:
           type: string
-          description: Name of the contact person
+          description: Name of the primary contact person
           maxLength: 255
         phone:
           type: string
-          description: Contact phone number
+          description: Primary contact phone number
           maxLength: 20
         email:
           type: string
           format: email
-          description: Contact email address
+          description: Primary contact email address
           maxLength: 254
         display_name:
           type: string
           readOnly: true
         is_active:
           type: boolean
-          description: Whether this QS is active
+          description: Whether this contact is currently active
       required:
       - company_name
       - contact_name
@@ -10510,35 +10942,35 @@ components:
         company_name:
           type: string
           minLength: 1
-          description: Name of the QS company
+          description: Name of the company/firm
           maxLength: 255
         contact_name:
           type: string
           minLength: 1
-          description: Name of the contact person
+          description: Name of the primary contact person
           maxLength: 255
         phone:
           type: string
           minLength: 1
-          description: Contact phone number
+          description: Primary contact phone number
           maxLength: 20
         email:
           type: string
           format: email
           minLength: 1
-          description: Contact email address
+          description: Primary contact email address
           maxLength: 254
         address:
           type: string
           nullable: true
-          description: Company address
+          description: Business address
         notes:
           type: string
           nullable: true
-          description: Additional notes about this QS
+          description: Additional notes about this contact
         is_active:
           type: boolean
-          description: Whether this QS is active
+          description: Whether this contact is currently active
       required:
       - company_name
       - contact_name
@@ -10863,208 +11295,230 @@ components:
         id:
           type: integer
           readOnly: true
-        address_unit:
-          type: string
-          nullable: true
-          maxLength: 20
-        address_street_no:
-          type: string
-          nullable: true
-          maxLength: 20
-        address_street_name:
-          type: string
-          nullable: true
-          maxLength: 100
-        address_suburb:
-          type: string
-          nullable: true
-          maxLength: 100
-        address_state:
-          type: string
-          nullable: true
-          maxLength: 50
-        address_postcode:
-          type: string
-          nullable: true
-          maxLength: 10
-        current_mortgagee:
-          type: string
-          nullable: true
-          maxLength: 255
-        first_mortgage:
-          type: string
-          nullable: true
-          maxLength: 255
-        second_mortgage:
-          type: string
-          nullable: true
-          maxLength: 255
-        current_debt_position:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
         property_type:
           nullable: true
+          description: |-
+            Type of property
+
+            * `residential` - Residential
+            * `commercial` - Commercial
+            * `industrial` - Industrial
+            * `retail` - Retail
+            * `land` - Land
+            * `rural` - Rural
+            * `other` - Other
           oneOf:
           - $ref: '#/components/schemas/PropertyTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
-        bedrooms:
-          type: integer
-          maximum: 2147483647
-          minimum: 0
-          nullable: true
-        bathrooms:
-          type: integer
-          maximum: 2147483647
-          minimum: 0
-          nullable: true
-        car_spaces:
-          type: integer
-          maximum: 2147483647
-          minimum: 0
-          nullable: true
-        building_size:
+        address_unit:
           type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
           nullable: true
-          description: Size in square meters
-        land_size:
+          description: Unit/apartment number
+          maxLength: 20
+        address_street_no:
           type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
           nullable: true
-          description: Size in square meters
-        is_single_story:
-          type: boolean
-        has_garage:
-          type: boolean
-        has_carport:
-          type: boolean
-        has_off_street_parking:
-          type: boolean
-        occupancy:
+          description: Street number
+          maxLength: 20
+        address_street_name:
+          type: string
           nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/OccupancyEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          description: Street name
+          maxLength: 100
+        address_suburb:
+          type: string
+          nullable: true
+          description: Suburb/city
+          maxLength: 100
+        address_state:
+          type: string
+          nullable: true
+          description: State/territory
+          maxLength: 50
+        address_postcode:
+          type: string
+          nullable: true
+          description: Postal code
+          maxLength: 10
         estimated_value:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+          description: Estimated property value
         purchase_price:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+          description: Property purchase price
+        current_debt_position:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+          description: Current outstanding debt amount
+        current_mortgagee:
+          type: string
+          nullable: true
+          description: Current mortgage holder
+          maxLength: 255
+        first_mortgage:
+          type: string
+          nullable: true
+          description: First mortgage details
+          maxLength: 255
+        second_mortgage:
+          type: string
+          nullable: true
+          description: Second mortgage details
+          maxLength: 255
+        bedrooms:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Number of bedrooms
+        bathrooms:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Number of bathrooms
+        car_spaces:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Number of car spaces
+        building_size:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+          description: Building size in square meters
+        land_size:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+          description: Land size in square meters
       required:
       - id
     SecurityPropertyRequest:
       type: object
       description: Serializer for security properties
       properties:
-        address_unit:
-          type: string
-          nullable: true
-          maxLength: 20
-        address_street_no:
-          type: string
-          nullable: true
-          maxLength: 20
-        address_street_name:
-          type: string
-          nullable: true
-          maxLength: 100
-        address_suburb:
-          type: string
-          nullable: true
-          maxLength: 100
-        address_state:
-          type: string
-          nullable: true
-          maxLength: 50
-        address_postcode:
-          type: string
-          nullable: true
-          maxLength: 10
-        current_mortgagee:
-          type: string
-          nullable: true
-          maxLength: 255
-        first_mortgage:
-          type: string
-          nullable: true
-          maxLength: 255
-        second_mortgage:
-          type: string
-          nullable: true
-          maxLength: 255
-        current_debt_position:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
         property_type:
           nullable: true
+          description: |-
+            Type of property
+
+            * `residential` - Residential
+            * `commercial` - Commercial
+            * `industrial` - Industrial
+            * `retail` - Retail
+            * `land` - Land
+            * `rural` - Rural
+            * `other` - Other
           oneOf:
           - $ref: '#/components/schemas/PropertyTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
-        bedrooms:
-          type: integer
-          maximum: 2147483647
-          minimum: 0
-          nullable: true
-        bathrooms:
-          type: integer
-          maximum: 2147483647
-          minimum: 0
-          nullable: true
-        car_spaces:
-          type: integer
-          maximum: 2147483647
-          minimum: 0
-          nullable: true
-        building_size:
+        address_unit:
           type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
           nullable: true
-          description: Size in square meters
-        land_size:
+          description: Unit/apartment number
+          maxLength: 20
+        address_street_no:
           type: string
-          format: decimal
-          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
           nullable: true
-          description: Size in square meters
-        is_single_story:
-          type: boolean
-        has_garage:
-          type: boolean
-        has_carport:
-          type: boolean
-        has_off_street_parking:
-          type: boolean
-        occupancy:
+          description: Street number
+          maxLength: 20
+        address_street_name:
+          type: string
           nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/OccupancyEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
+          description: Street name
+          maxLength: 100
+        address_suburb:
+          type: string
+          nullable: true
+          description: Suburb/city
+          maxLength: 100
+        address_state:
+          type: string
+          nullable: true
+          description: State/territory
+          maxLength: 50
+        address_postcode:
+          type: string
+          nullable: true
+          description: Postal code
+          maxLength: 10
         estimated_value:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+          description: Estimated property value
         purchase_price:
           type: string
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+          description: Property purchase price
+        current_debt_position:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
+          description: Current outstanding debt amount
+        current_mortgagee:
+          type: string
+          nullable: true
+          description: Current mortgage holder
+          maxLength: 255
+        first_mortgage:
+          type: string
+          nullable: true
+          description: First mortgage details
+          maxLength: 255
+        second_mortgage:
+          type: string
+          nullable: true
+          description: Second mortgage details
+          maxLength: 255
+        bedrooms:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Number of bedrooms
+        bathrooms:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Number of bathrooms
+        car_spaces:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Number of car spaces
+        building_size:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+          description: Building size in square meters
+        land_size:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+          description: Land size in square meters
     StageEnum:
       enum:
       - inquiry
@@ -11292,36 +11746,37 @@ components:
           readOnly: true
         company_name:
           type: string
-          description: Name of the valuation company
+          description: Name of the company/firm
           maxLength: 255
         contact_name:
           type: string
-          description: Name of the contact person
+          description: Name of the primary contact person
           maxLength: 255
         phone:
           type: string
-          description: Contact phone number
+          description: Primary contact phone number
           maxLength: 20
         email:
           type: string
           format: email
-          description: Contact email address
+          description: Primary contact email address
           maxLength: 254
         address:
           type: string
           nullable: true
-          description: Company address
+          description: Business address
         notes:
           type: string
           nullable: true
-          description: Additional notes about this valuer
+          description: Additional notes about this contact
         is_active:
           type: boolean
-          description: Whether this valuer is active
+          description: Whether this contact is currently active
         created_by:
           type: integer
           readOnly: true
           nullable: true
+          description: User who created this record
         created_by_details:
           allOf:
           - $ref: '#/components/schemas/User'
@@ -11330,10 +11785,12 @@ components:
           type: string
           format: date-time
           readOnly: true
+          description: When this record was created
         updated_at:
           type: string
           format: date-time
           readOnly: true
+          description: When this record was last updated
         application_count:
           type: string
           readOnly: true
@@ -11357,27 +11814,27 @@ components:
           readOnly: true
         company_name:
           type: string
-          description: Name of the valuation company
+          description: Name of the company/firm
           maxLength: 255
         contact_name:
           type: string
-          description: Name of the contact person
+          description: Name of the primary contact person
           maxLength: 255
         phone:
           type: string
-          description: Contact phone number
+          description: Primary contact phone number
           maxLength: 20
         email:
           type: string
           format: email
-          description: Contact email address
+          description: Primary contact email address
           maxLength: 254
         display_name:
           type: string
           readOnly: true
         is_active:
           type: boolean
-          description: Whether this valuer is active
+          description: Whether this contact is currently active
       required:
       - company_name
       - contact_name
@@ -11392,35 +11849,35 @@ components:
         company_name:
           type: string
           minLength: 1
-          description: Name of the valuation company
+          description: Name of the company/firm
           maxLength: 255
         contact_name:
           type: string
           minLength: 1
-          description: Name of the contact person
+          description: Name of the primary contact person
           maxLength: 255
         phone:
           type: string
           minLength: 1
-          description: Contact phone number
+          description: Primary contact phone number
           maxLength: 20
         email:
           type: string
           format: email
           minLength: 1
-          description: Contact email address
+          description: Primary contact email address
           maxLength: 254
         address:
           type: string
           nullable: true
-          description: Company address
+          description: Business address
         notes:
           type: string
           nullable: true
-          description: Additional notes about this valuer
+          description: Additional notes about this contact
         is_active:
           type: boolean
-          description: Whether this valuer is active
+          description: Whether this contact is currently active
       required:
       - company_name
       - contact_name

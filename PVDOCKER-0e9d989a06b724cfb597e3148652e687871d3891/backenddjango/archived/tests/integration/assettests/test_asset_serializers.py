@@ -1,7 +1,7 @@
 from django.test import TestCase
 from rest_framework.test import APIRequestFactory
 from borrowers.models import Asset, Borrower, Guarantor
-from applications.serializers_asset import GuarantorAssetSerializer, CompanyAssetSerializer
+from applications.serializers import GuarantorAssetSerializer, CompanyAssetSerializer
 from django.contrib.auth import get_user_model
 from rest_framework.exceptions import ValidationError
 

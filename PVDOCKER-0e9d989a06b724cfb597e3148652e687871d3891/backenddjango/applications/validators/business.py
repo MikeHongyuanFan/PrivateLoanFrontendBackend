@@ -1,5 +1,13 @@
+"""
+Business Validation Functions
+
+This module contains validators for business-related data including
+ABN, ACN validation and company borrower information validation.
+"""
+
 from django.core.exceptions import ValidationError
 import re
+
 
 def validate_abn(abn):
     """
@@ -29,6 +37,7 @@ def validate_abn(abn):
         raise ValidationError('Invalid ABN checksum')
     
     return abn_cleaned
+
 
 def validate_acn(acn):
     """
@@ -60,6 +69,7 @@ def validate_acn(acn):
     
     return acn_cleaned
 
+
 def validate_company_borrower(company_data):
     """
     Validate company borrower information
@@ -84,11 +94,13 @@ def validate_company_borrower(company_data):
     
     return errors
 
+
 def _validate_required_fields(company_data):
     """Validate optional company fields - no fields are required anymore"""
     errors = {}
     # All fields are now optional - no validation needed
     return errors
+
 
 def _validate_identifiers(company_data):
     """Validate ABN and ACN"""
@@ -109,6 +121,7 @@ def _validate_identifiers(company_data):
             errors['company_acn'] = str(e)
             
     return errors
+
 
 def _validate_business_details(company_data):
     """Validate business type and years in business"""
@@ -131,6 +144,7 @@ def _validate_business_details(company_data):
             
     return errors
 
+
 def _validate_financial_info(company_data):
     """Validate financial information"""
     errors = {}
@@ -147,6 +161,7 @@ def _validate_financial_info(company_data):
                     errors[f'financial_info.{field}'] = f'{field.replace("_", " ").title()} must be a number'
                     
     return errors
+
 
 def _validate_address(company_data):
     """Validate company address"""
@@ -167,6 +182,7 @@ def _validate_address(company_data):
                 
     return errors
 
+
 def _validate_directors(company_data):
     """Validate company directors"""
     errors = {}
@@ -185,125 +201,4 @@ def _validate_directors(company_data):
                     if role and role not in valid_roles:
                         errors[f'directors[{i}].roles'] = f'Invalid role: {role}'
                 
-    return errors
-
-def validate_security_property(property_data):
-    """
-    Validate security property information
-    """
-    errors = {}
-    
-    # Validate required fields
-    errors.update(_validate_property_required_fields(property_data))
-    
-    # Validate property type
-    errors.update(_validate_property_type(property_data))
-    
-    # Validate numeric fields
-    errors.update(_validate_property_numeric_fields(property_data))
-    
-    return errors
-
-def _validate_property_required_fields(property_data):
-    """Validate optional property fields - no fields are required anymore"""
-    errors = {}
-    # All fields are now optional - no validation needed
-    return errors
-
-def _validate_property_type(property_data):
-    """Validate property type"""
-    errors = {}
-    
-    from applications.models import SecurityProperty
-    valid_property_types = [choice[0] for choice in SecurityProperty.PROPERTY_TYPE_CHOICES]
-    if property_data.get('property_type') and property_data['property_type'] not in valid_property_types:
-        errors['property_type'] = 'Invalid property type'
-    
-    return errors
-
-def _validate_property_numeric_fields(property_data):
-    """Validate numeric fields"""
-    errors = {}
-    
-    numeric_fields = ['bedrooms', 'bathrooms', 'car_spaces', 'building_size', 'land_size', 
-                     'current_debt_position', 'estimated_value', 'purchase_price']
-    
-    for field in numeric_fields:
-        if field in property_data and property_data[field]:
-            try:
-                value = float(property_data[field])
-                if field in ['bedrooms', 'bathrooms', 'car_spaces'] and value < 0:
-                    errors[field] = f'{field.replace("_", " ").title()} cannot be negative'
-                elif field in ['building_size', 'land_size'] and value <= 0:
-                    errors[field] = f'{field.replace("_", " ").title()} must be greater than 0'
-                elif field in ['current_debt_position', 'estimated_value', 'purchase_price'] and value < 0:
-                    errors[field] = f'{field.replace("_", " ").title()} cannot be negative'
-            except (ValueError, TypeError):
-                errors[field] = f'{field.replace("_", " ").title()} must be a number'
-    
-    return errors
-
-def validate_loan_requirement(requirement_data):
-    """
-    Validate loan requirement information - all fields are now optional
-    """
-    errors = {}
-    
-    # Validate amount if provided
-    if 'amount' in requirement_data and requirement_data['amount']:
-        try:
-            amount = float(requirement_data['amount'])
-            if amount <= 0:
-                errors['amount'] = 'Amount must be greater than 0'
-        except (ValueError, TypeError):
-            errors['amount'] = 'Amount must be a number'
-    
-    return errors
-
-def validate_guarantor(guarantor_data):
-    """
-    Validate guarantor information
-    """
-    errors = {}
-    
-    # Validate required fields
-    errors.update(_validate_guarantor_required_fields(guarantor_data))
-    
-    # Validate guarantor type
-    errors.update(_validate_guarantor_type(guarantor_data))
-    
-    # Validate numeric fields
-    errors.update(_validate_guarantor_numeric_fields(guarantor_data))
-    
-    return errors
-
-def _validate_guarantor_required_fields(guarantor_data):
-    """Validate optional guarantor fields - no fields are required anymore"""
-    errors = {}
-    # All fields are now optional - no validation needed
-    return errors
-
-def _validate_guarantor_type(guarantor_data):
-    """Validate guarantor type"""
-    errors = {}
-    
-    from borrowers.models import Guarantor
-    valid_guarantor_types = [choice[0] for choice in Guarantor.GUARANTOR_TYPE_CHOICES]
-    if guarantor_data.get('guarantor_type') and guarantor_data['guarantor_type'] not in valid_guarantor_types:
-        errors['guarantor_type'] = 'Invalid guarantor type'
-    
-    return errors
-
-def _validate_guarantor_numeric_fields(guarantor_data):
-    """Validate numeric fields"""
-    errors = {}
-    
-    if guarantor_data.get('annual_income'):
-        try:
-            income = float(guarantor_data['annual_income'])
-            if income < 0:
-                errors['annual_income'] = 'Annual income cannot be negative'
-        except (ValueError, TypeError):
-            errors['annual_income'] = 'Annual income must be a number'
-    
-    return errors
+    return errors 
