@@ -21,7 +21,7 @@ class ApplicationViewSet(viewsets.ModelViewSet):
             queryset = queryset.select_related('bd').prefetch_related(
                 'borrowers',
                 'guarantors',
-                'securityproperty_set'
+                'security_properties'
             )
         elif self.action == 'retrieve':
             # Optimize the detail view with prefetches for all related entities
@@ -433,7 +433,6 @@ class ApplicationViewSet(viewsets.ModelViewSet):
                     status=status.HTTP_400_BAD_REQUEST
                 )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['post'])
     def validate_schema(self, request):
@@ -467,3 +466,58 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         
         serializer = ApplicationListSerializer(filtered_queryset, many=True, context={'request': request})
         return Response(serializer.data)
+
+    @action(detail=True, methods=['patch'])
+    def partial_update_with_cascade(self, request, pk=None):
+        """
+        Partial update application with cascade support for related objects.
+        
+        This endpoint allows updating the application and its nested related objects:
+        - Borrowers (create/update/remove)
+        - Guarantors (create/update/remove)
+        - Company Borrowers (create/update/remove)
+        - Security Properties (replace all)
+        - Loan Requirements (replace all)
+        - Funding Calculation (trigger new calculation)
+        
+        The endpoint supports both updating existing related objects (by providing ID)
+        and creating new ones (without ID).
+        """
+        application = self.get_object()
+        
+        from ..serializers import ApplicationPartialUpdateSerializer
+        serializer = ApplicationPartialUpdateSerializer(
+            application, 
+            data=request.data, 
+            partial=True,
+            context={'request': request}
+        )
+        
+        if serializer.is_valid():
+            try:
+                updated_application = serializer.save()
+                
+                # Create a note about the partial update
+                from documents.models import Note
+                updated_fields = list(request.data.keys())
+                Note.objects.create(
+                    application=updated_application,
+                    content=f"Application partially updated with cascade. Updated fields: {', '.join(updated_fields)}",
+                    created_by=request.user
+                )
+                
+                # Return the updated application data
+                from ..serializers import ApplicationDetailSerializer
+                response_serializer = ApplicationDetailSerializer(
+                    updated_application, 
+                    context={'request': request}
+                )
+                return Response(response_serializer.data, status=status.HTTP_200_OK)
+                
+            except Exception as e:
+                return Response(
+                    {"error": f"Failed to update application: {str(e)}"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

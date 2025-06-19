@@ -114,3 +114,6 @@ class ApplicationFilter(FilterSet):
             Q(securityproperty_set__address_state__icontains=value) |
             Q(securityproperty_set__address_postcode__icontains=value)
         ).distinct()
+
+# Alias for backward compatibility - some views might reference this name
+EnhancedApplicationFilterSet = ApplicationFilter

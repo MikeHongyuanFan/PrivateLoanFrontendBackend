@@ -1,441 +1,105 @@
-from django.db import models
-from django.conf import settings
-from django.utils.crypto import get_random_string
-from django.utils import timezone
-from django.db.models import JSONField
-from brokers.models import Broker, Branch, BDM
+"""
+Django models for loan applications.
 
+REFACTORED STRUCTURE - Backward Compatibility Layer
+===================================================
 
-def generate_reference_number():
-    """Generate a unique reference number for applications"""
-    prefix = "APP"
-    random_suffix = get_random_string(length=8, allowed_chars='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789')
-    return f"{prefix}-{random_suffix}"
+This module has been refactored into logical sub-modules for better maintainability:
 
+- models/base.py - Abstract base models for shared functionality
+- models/core.py - Main Application model  
+- models/contacts.py - Valuer and QuantitySurveyor models
+- models/properties.py - SecurityProperty model
+- models/requirements.py - LoanRequirement model
+- models/documents.py - Document model
+- models/financial.py - Fee, Repayment, FundingCalculationHistory models
 
-class Valuer(models.Model):
-    """
-    Model for reusable valuer contacts
-    """
-    company_name = models.CharField(max_length=255, help_text="Name of the valuation company")
-    contact_name = models.CharField(max_length=255, help_text="Name of the contact person")
-    phone = models.CharField(max_length=20, help_text="Contact phone number")
-    email = models.EmailField(help_text="Contact email address")
-    
-    # Additional fields for better management
-    address = models.TextField(null=True, blank=True, help_text="Company address")
-    notes = models.TextField(null=True, blank=True, help_text="Additional notes about this valuer")
-    is_active = models.BooleanField(default=True, help_text="Whether this valuer is active")
-    
-    # Metadata
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='created_valuers')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        ordering = ['company_name', 'contact_name']
-        verbose_name = "Valuer"
-        verbose_name_plural = "Valuers"
-    
-    def __str__(self):
-        return f"{self.company_name} - {self.contact_name}"
+All existing functionality is preserved. Imports and references from serializers,
+views, and other modules will continue to work exactly as before.
 
+For new development, you can import directly from sub-modules:
+    from applications.models.core import Application
+    from applications.models.contacts import Valuer, QuantitySurveyor
+    
+Or continue using the traditional approach:
+    from applications.models import Application, Valuer, QuantitySurveyor
+"""
 
-class QuantitySurveyor(models.Model):
-    """
-    Model for reusable quantity surveyor contacts
-    """
-    company_name = models.CharField(max_length=255, help_text="Name of the QS company")
-    contact_name = models.CharField(max_length=255, help_text="Name of the contact person")
-    phone = models.CharField(max_length=20, help_text="Contact phone number")
-    email = models.EmailField(help_text="Contact email address")
-    
-    # Additional fields for better management
-    address = models.TextField(null=True, blank=True, help_text="Company address")
-    notes = models.TextField(null=True, blank=True, help_text="Additional notes about this QS")
-    is_active = models.BooleanField(default=True, help_text="Whether this QS is active")
-    
-    # Metadata
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='created_quantity_surveyors')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        ordering = ['company_name', 'contact_name']
-        verbose_name = "Quantity Surveyor"
-        verbose_name_plural = "Quantity Surveyors"
-    
-    def __str__(self):
-        return f"{self.company_name} - {self.contact_name}"
+# Import all models from the new modular structure
+# This ensures 100% backward compatibility
+from .models.base import (
+    TimestampedModel,
+    UserTrackingModel, 
+    BaseApplicationModel
+)
 
+from .models.core import (
+    Application,
+    generate_reference_number
+)
 
-class Application(models.Model):
-    """
-    Model for loan applications
-    """
-    STAGE_CHOICES = [
-        ('inquiry', 'Inquiry'),
-        ('sent_to_lender', 'Sent to Lender'),
-        ('funding_table_issued', 'Funding Table Issued'),
-        ('iloo_issued', 'ILOO Issued'),
-        ('iloo_signed', 'ILOO Signed'),
-        ('commitment_fee_paid', 'Commitment Fee Paid'),
-        ('app_submitted', 'App Submitted'),
-        ('valuation_ordered', 'Valuation Ordered'),
-        ('valuation_received', 'Valuation Received'),
-        ('more_info_required', 'More Info Required'),
-        ('formal_approval', 'Formal Approval'),
-        ('loan_docs_instructed', 'Loan Docs Instructed'),
-        ('loan_docs_issued', 'Loan Docs Issued'),
-        ('loan_docs_signed', 'Loan Docs Signed'),
-        ('settlement_conditions', 'Settlement Conditions'),
-        ('settled', 'Settled'),
-        ('closed', 'Closed'),
-        ('declined', 'Declined'),
-        ('withdrawn', 'Withdrawn'),
-    ]
-    
-    APPLICATION_TYPE_CHOICES = [
-        ('acquisition', 'Acquisition'),
-        ('refinance', 'Refinance'),
-        ('equity_release', 'Equity Release'),
-        ('refinance_equity_release', 'Refinance & Equity Release'),
-        ('second_mortgage', '2nd Mortgage'),
-        ('caveat', 'Caveat'),
-        ('other', 'Other'),
-    ]
-    
-    REPAYMENT_FREQUENCY_CHOICES = [
-        ('weekly', 'Weekly'),
-        ('fortnightly', 'Fortnightly'),
-        ('monthly', 'Monthly'),
-        ('quarterly', 'Quarterly'),
-        ('annually', 'Annually'),
-    ]
-    
-    LOAN_PURPOSE_CHOICES = [
-        ('purchase', 'Purchase'),
-        ('refinance', 'Refinance'),
-        ('construction', 'Construction'),
-        ('equity_release', 'Equity Release'),
-        ('debt_consolidation', 'Debt Consolidation'),
-        ('business_expansion', 'Business Expansion'),
-        ('working_capital', 'Working Capital'),
-        ('other', 'Other'),
-    ]
-    
-    EXIT_STRATEGY_CHOICES = [
-        ('sale', 'Sale of Property'),
-        ('refinance', 'Refinance'),
-        ('income', 'Income/Cash Flow'),
-        ('other', 'Other'),
-    ]
-    
-    # Basic application details
-    reference_number = models.CharField(max_length=20, unique=True, default=generate_reference_number)
-    stage = models.CharField(max_length=25, choices=STAGE_CHOICES, default='inquiry')
-    stage_last_updated = models.DateTimeField(default=timezone.now)  # Track when stage was last updated
-    application_type = models.CharField(max_length=30, choices=APPLICATION_TYPE_CHOICES, null=True, blank=True)
-    application_type_other = models.TextField(null=True, blank=True, help_text="Details for 'Other' application type")
-    purpose = models.TextField(null=True, blank=True, default='')
-    
-    # Loan details
-    loan_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    loan_term = models.PositiveIntegerField(help_text="Loan term in months", null=True, blank=True)
-    capitalised_interest_term = models.PositiveIntegerField(null=True, blank=True, help_text="Capitalised Interest Term in months")
-    interest_rate = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    repayment_frequency = models.CharField(max_length=20, choices=REPAYMENT_FREQUENCY_CHOICES, default='monthly')
-    product_id = models.CharField(max_length=50, null=True, blank=True)
-    estimated_settlement_date = models.DateField(null=True, blank=True)
-    
-    # Loan purpose details
-    loan_purpose = models.CharField(max_length=50, choices=LOAN_PURPOSE_CHOICES, null=True, blank=True)
-    additional_comments = models.TextField(null=True, blank=True)
-    prior_application = models.BooleanField(default=False)
-    prior_application_details = models.TextField(null=True, blank=True)
-    
-    # Exit strategy
-    exit_strategy = models.CharField(max_length=50, choices=EXIT_STRATEGY_CHOICES, null=True, blank=True)
-    exit_strategy_details = models.TextField(null=True, blank=True)
-    
-    # General Solvency Enquiries
-    has_pending_litigation = models.BooleanField(null=True, blank=True, default=None, help_text="Do the Borrower(s) and the Guarantor(s) have any pending or past litigation matters (within the last 2 years)?")
-    has_unsatisfied_judgements = models.BooleanField(null=True, blank=True, default=None, help_text="Are there any unsatisfied judgements against the Borrower(s) and the Guarantor(s)?")
-    has_been_bankrupt = models.BooleanField(null=True, blank=True, default=None, help_text="Have the Borrower(s) and the Guarantor(s) been bankrupt or insolvent in the past 5 years?")
-    has_been_refused_credit = models.BooleanField(null=True, blank=True, default=None, help_text="Has the Borrower(s) and the Guarantor(s) been refused credit by a credit provider in the last 1 year?")
-    has_outstanding_ato_debt = models.BooleanField(null=True, blank=True, default=None, help_text="Are there any outstanding debts current or otherwise due to the ATO by the Borrower(s) and the Guarantor(s)?")
-    has_outstanding_tax_returns = models.BooleanField(null=True, blank=True, default=None, help_text="Does the Borrower(s) and the Guarantor(s) have outstanding Tax or BAS returns due to be lodged with the ATO?")
-    has_payment_arrangements = models.BooleanField(null=True, blank=True, default=None, help_text="Has the Borrower(s) and the Guarantor(s) made payment arrangements with a creditor to payout debt that is still current?")
-    solvency_enquiries_details = models.TextField(null=True, blank=True, help_text="Additional details for any 'Yes' answers to solvency enquiries")
-    
-    # Funding calculation result
-    funding_result = JSONField(null=True, blank=True, help_text="Stores the current funding calculation result")
-    
-    # Relationships
-    broker = models.ForeignKey(Broker, on_delete=models.SET_NULL, null=True, related_name='broker_applications')
-    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, related_name='branch_applications')
-    bd = models.ForeignKey(BDM, on_delete=models.SET_NULL, null=True, related_name='bdm_applications')
-    assigned_bd = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='assigned_applications')
-    borrowers = models.ManyToManyField('borrowers.Borrower', related_name='borrower_applications')
-    guarantors = models.ManyToManyField('borrowers.Guarantor', related_name='guaranteed_applications', blank=True)
-    
-    # NEW: Valuer and QS relationships
-    valuer = models.ForeignKey(Valuer, on_delete=models.SET_NULL, null=True, blank=True, related_name='applications', help_text="Selected valuer for this application")
-    quantity_surveyor = models.ForeignKey(QuantitySurveyor, on_delete=models.SET_NULL, null=True, blank=True, related_name='applications', help_text="Selected quantity surveyor for this application")
-    
-    # Signature and document info
-    signed_by = models.CharField(max_length=255, null=True, blank=True)
-    signature_date = models.DateField(null=True, blank=True)
-    uploaded_pdf_path = models.FileField(upload_to='applications/signed_forms/', null=True, blank=True)
-    
-    # Valuer information (legacy flat fields - kept for backward compatibility)
-    valuer_company_name = models.CharField(max_length=255, null=True, blank=True)
-    valuer_contact_name = models.CharField(max_length=255, null=True, blank=True)
-    valuer_phone = models.CharField(max_length=20, null=True, blank=True)
-    valuer_email = models.EmailField(null=True, blank=True)
-    valuation_date = models.DateField(null=True, blank=True)
-    valuation_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    
-    # Quantity Surveyor information (legacy flat fields - kept for backward compatibility)
-    qs_company_name = models.CharField(max_length=255, null=True, blank=True)
-    qs_contact_name = models.CharField(max_length=255, null=True, blank=True)
-    qs_phone = models.CharField(max_length=20, null=True, blank=True)
-    qs_email = models.EmailField(null=True, blank=True)
-    qs_report_date = models.DateField(null=True, blank=True)
-    
-    # Security property details (legacy fields)
-    security_address = models.TextField(null=True, blank=True)
-    security_type = models.CharField(max_length=50, null=True, blank=True)
-    security_value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    
-    # Metadata
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='created_applications')
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    class Meta:
-        ordering = ['-created_at']
-    
-    def __str__(self):
-        return f"{self.reference_number} - {self.get_stage_display()}"
-    
-    def save(self, *args, **kwargs):
-        # Generate reference number if not provided
-        if not self.reference_number:
-            self.reference_number = generate_reference_number()
-        
-        # Check if stage has changed
-        if self.pk:
-            old_instance = Application.objects.get(pk=self.pk)
-            if old_instance.stage != self.stage:
-                from django.utils import timezone
-                self.stage_last_updated = timezone.now()
-        
-        super().save(*args, **kwargs)
+from .models.contacts import (
+    Valuer,
+    QuantitySurveyor
+)
 
+from .models.properties import (
+    SecurityProperty
+)
 
-class SecurityProperty(models.Model):
-    """
-    Model for security properties
-    """
-    PROPERTY_TYPE_CHOICES = [
-        ('residential', 'Residential'),
-        ('commercial', 'Commercial'),
-        ('industrial', 'Industrial'),
-        ('retail', 'Retail'),
-        ('land', 'Land'),
-        ('rural', 'Rural'),
-        ('other', 'Other'),
-    ]
-    
-    OCCUPANCY_CHOICES = [
-        ('owner_occupied', 'Owner Occupied'),
-        ('investment', 'Investment Property'),
-    ]
-    
-    application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name='security_properties')
-    
-    # Property address
-    address_unit = models.CharField(max_length=20, null=True, blank=True)
-    address_street_no = models.CharField(max_length=20, null=True, blank=True)
-    address_street_name = models.CharField(max_length=100, null=True, blank=True)
-    address_suburb = models.CharField(max_length=100, null=True, blank=True)
-    address_state = models.CharField(max_length=50, null=True, blank=True)
-    address_postcode = models.CharField(max_length=10, null=True, blank=True)
-    
-    # Mortgage details
-    current_mortgagee = models.CharField(max_length=255, null=True, blank=True)
-    first_mortgage = models.CharField(max_length=255, null=True, blank=True)
-    second_mortgage = models.CharField(max_length=255, null=True, blank=True)
-    current_debt_position = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    
-    # Property type
-    property_type = models.CharField(max_length=20, choices=PROPERTY_TYPE_CHOICES, null=True, blank=True)
-    
-    # Description
-    bedrooms = models.PositiveIntegerField(null=True, blank=True)
-    bathrooms = models.PositiveIntegerField(null=True, blank=True)
-    car_spaces = models.PositiveIntegerField(null=True, blank=True)
-    building_size = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Size in square meters")
-    land_size = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Size in square meters")
-    
-    # Structure
-    is_single_story = models.BooleanField(default=True)
-    has_garage = models.BooleanField(default=False)
-    has_carport = models.BooleanField(default=False)
-    has_off_street_parking = models.BooleanField(default=False)
-    
-    # Occupancy
-    occupancy = models.CharField(max_length=20, choices=OCCUPANCY_CHOICES, null=True, blank=True)
-    
-    # Valuation
-    estimated_value = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    purchase_price = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    
-    # Metadata
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        address_parts = [
-            self.address_unit,
-            self.address_street_no,
-            self.address_street_name,
-            self.address_suburb,
-            self.address_state,
-            self.address_postcode
-        ]
-        address = ' '.join(filter(None, address_parts))
-        return f"{address} - {self.estimated_value}"
+from .models.requirements import (
+    LoanRequirement
+)
 
+from .models.documents import (
+    Document
+)
 
-class LoanRequirement(models.Model):
-    """
-    Model for loan requirements
-    """
-    application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name='loan_requirements')
-    description = models.CharField(max_length=255, null=True, blank=True)
-    amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    
-    # Metadata
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        return f"{self.description} - {self.amount}"
+from .models.financial import (
+    Fee,
+    Repayment,
+    FundingCalculationHistory
+)
 
-
-class Document(models.Model):
-    """
-    Model for application documents
-    """
-    DOCUMENT_TYPE_CHOICES = [
-        ('id', 'Identification'),
-        ('income', 'Income Verification'),
-        ('bank_statement', 'Bank Statement'),
-        ('property', 'Property Document'),
-        ('application', 'Application Form'),
-        ('contract', 'Contract'),
-        ('valuation', 'Valuation Report'),
-        ('other', 'Other'),
-    ]
+# Maintain the original __all__ list for explicit exports
+__all__ = [
+    # Core models
+    'Application',
+    'generate_reference_number',
     
-    application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name='app_documents', null=True, blank=True)
-    document_type = models.CharField(max_length=20, choices=DOCUMENT_TYPE_CHOICES, default='other')
-    file = models.FileField(upload_to='documents/', null=True, blank=True)
-    description = models.TextField(null=True, blank=True)
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='uploaded_documents')
+    # Contact models
+    'Valuer',
+    'QuantitySurveyor',
     
-    def __str__(self):
-        if self.application:
-            return f"{self.get_document_type_display()} - {self.application.reference_number}"
-        return f"{self.get_document_type_display()} - No Application"
-
-
-class Fee(models.Model):
-    """
-    Model for application fees
-    """
-    FEE_TYPE_CHOICES = [
-        ('application', 'Application Fee'),
-        ('valuation', 'Valuation Fee'),
-        ('legal', 'Legal Fee'),
-        ('broker', 'Broker Commission'),
-        ('settlement', 'Settlement Fee'),
-        ('other', 'Other Fee'),
-    ]
+    # Property models
+    'SecurityProperty',
     
-    STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('paid', 'Paid'),
-        ('waived', 'Waived'),
-        ('refunded', 'Refunded'),
-    ]
+    # Requirement models
+    'LoanRequirement',
     
-    application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name='app_fees', null=True, blank=True)
-    fee_type = models.CharField(max_length=20, choices=FEE_TYPE_CHOICES, default='other')
-    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    due_date = models.DateField(null=True, blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='pending')
-    invoice = models.FileField(upload_to='invoices/', null=True, blank=True)
-    notes = models.TextField(null=True, blank=True)
+    # Document models
+    'Document',
     
-    # Metadata
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    # Financial models
+    'Fee',
+    'Repayment',
+    'FundingCalculationHistory',
     
-    def __str__(self):
-        fee_type = self.get_fee_type_display() if self.fee_type else "Fee"
-        amount = self.amount if self.amount else 0
-        return f"{fee_type} - {amount}"
+    # Base models (available but typically not imported directly)
+    'TimestampedModel',
+    'UserTrackingModel',
+    'BaseApplicationModel',
+]
 
+# Optional: Provide migration guidance
+"""
+MIGRATION NOTES:
+===============
 
-class FundingCalculationHistory(models.Model):
-    """
-    Model for storing funding calculation history for auditing and compliance
-    """
-    application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name='funding_calculations')
-    calculation_input = JSONField(help_text="Full set of manual input fields used during calculation")
-    calculation_result = JSONField(help_text="Computed funding breakdown (all fees, funds available)")
-    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='funding_calculations')
-    created_at = models.DateTimeField(auto_now_add=True)
+Schema Changes: None - all field definitions remain identical
+Foreign Keys: All relationships preserved with same related_names
+Choices: All choice fields maintain same values and labels
+Validation: All validators and constraints preserved
 
-    class Meta:
-        ordering = ['-created_at']
-        verbose_name_plural = "Funding calculation histories"
-
-    def __str__(self):
-        return f"Funding calculation for {self.application.reference_number} at {self.created_at}"
-
-
-class Repayment(models.Model):
-    """
-    Model for loan repayments
-    """
-    STATUS_CHOICES = [
-        ('scheduled', 'Scheduled'),
-        ('paid', 'Paid'),
-        ('missed', 'Missed'),
-        ('partial', 'Partial Payment'),
-    ]
-    
-    application = models.ForeignKey(Application, on_delete=models.CASCADE, related_name='app_repayments', null=True, blank=True)
-    due_date = models.DateField(null=True, blank=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='scheduled')
-    paid_date = models.DateField(null=True, blank=True)
-    payment_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    invoice = models.FileField(upload_to='repayment_invoices/', null=True, blank=True)
-    notes = models.TextField(null=True, blank=True)
-    
-    # Metadata
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    
-    def __str__(self):
-        due_date = self.due_date if self.due_date else "No date"
-        amount = self.amount if self.amount else 0
-        return f"Repayment {due_date} - {amount}"
+This refactoring is purely organizational - no database migrations needed.
+"""

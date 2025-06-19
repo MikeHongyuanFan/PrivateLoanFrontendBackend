@@ -2,7 +2,7 @@ from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Borrower, Guarantor, Asset, Liability
-from applications.serializers_asset import CompanyAssetSerializer, GuarantorAssetSerializer
+from applications.serializers import CompanyAssetSerializer, GuarantorAssetSerializer
 from rest_framework.permissions import IsAuthenticated
 from .serializers import GuarantorSerializer, BorrowerListSerializer, BorrowerDetailSerializer
 from django_filters.rest_framework import DjangoFilterBackend
