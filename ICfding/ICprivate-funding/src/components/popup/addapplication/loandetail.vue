@@ -81,47 +81,121 @@
             <h1>Valuer</h1>
         </div>
         <div class="item">
-            <p>Company Name</p>
-            <el-input v-model="detail.valuer_company_name" placeholder="Valuation company name" />
-            <span class="hint">Name of the valuation company</span>
+            <p>Select Valuer</p>
+            <el-select v-model="detail.valuer" placeholder="Select a valuer" filterable clearable>
+                <el-option value="add_new" label="+ Add New Valuer">
+                    <div style="display: flex; align-items: center; color: #409EFF;">
+                        <span style="margin-left: 5px;">+ Add New Valuer</span>
+                    </div>
+                </el-option>
+                <el-option 
+                    v-for="valuer in valuers" 
+                    :key="valuer.id" 
+                    :value="valuer.id" 
+                    :label="valuer.display_name">
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-weight: bold;">{{ valuer.company_name }}</span>
+                        <span style="font-size: 12px; color: #8c8c8c;">{{ valuer.contact_name }} - {{ valuer.phone }}</span>
+                    </div>
+                </el-option>
+            </el-select>
+            <span class="hint">Select an existing valuer or add a new one</span>
         </div>
-        <div class="item">
-            <p>Contact Name</p>
-            <el-input v-model="detail.valuer_contact_name" placeholder="Contact person name" />
-            <span class="hint">Name of the contact person at the valuation company</span>
-        </div>
-        <div class="item">
-            <p>Phone Number</p>
-            <el-input v-model="detail.valuer_phone" placeholder="e.g. +61 2 1234 5678" />
-            <span class="hint">Contact phone number (max 20 characters)</span>
-        </div>
-        <div class="item">
-            <p>Email Address</p>
-            <el-input v-model="detail.valuer_email" type="email" placeholder="example@domain.com" />
-            <span class="hint">Must be a valid email address</span>
+        <div v-if="detail.valuer === 'add_new' || showValuerForm" class="valuer-form" style="grid-column: 1 / 3; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px 20px; margin-top: 10px; padding: 15px; border: 1px solid #e1e1e1; border-radius: 5px;">
+            <div class="item">
+                <p>Company Name <span class="required">*</span></p>
+                <el-input v-model="newValuer.company_name" placeholder="Valuation company name" />
+                <span class="hint">Name of the valuation company</span>
+            </div>
+            <div class="item">
+                <p>Contact Name <span class="required">*</span></p>
+                <el-input v-model="newValuer.contact_name" placeholder="Contact person name" />
+                <span class="hint">Name of the contact person</span>
+            </div>
+            <div class="item">
+                <p>Phone Number <span class="required">*</span></p>
+                <el-input v-model="newValuer.phone" placeholder="e.g. +61 2 1234 5678" />
+                <span class="hint">Contact phone number</span>
+            </div>
+            <div class="item">
+                <p>Email Address <span class="required">*</span></p>
+                <el-input v-model="newValuer.email" type="email" placeholder="example@domain.com" />
+                <span class="hint">Contact email address</span>
+            </div>
+            <div class="item" style="grid-column: 1 / 3;">
+                <p>Address</p>
+                <el-input v-model="newValuer.address" type="textarea" :rows="2" placeholder="Company address" />
+                <span class="hint">Optional company address</span>
+            </div>
+            <div class="item" style="grid-column: 1 / 3;">
+                <p>Notes</p>
+                <el-input v-model="newValuer.notes" type="textarea" :rows="2" placeholder="Additional notes" />
+                <span class="hint">Optional notes about this valuer</span>
+            </div>
+            <div class="item" style="grid-column: 1 / 3; display: flex; gap: 10px; justify-content: flex-end;">
+                <el-button @click="cancelNewValuer">Cancel</el-button>
+                <el-button type="primary" @click="saveNewValuer" :loading="savingValuer">Save Valuer</el-button>
+            </div>
         </div>
         <div class="long_item">
-            <h1>QS</h1>
+            <h1>Quantity Surveyor</h1>
         </div>
         <div class="item">
-            <p>Company Name</p>
-            <el-input v-model="detail.qs_company_name" placeholder="QS company name" />
-            <span class="hint">Name of the quantity surveyor company</span>
+            <p>Select Quantity Surveyor</p>
+            <el-select v-model="detail.quantity_surveyor" placeholder="Select a quantity surveyor" filterable clearable>
+                <el-option value="add_new" label="+ Add New QS">
+                    <div style="display: flex; align-items: center; color: #409EFF;">
+                        <span style="margin-left: 5px;">+ Add New Quantity Surveyor</span>
+                    </div>
+                </el-option>
+                <el-option 
+                    v-for="qs in quantitySurveyors" 
+                    :key="qs.id" 
+                    :value="qs.id" 
+                    :label="qs.display_name">
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-weight: bold;">{{ qs.company_name }}</span>
+                        <span style="font-size: 12px; color: #8c8c8c;">{{ qs.contact_name }} - {{ qs.phone }}</span>
+                    </div>
+                </el-option>
+            </el-select>
+            <span class="hint">Select an existing quantity surveyor or add a new one</span>
         </div>
-        <div class="item">
-            <p>Contact Name</p>
-            <el-input v-model="detail.qs_contact_name" placeholder="Contact person name" />
-            <span class="hint">Name of the contact person at the QS company</span>
-        </div>
-        <div class="item">
-            <p>Phone Number</p>
-            <el-input v-model="detail.qs_phone" placeholder="e.g. +61 2 1234 5678" />
-            <span class="hint">Contact phone number (max 20 characters)</span>
-        </div>
-        <div class="item">
-            <p>Email Address</p>
-            <el-input v-model="detail.qs_email" type="email" placeholder="example@domain.com" />
-            <span class="hint">Must be a valid email address</span>
+        <div v-if="detail.quantity_surveyor === 'add_new' || showQsForm" class="qs-form" style="grid-column: 1 / 3; display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px 20px; margin-top: 10px; padding: 15px; border: 1px solid #e1e1e1; border-radius: 5px;">
+            <div class="item">
+                <p>Company Name <span class="required">*</span></p>
+                <el-input v-model="newQs.company_name" placeholder="QS company name" />
+                <span class="hint">Name of the QS company</span>
+            </div>
+            <div class="item">
+                <p>Contact Name <span class="required">*</span></p>
+                <el-input v-model="newQs.contact_name" placeholder="Contact person name" />
+                <span class="hint">Name of the contact person</span>
+            </div>
+            <div class="item">
+                <p>Phone Number <span class="required">*</span></p>
+                <el-input v-model="newQs.phone" placeholder="e.g. +61 2 1234 5678" />
+                <span class="hint">Contact phone number</span>
+            </div>
+            <div class="item">
+                <p>Email Address <span class="required">*</span></p>
+                <el-input v-model="newQs.email" type="email" placeholder="example@domain.com" />
+                <span class="hint">Contact email address</span>
+            </div>
+            <div class="item" style="grid-column: 1 / 3;">
+                <p>Address</p>
+                <el-input v-model="newQs.address" type="textarea" :rows="2" placeholder="Company address" />
+                <span class="hint">Optional company address</span>
+            </div>
+            <div class="item" style="grid-column: 1 / 3;">
+                <p>Notes</p>
+                <el-input v-model="newQs.notes" type="textarea" :rows="2" placeholder="Additional notes" />
+                <span class="hint">Optional notes about this quantity surveyor</span>
+            </div>
+            <div class="item" style="grid-column: 1 / 3; display: flex; gap: 10px; justify-content: flex-end;">
+                <el-button @click="cancelNewQs">Cancel</el-button>
+                <el-button type="primary" @click="saveNewQs" :loading="savingQs">Save Quantity Surveyor</el-button>
+            </div>
         </div>
         <div class="long_item">
             <h1>Loan Purpose</h1>
@@ -158,6 +232,8 @@
 
 <script setup>
     import { ref, watch, onMounted } from 'vue';
+    import { ElMessage } from 'element-plus';
+    import { api } from '@/api';
 
     const props = defineProps({
         detail: Object
@@ -166,8 +242,166 @@
     // Create local ref for other purpose
     const otherPurpose = ref("");
 
+    // Reactive data for valuers and quantity surveyors
+    const valuers = ref([]);
+    const quantitySurveyors = ref([]);
+    const showValuerForm = ref(false);
+    const showQsForm = ref(false);
+    const savingValuer = ref(false);
+    const savingQs = ref(false);
+
+    // Forms for new valuer and QS
+    const newValuer = ref({
+        company_name: '',
+        contact_name: '',
+        phone: '',
+        email: '',
+        address: '',
+        notes: ''
+    });
+
+    const newQs = ref({
+        company_name: '',
+        contact_name: '',
+        phone: '',
+        email: '',
+        address: '',
+        notes: ''
+    });
+
+    // Load valuers and quantity surveyors
+    const loadValuers = async () => {
+        try {
+            const [err, data] = await api.valuers();
+            if (!err && data) {
+                valuers.value = data.results || data;
+            }
+        } catch (error) {
+            console.error('Error loading valuers:', error);
+        }
+    };
+
+    const loadQuantitySurveyors = async () => {
+        try {
+            const [err, data] = await api.quantitySurveyors();
+            if (!err && data) {
+                quantitySurveyors.value = data.results || data;
+            }
+        } catch (error) {
+            console.error('Error loading quantity surveyors:', error);
+        }
+    };
+
+    // Save new valuer
+    const saveNewValuer = async () => {
+        // Validate required fields
+        if (!newValuer.value.company_name || !newValuer.value.contact_name || 
+            !newValuer.value.phone || !newValuer.value.email) {
+            ElMessage.error('Please fill in all required fields for the valuer');
+            return;
+        }
+
+        savingValuer.value = true;
+        try {
+            const [err, data] = await api.addValuer(newValuer.value);
+            if (!err && data) {
+                ElMessage.success('Valuer saved successfully');
+                // Add to list and select it
+                valuers.value.push(data);
+                props.detail.valuer = data.id;
+                // Reset form
+                newValuer.value = {
+                    company_name: '',
+                    contact_name: '',
+                    phone: '',
+                    email: '',
+                    address: '',
+                    notes: ''
+                };
+                showValuerForm.value = false;
+            } else {
+                ElMessage.error('Failed to save valuer: ' + (err.message || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error saving valuer:', error);
+            ElMessage.error('Error saving valuer');
+        } finally {
+            savingValuer.value = false;
+        }
+    };
+
+    // Save new quantity surveyor
+    const saveNewQs = async () => {
+        // Validate required fields
+        if (!newQs.value.company_name || !newQs.value.contact_name || 
+            !newQs.value.phone || !newQs.value.email) {
+            ElMessage.error('Please fill in all required fields for the quantity surveyor');
+            return;
+        }
+
+        savingQs.value = true;
+        try {
+            const [err, data] = await api.addQuantitySurveyor(newQs.value);
+            if (!err && data) {
+                ElMessage.success('Quantity Surveyor saved successfully');
+                // Add to list and select it
+                quantitySurveyors.value.push(data);
+                props.detail.quantity_surveyor = data.id;
+                // Reset form
+                newQs.value = {
+                    company_name: '',
+                    contact_name: '',
+                    phone: '',
+                    email: '',
+                    address: '',
+                    notes: ''
+                };
+                showQsForm.value = false;
+            } else {
+                ElMessage.error('Failed to save quantity surveyor: ' + (err.message || 'Unknown error'));
+            }
+        } catch (error) {
+            console.error('Error saving quantity surveyor:', error);
+            ElMessage.error('Error saving quantity surveyor');
+        } finally {
+            savingQs.value = false;
+        }
+    };
+
+    // Cancel new valuer
+    const cancelNewValuer = () => {
+        newValuer.value = {
+            company_name: '',
+            contact_name: '',
+            phone: '',
+            email: '',
+            address: '',
+            notes: ''
+        };
+        props.detail.valuer = null;
+        showValuerForm.value = false;
+    };
+
+    // Cancel new QS
+    const cancelNewQs = () => {
+        newQs.value = {
+            company_name: '',
+            contact_name: '',
+            phone: '',
+            email: '',
+            address: '',
+            notes: ''
+        };
+        props.detail.quantity_surveyor = null;
+        showQsForm.value = false;
+    };
+
     // Initialize values from props
     onMounted(() => {
+        // Load valuers and QS
+        loadValuers();
+        loadQuantitySurveyors();
+
         // Check if loan_purpose is already set and is a valid enum value
         const validPurposes = ["purchase", "refinance", "construction", "equity_release", 
                               "debt_consolidation", "business_expansion", "working_capital", "other"];
@@ -210,6 +444,24 @@
         if (newVal !== 'other') {
             // Reset the other application type input when a predefined type is selected
             props.detail.application_type_other = "";
+        }
+    });
+
+    // Watch for valuer selection changes
+    watch(() => props.detail.valuer, (newVal) => {
+        if (newVal === 'add_new') {
+            showValuerForm.value = true;
+        } else {
+            showValuerForm.value = false;
+        }
+    });
+
+    // Watch for QS selection changes
+    watch(() => props.detail.quantity_surveyor, (newVal) => {
+        if (newVal === 'add_new') {
+            showQsForm.value = true;
+        } else {
+            showQsForm.value = false;
         }
     });
 </script>

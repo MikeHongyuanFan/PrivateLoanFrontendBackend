@@ -13,4 +13,7 @@ export const system = {
   setting: "Setting",
   notification: "Notification",
   inbox: "Inbox",
+  management: "Management",
+  valuers: "Valuers",
+  quantitySurveyors: "Quantity Surveyors",
 };
