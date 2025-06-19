@@ -1,12 +1,15 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views.application_views import ApplicationViewSet
+from .views.valuer_qs_views import ValuerViewSet, QuantitySurveyorViewSet
 from .views.pdf_generation import GenerateFilledFormView
 from .views.funding_calculator_views import ManualFundingCalculationView
 
 # Create a router for ViewSets
 router = DefaultRouter()
 router.register(r'applications', ApplicationViewSet, basename='application')
+router.register(r'valuers', ValuerViewSet, basename='valuer')
+router.register(r'quantity-surveyors', QuantitySurveyorViewSet, basename='quantity-surveyor')
 
 urlpatterns = [
     # Include router URLs

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Application, SecurityProperty, LoanRequirement, Document, Fee, Repayment, FundingCalculationHistory
+from .models import Application, SecurityProperty, LoanRequirement, Document, Fee, Repayment, FundingCalculationHistory, Valuer, QuantitySurveyor
 
 
 class SecurityPropertyInline(admin.TabularInline):
@@ -61,7 +61,7 @@ class ApplicationAdmin(admin.ModelAdmin):
                       'has_payment_arrangements', 'solvency_enquiries_details')
         }),
         ('Relationships', {
-            'fields': ('broker', 'branch', 'bd', 'borrowers', 'guarantors')
+            'fields': ('broker', 'branch', 'bd', 'valuer', 'quantity_surveyor', 'borrowers', 'guarantors')
         }),
         ('Security Property (Legacy)', {
             'fields': ('security_address', 'security_type', 'security_value')
@@ -145,3 +145,55 @@ class FundingCalculationHistoryAdmin(admin.ModelAdmin):
     list_filter = ('created_at',)
     readonly_fields = ('created_at', 'created_by')
     date_hierarchy = 'created_at'
+
+
+@admin.register(Valuer)
+class ValuerAdmin(admin.ModelAdmin):
+    list_display = ('company_name', 'contact_name', 'phone', 'email', 'is_active', 'created_at')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('company_name', 'contact_name', 'email', 'phone')
+    readonly_fields = ('created_by', 'created_at', 'updated_at')
+    date_hierarchy = 'created_at'
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('company_name', 'contact_name', 'phone', 'email')
+        }),
+        ('Additional Information', {
+            'fields': ('address', 'notes', 'is_active')
+        }),
+        ('Metadata', {
+            'fields': ('created_by', 'created_at', 'updated_at')
+        }),
+    )
+    
+    def save_model(self, request, obj, form, change):
+        if not change:  # If creating a new object
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
+
+
+@admin.register(QuantitySurveyor)
+class QuantitySurveyorAdmin(admin.ModelAdmin):
+    list_display = ('company_name', 'contact_name', 'phone', 'email', 'is_active', 'created_at')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('company_name', 'contact_name', 'email', 'phone')
+    readonly_fields = ('created_by', 'created_at', 'updated_at')
+    date_hierarchy = 'created_at'
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('company_name', 'contact_name', 'phone', 'email')
+        }),
+        ('Additional Information', {
+            'fields': ('address', 'notes', 'is_active')
+        }),
+        ('Metadata', {
+            'fields': ('created_by', 'created_at', 'updated_at')
+        }),
+    )
+    
+    def save_model(self, request, obj, form, change):
+        if not change:  # If creating a new object
+            obj.created_by = request.user
+        super().save_model(request, obj, form, change)
