@@ -115,23 +115,18 @@
                 <h1>Financial Summary</h1>
             </div>
             <div class="item">
-                <p>Annual Revenue ($) <span class="required">*</span></p>
-                <el-input v-model="company.financial_info.annual_revenue" type="number" placeholder="e.g. 1000000" />
-                <span class="hint">Annual revenue in dollars (max 10 digits)</span>
-            </div>
-            <div class="item">
-                <p>Net Profit ($) <span class="required">*</span></p>
-                <el-input v-model="company.financial_info.net_profit" type="number" placeholder="e.g. 250000" />
-                <span class="hint">Annual net profit in dollars (max 10 digits)</span>
+                <p>Annual Company Income ($) <span class="required">*</span></p>
+                <el-input v-model="company.annual_company_income" type="number" placeholder="e.g. 1000000" />
+                <span class="hint">Annual company income in dollars (max 10 digits)</span>
             </div>
             <div class="item">
                 <p>Total Assets ($)</p>
-                <el-input v-model="company.financial_info.assets" type="number" disabled />
+                <el-input :value="calculateTotalAssets(company)" type="number" disabled />
                 <span class="hint">Sum of all assets (calculated automatically)</span>
             </div>
             <div class="item">
                 <p>Total Liabilities ($)</p>
-                <el-input v-model="company.financial_info.liabilities" type="number" disabled />
+                <el-input :value="calculateTotalLiabilities(company)" type="number" disabled />
                 <span class="hint">Sum of all liabilities (calculated automatically)</span>
             </div>
         </div>
@@ -144,6 +139,23 @@
     });
 
     defineEmits(['addAsset', 'removeAsset', 'addLiability', 'removeLiability']);
+
+    // Helper functions to calculate totals
+    const calculateTotalAssets = (company) => {
+        if (!company?.assets || !Array.isArray(company.assets)) return 0;
+        return company.assets.reduce((total, asset) => {
+            const value = parseFloat(asset.value) || 0;
+            return total + value;
+        }, 0);
+    };
+
+    const calculateTotalLiabilities = (company) => {
+        if (!company?.liabilities || !Array.isArray(company.liabilities)) return 0;
+        return company.liabilities.reduce((total, liability) => {
+            const amount = parseFloat(liability.amount) || 0;
+            return total + amount;
+        }, 0);
+    };
 </script>
 
 <style scoped>

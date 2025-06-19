@@ -122,8 +122,15 @@ class Borrower(models.Model):
     
     def __str__(self):
         if self.is_company:
-            return f"{self.company_name}"
-        return f"{self.first_name} {self.last_name}"
+            company_name = str(self.company_name) if self.company_name else "Unknown Company"
+            return company_name
+        
+        first_name = str(self.first_name) if self.first_name else ""
+        last_name = str(self.last_name) if self.last_name else ""
+        full_name = f"{first_name} {last_name}".strip()
+        if not full_name:
+            full_name = "Unknown Borrower"
+        return full_name
 
 
 class Director(models.Model):
@@ -316,5 +323,12 @@ class Guarantor(models.Model):
     
     def __str__(self):
         if self.guarantor_type == 'company':
-            return f"{self.company_name} (Company Guarantor)"
-        return f"{self.first_name} {self.last_name} (Individual Guarantor)"
+            company_name = str(self.company_name) if self.company_name else "Unknown Company"
+            return f"{company_name} (Company Guarantor)"
+        
+        first_name = str(self.first_name) if self.first_name else ""
+        last_name = str(self.last_name) if self.last_name else ""
+        full_name = f"{first_name} {last_name}".strip()
+        if not full_name:
+            full_name = "Unknown Guarantor"
+        return f"{full_name} (Individual Guarantor)"

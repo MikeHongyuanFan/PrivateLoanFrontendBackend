@@ -5,7 +5,7 @@ from users.models import User
 
 class ReminderSerializer(serializers.ModelSerializer):
     """
-    Serializer for reminders
+    Serializer for reminders with null/blank handling for minimal data creation
     """
     created_by_name = serializers.StringRelatedField(source='created_by')
     send_as_user_email = serializers.SerializerMethodField()
@@ -21,6 +21,18 @@ class ReminderSerializer(serializers.ModelSerializer):
             'related_application', 'related_borrower', 'created_at', 'updated_at'
         ]
         read_only_fields = ['created_by', 'is_sent', 'sent_at', 'error_message', 'created_at', 'updated_at']
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'recipient_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'recipient_email': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'send_datetime': {'required': False, 'allow_null': True},
+            'email_body': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'subject': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'send_as_user': {'required': False, 'allow_null': True},
+            'reply_to_user': {'required': False, 'allow_null': True},
+            'related_application': {'required': False, 'allow_null': True},
+            'related_borrower': {'required': False, 'allow_null': True},
+        }
     
     def get_send_as_user_email(self, obj) -> str:
         if obj.send_as_user:

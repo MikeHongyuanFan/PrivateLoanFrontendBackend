@@ -521,3 +521,111 @@ class ApplicationViewSet(viewsets.ModelViewSet):
                 )
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @action(detail=True, methods=['get'])
+    def retrieve_with_cascade(self, request, pk=None):
+        """
+        Retrieve application with cascade support for all related objects.
+        
+        This endpoint provides comprehensive application data with optimized loading:
+        - Complete application details
+        - All borrowers with their assets and liabilities
+        - All guarantors with their assets and liabilities
+        - All security properties
+        - All loan requirements
+        - All documents and notes
+        - All fees, repayments, and ledger entries
+        - Related parties (broker, BD, branch, valuer, quantity surveyor)
+        - Funding calculation history
+        
+        This endpoint is optimized for cases where you need complete application data
+        with all related objects in a single request.
+        """
+        try:
+            # Get application with comprehensive prefetching for cascade loading
+            application = Application.objects.select_related(
+                'bd', 'broker', 'branch', 'valuer', 'quantity_surveyor', 'created_by'
+            ).prefetch_related(
+                # Borrowers and their related data
+                'borrowers',
+                'borrowers__assets',
+                'borrowers__liabilities',
+                
+                # Guarantors and their related data
+                'guarantors',
+                'guarantors__assets',
+                'guarantors__liabilities',
+                
+                # Security and loan details
+                'security_properties',
+                'loan_requirements',
+                
+                # Documents and tracking - use correct relationship names
+                'documents',  # From documents app
+                'notes',      # From documents app
+                'fees',       # From documents app
+                'repayments', # From documents app
+                'ledger_entries',
+                
+                # Funding calculation history
+                'funding_calculations'
+            ).get(pk=pk)
+            
+            # Create a note about the cascade retrieval for audit purposes
+            from documents.models import Note
+            Note.objects.create(
+                application=application,
+                content=f"Application retrieved with cascade by {request.user.get_full_name() or request.user.email}",
+                created_by=request.user
+            )
+            
+            # Return comprehensive application data using the detail serializer
+            from ..serializers import ApplicationDetailSerializer
+            serializer = ApplicationDetailSerializer(
+                application, 
+                context={'request': request}
+            )
+            response_data = serializer.data
+            
+            # Add cascade metadata with safe type conversion
+            try:
+                borrowers = response_data.get('borrowers', [])
+                guarantors = response_data.get('guarantors', [])
+                security_properties = response_data.get('security_properties', [])
+                loan_requirements = response_data.get('loan_requirements', [])
+                documents = response_data.get('documents', [])
+                notes = response_data.get('notes', [])
+                
+                response_data['cascade_info'] = {
+                    'retrieved_at': str(application.updated_at),
+                    'borrower_count': len(borrowers) if borrowers else 0,
+                    'guarantor_count': len(guarantors) if guarantors else 0,
+                    'security_property_count': len(security_properties) if security_properties else 0,
+                    'loan_requirement_count': len(loan_requirements) if loan_requirements else 0,
+                    'document_count': len(documents) if documents else 0,
+                    'note_count': len(notes) if notes else 0,
+                    'retrieval_method': 'cascade'
+                }
+            except Exception as meta_error:
+                # Log the metadata error but don't fail the request
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Error creating cascade metadata: {str(meta_error)}")
+                response_data['cascade_info'] = {
+                    'retrieved_at': str(application.updated_at),
+                    'retrieval_method': 'cascade',
+                    'metadata_error': str(meta_error)
+                }
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+            
+        except Application.DoesNotExist:
+            return Response(
+                {"error": "Application not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to retrieve application with cascade: {str(e)}"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

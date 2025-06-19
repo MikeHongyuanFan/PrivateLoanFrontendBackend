@@ -6,11 +6,38 @@ repayment schedules, and funding calculations for loan applications.
 """
 
 from datetime import datetime, timedelta
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from django.utils import timezone
 
 from ..models import Application, FundingCalculationHistory
 from documents.models import Fee, Repayment, Note
+
+
+def safe_decimal(value, default=0):
+    """
+    Safely convert a value to Decimal, handling None, empty strings, and invalid values
+    
+    Args:
+        value: The value to convert
+        default: Default value to return if conversion fails
+        
+    Returns:
+        Decimal value or default
+    """
+    if value is None:
+        return Decimal(str(default))
+    
+    # Convert to string and strip whitespace
+    str_value = str(value).strip()
+    
+    # Handle empty strings
+    if not str_value:
+        return Decimal(str(default))
+    
+    try:
+        return Decimal(str_value)
+    except (InvalidOperation, ValueError, TypeError):
+        return Decimal(str(default))
 
 
 def generate_repayment_schedule(application_id, user):
@@ -154,21 +181,21 @@ def calculate_funding(application, calculation_input, user):
         Tuple of (calculation_result, funding_history)
     """
     # Extract parameters
-    loan_amount = Decimal(str(application.loan_amount))
-    interest_rate = Decimal(str(application.interest_rate)) / 100 if application.interest_rate else Decimal('0')
-    security_value = Decimal(str(application.security_value)) if application.security_value else Decimal('0')
+    loan_amount = safe_decimal(application.loan_amount)
+    interest_rate = safe_decimal(application.interest_rate) / 100 if application.interest_rate else Decimal('0')
+    security_value = safe_decimal(application.security_value) if application.security_value else Decimal('0')
     
     # Extract calculation input parameters
-    establishment_fee_rate = Decimal(str(calculation_input.get('establishment_fee_rate', 2.0))) / 100
-    capped_interest_months = calculation_input.get('capped_interest_months', 9)
-    monthly_line_fee_rate = Decimal(str(calculation_input.get('monthly_line_fee_rate', 0.5))) / 100
-    brokerage_fee_rate = Decimal(str(calculation_input.get('brokerage_fee_rate', 2.0))) / 100
-    application_fee = Decimal(str(calculation_input.get('application_fee', 500)))
-    due_diligence_fee = Decimal(str(calculation_input.get('due_diligence_fee', 800)))
-    legal_fee_before_gst = Decimal(str(calculation_input.get('legal_fee_before_gst', 1200)))
-    valuation_fee = Decimal(str(calculation_input.get('valuation_fee', 1000)))
-    monthly_account_fee = Decimal(str(calculation_input.get('monthly_account_fee', 50)))
-    working_fee = Decimal(str(calculation_input.get('working_fee', 0)))
+    establishment_fee_rate = safe_decimal(calculation_input.get('establishment_fee_rate', 2.0)) / 100
+    capped_interest_months = int(safe_decimal(calculation_input.get('capped_interest_months', 9)))
+    monthly_line_fee_rate = safe_decimal(calculation_input.get('monthly_line_fee_rate', 0.5)) / 100
+    brokerage_fee_rate = safe_decimal(calculation_input.get('brokerage_fee_rate', 2.0)) / 100
+    application_fee = safe_decimal(calculation_input.get('application_fee', 500))
+    due_diligence_fee = safe_decimal(calculation_input.get('due_diligence_fee', 800))
+    legal_fee_before_gst = safe_decimal(calculation_input.get('legal_fee_before_gst', 1200))
+    valuation_fee = safe_decimal(calculation_input.get('valuation_fee', 1000))
+    monthly_account_fee = safe_decimal(calculation_input.get('monthly_account_fee', 50))
+    working_fee = safe_decimal(calculation_input.get('working_fee', 0))
     
     # Calculate fees
     establishment_fee = loan_amount * establishment_fee_rate
@@ -228,21 +255,21 @@ def calculate_funding_manual(loan_amount, interest_rate, security_value, calcula
         Dictionary with calculation results
     """
     # Convert to Decimal for precise calculations
-    loan_amount = Decimal(str(loan_amount))
-    interest_rate = Decimal(str(interest_rate)) / 100
-    security_value = Decimal(str(security_value))
+    loan_amount = safe_decimal(loan_amount)
+    interest_rate = safe_decimal(interest_rate) / 100
+    security_value = safe_decimal(security_value)
     
     # Extract calculation input parameters
-    establishment_fee_rate = Decimal(str(calculation_input.get('establishment_fee_rate', 2.0))) / 100
-    capped_interest_months = calculation_input.get('capped_interest_months', 9)
-    monthly_line_fee_rate = Decimal(str(calculation_input.get('monthly_line_fee_rate', 0.5))) / 100
-    brokerage_fee_rate = Decimal(str(calculation_input.get('brokerage_fee_rate', 2.0))) / 100
-    application_fee = Decimal(str(calculation_input.get('application_fee', 500)))
-    due_diligence_fee = Decimal(str(calculation_input.get('due_diligence_fee', 800)))
-    legal_fee_before_gst = Decimal(str(calculation_input.get('legal_fee_before_gst', 1200)))
-    valuation_fee = Decimal(str(calculation_input.get('valuation_fee', 1000)))
-    monthly_account_fee = Decimal(str(calculation_input.get('monthly_account_fee', 50)))
-    working_fee = Decimal(str(calculation_input.get('working_fee', 0)))
+    establishment_fee_rate = safe_decimal(calculation_input.get('establishment_fee_rate', 2.0)) / 100
+    capped_interest_months = int(safe_decimal(calculation_input.get('capped_interest_months', 9)))
+    monthly_line_fee_rate = safe_decimal(calculation_input.get('monthly_line_fee_rate', 0.5)) / 100
+    brokerage_fee_rate = safe_decimal(calculation_input.get('brokerage_fee_rate', 2.0)) / 100
+    application_fee = safe_decimal(calculation_input.get('application_fee', 500))
+    due_diligence_fee = safe_decimal(calculation_input.get('due_diligence_fee', 800))
+    legal_fee_before_gst = safe_decimal(calculation_input.get('legal_fee_before_gst', 1200))
+    valuation_fee = safe_decimal(calculation_input.get('valuation_fee', 1000))
+    monthly_account_fee = safe_decimal(calculation_input.get('monthly_account_fee', 50))
+    working_fee = safe_decimal(calculation_input.get('working_fee', 0))
     
     # Calculate fees
     establishment_fee = loan_amount * establishment_fee_rate

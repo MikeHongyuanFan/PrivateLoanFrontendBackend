@@ -13,61 +13,87 @@ from django.db import transaction
 
 class AddressSerializer(serializers.Serializer):
     """
-    Serializer for address information
+    Serializer for address information with optional fields for minimal data creation
     """
-    street = serializers.CharField(max_length=255)
-    city = serializers.CharField(max_length=100)
-    state = serializers.CharField(max_length=100)
-    postal_code = serializers.CharField(max_length=20)
-    country = serializers.CharField(max_length=100)
+    street = serializers.CharField(max_length=255, required=False, allow_null=True, allow_blank=True)
+    city = serializers.CharField(max_length=100, required=False, allow_null=True, allow_blank=True)
+    state = serializers.CharField(max_length=100, required=False, allow_null=True, allow_blank=True)
+    postal_code = serializers.CharField(max_length=20, required=False, allow_null=True, allow_blank=True)
+    country = serializers.CharField(max_length=100, required=False, allow_null=True, allow_blank=True)
 
 
 class EmploymentInfoSerializer(serializers.Serializer):
     """
-    Serializer for employment information
+    Serializer for employment information with optional fields for minimal data creation
     """
-    employer = serializers.CharField(max_length=255)
-    position = serializers.CharField(max_length=100)
-    income = serializers.DecimalField(max_digits=12, decimal_places=2)
-    years_employed = serializers.DecimalField(max_digits=5, decimal_places=2)
+    employer = serializers.CharField(max_length=255, required=False, allow_null=True, allow_blank=True)
+    position = serializers.CharField(max_length=100, required=False, allow_null=True, allow_blank=True)
+    income = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
+    years_employed = serializers.DecimalField(max_digits=5, decimal_places=2, required=False, allow_null=True)
 
 
 class FinancialInfoSerializer(serializers.Serializer):
     """
-    Serializer for borrower financial information
+    Serializer for borrower financial information with optional fields for minimal data creation
     """
     id = serializers.IntegerField(required=False)
-    annual_income = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
-    monthly_expenses = serializers.DecimalField(max_digits=12, decimal_places=2, required=False)
-    employment_status = serializers.CharField(max_length=100, required=False)
-    employment_start_date = serializers.DateField(required=False)
+    annual_income = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
+    monthly_expenses = serializers.DecimalField(max_digits=12, decimal_places=2, required=False, allow_null=True)
+    employment_status = serializers.CharField(max_length=100, required=False, allow_null=True, allow_blank=True)
+    employment_start_date = serializers.DateField(required=False, allow_null=True)
 
 
 class DirectorSerializer(serializers.ModelSerializer):
     """
-    Serializer for company directors
+    Serializer for company directors with optional fields for minimal data creation
     """
     class Meta:
         model = Director
         fields = ['id', 'name', 'roles', 'director_id']
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'roles': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'director_id': {'required': False, 'allow_null': True, 'allow_blank': True},
+        }
 
 
 class AssetSerializer(serializers.ModelSerializer):
     """
-    Serializer for borrower assets
+    Serializer for borrower assets with null/blank handling for minimal data creation
     """
     class Meta:
         model = Asset
         fields = ['id', 'asset_type', 'description', 'value', 'amount_owing', 'to_be_refinanced', 'address', 'bg_type']
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'asset_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'description': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'value': {'required': False, 'allow_null': True},
+            'amount_owing': {'required': False, 'allow_null': True},
+            'to_be_refinanced': {'required': False, 'allow_null': True},
+            'address': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'bg_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+        }
 
 
 class LiabilitySerializer(serializers.ModelSerializer):
     """
-    Serializer for borrower liabilities
+    Serializer for borrower liabilities with null/blank handling for minimal data creation
     """
     class Meta:
         model = Liability
         fields = ['id', 'liability_type', 'description', 'amount', 'lender', 'monthly_payment', 'to_be_refinanced', 'bg_type']
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'liability_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'description': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'amount': {'required': False, 'allow_null': True},
+            'lender': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'monthly_payment': {'required': False, 'allow_null': True},
+            'to_be_refinanced': {'required': False, 'allow_null': True},
+            'bg_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+        }
 
 
 class ApplicationLiabilitySerializer(serializers.ModelSerializer):
@@ -120,18 +146,33 @@ class CompanyAssetSerializer(serializers.ModelSerializer):
 
 class BorrowerSerializer(serializers.ModelSerializer):
     """
-    Serializer for individual borrowers
+    Serializer for individual borrowers with null/blank handling for minimal data creation
     """
     address = serializers.SerializerMethodField()
     employment_info = serializers.SerializerMethodField()
+    assets = AssetSerializer(many=True, read_only=True)
+    liabilities = LiabilitySerializer(many=True, read_only=True)
     
     class Meta:
         model = Borrower
         fields = [
             'id', 'first_name', 'last_name', 'email', 'phone', 'date_of_birth',
             'address', 'employment_info', 'tax_id', 'marital_status',
-            'residency_status', 'referral_source', 'tags'
+            'residency_status', 'referral_source', 'tags', 'assets', 'liabilities'
         ]
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'first_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'last_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'email': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'phone': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'date_of_birth': {'required': False, 'allow_null': True},
+            'tax_id': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'marital_status': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'residency_status': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'referral_source': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'tags': {'required': False, 'allow_null': True, 'allow_blank': True},
+        }
     
     def get_address(self, obj) -> dict:
         return {
@@ -190,7 +231,7 @@ class BorrowerUpdateSerializer(serializers.ModelSerializer):
 
 class GuarantorSerializer(serializers.ModelSerializer):
     """
-    Serializer for guarantor
+    Serializer for guarantor with null/blank handling for minimal data creation
     """
     address = AddressSerializer(required=False)
     employment_info = EmploymentInfoSerializer(required=False)
@@ -201,16 +242,49 @@ class GuarantorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Guarantor
         fields = [
-            'id', 'first_name', 'last_name', 'email', 'mobile', 'home_phone', 'date_of_birth',
-            'address', 'assets', 'liabilities', 'employment_info', 'financial_info'
+            'id', 'guarantor_type', 'first_name', 'last_name', 'email', 'mobile',
+            'date_of_birth', 'address', 'employment_info', 'financial_info',
+            'assets', 'liabilities'
         ]
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'guarantor_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'first_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'last_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'email': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'mobile': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'date_of_birth': {'required': False, 'allow_null': True},
+        }
     
     def to_representation(self, instance):
         data = super().to_representation(instance)
         
-        # Calculate total asset value and total liability amount
-        total_assets = sum([asset.get('value', 0) or 0 for asset in data.get('assets', [])])
-        total_liabilities = sum([liability.get('amount', 0) or 0 for liability in data.get('liabilities', [])])
+        # Calculate total asset value and total liability amount with safe type conversion
+        total_assets = 0
+        for asset in data.get('assets', []):
+            value = asset.get('value', 0)
+            try:
+                # Convert to float first, then to Decimal if needed
+                if value is None:
+                    value = 0
+                elif isinstance(value, str):
+                    value = float(value) if value.strip() else 0
+                total_assets += value
+            except (ValueError, TypeError):
+                total_assets += 0
+        
+        total_liabilities = 0
+        for liability in data.get('liabilities', []):
+            amount = liability.get('amount', 0)
+            try:
+                # Convert to float first, then to Decimal if needed
+                if amount is None:
+                    amount = 0
+                elif isinstance(amount, str):
+                    amount = float(amount) if amount.strip() else 0
+                total_liabilities += amount
+            except (ValueError, TypeError):
+                total_liabilities += 0
         
         data['total_assets'] = total_assets
         data['total_liabilities'] = total_liabilities
@@ -240,7 +314,7 @@ class GuarantorSerializer(serializers.ModelSerializer):
 
 class CompanyBorrowerSerializer(serializers.ModelSerializer):
     """
-    Serializer for company borrower
+    Serializer for company borrower with null/blank handling for minimal data creation
     """
     directors = DirectorSerializer(many=True, required=False)
     address = AddressSerializer(required=False)
@@ -250,11 +324,25 @@ class CompanyBorrowerSerializer(serializers.ModelSerializer):
         model = Borrower
         fields = [
             'id', 'company_name', 'company_abn', 'company_acn', 'industry_type',
-            'annual_company_income', 
+            'annual_company_income', 'is_company',
             'registered_address_unit', 'registered_address_street_no', 'registered_address_street_name',
             'registered_address_suburb', 'registered_address_state', 'registered_address_postcode',
             'directors', 'address', 'assets'
         ]
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'company_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'company_abn': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'company_acn': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'industry_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'annual_company_income': {'required': False, 'allow_null': True},
+            'registered_address_unit': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'registered_address_street_no': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'registered_address_street_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'registered_address_suburb': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'registered_address_state': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'registered_address_postcode': {'required': False, 'allow_null': True, 'allow_blank': True},
+        }
     
     def validate(self, data):
         # Use the custom validator for company borrower
@@ -269,8 +357,8 @@ class CompanyBorrowerSerializer(serializers.ModelSerializer):
             directors_data = validated_data.pop('directors', [])
             assets_data = validated_data.pop('assets', [])
             
-            # Set borrower type to company
-            validated_data['borrower_type'] = 'company'
+            # Set is_company flag to True for company borrowers
+            validated_data['is_company'] = True
             
             # Create the borrower
             borrower = Borrower.objects.create(**validated_data)

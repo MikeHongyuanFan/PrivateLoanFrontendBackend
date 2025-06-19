@@ -516,6 +516,45 @@
                 }
             }
         },
+        "/api/applications/{id}/retrieve-cascade/": {
+            "get": {
+                "operationId": "applications_retrieve_cascade_retrieve",
+                "description": "Retrieve application with cascade support for all related objects.\n\nThis endpoint provides comprehensive application data with optimized loading:\n- Complete application details\n- All borrowers with their assets and liabilities\n- All guarantors with their assets and liabilities\n- All security properties\n- All loan requirements\n- All documents and notes\n- All fees, repayments, and ledger entries\n- Related parties (broker, BD, branch, valuer, quantity surveyor)\n- Funding calculation history\n\nThis endpoint is optimized for cases where you need complete application data\nwith all related objects in a single request.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApplicationList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/applications/{id}/sign/": {
             "post": {
                 "operationId": "applications_sign_create",
@@ -1402,6 +1441,46 @@
                 }
             }
         },
+        "/api/applications/applications/{id}/retrieve_with_cascade/": {
+            "get": {
+                "operationId": "applications_applications_retrieve_with_cascade_retrieve",
+                "description": "Retrieve application with cascade support for all related objects.\n\nThis endpoint provides comprehensive application data with optimized loading:\n- Complete application details\n- All borrowers with their assets and liabilities\n- All guarantors with their assets and liabilities\n- All security properties\n- All loan requirements\n- All documents and notes\n- All fees, repayments, and ledger entries\n- Related parties (broker, BD, branch, valuer, quantity surveyor)\n- Funding calculation history\n\nThis endpoint is optimized for cases where you need complete application data\nwith all related objects in a single request.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "A unique integer value identifying this Application.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "applications"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApplicationList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/applications/applications/{id}/sign/": {
             "post": {
                 "operationId": "applications_applications_sign_create",
@@ -1972,8 +2051,7 @@
                                 "$ref": "#/components/schemas/QuantitySurveyorRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -2070,8 +2148,7 @@
                                 "$ref": "#/components/schemas/QuantitySurveyorRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -2218,8 +2295,7 @@
                                 "$ref": "#/components/schemas/QuantitySurveyorRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -2318,8 +2394,7 @@
                                 "$ref": "#/components/schemas/QuantitySurveyorRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -2471,8 +2546,7 @@
                                 "$ref": "#/components/schemas/ValuerRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -2569,8 +2643,7 @@
                                 "$ref": "#/components/schemas/ValuerRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -2717,8 +2790,7 @@
                                 "$ref": "#/components/schemas/ValuerRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -2817,8 +2889,7 @@
                                 "$ref": "#/components/schemas/ValuerRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -4365,8 +4436,7 @@
                                 "$ref": "#/components/schemas/BrokerDetailRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -4463,8 +4533,7 @@
                                 "$ref": "#/components/schemas/BrokerDetailRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -4734,8 +4803,7 @@
                                 "$ref": "#/components/schemas/BDMRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -4832,8 +4900,7 @@
                                 "$ref": "#/components/schemas/BDMRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -5009,8 +5076,7 @@
                                 "$ref": "#/components/schemas/BDMRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -5058,8 +5124,7 @@
                                 "$ref": "#/components/schemas/BDMRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -5154,8 +5219,7 @@
                                 "$ref": "#/components/schemas/BranchRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -5252,8 +5316,7 @@
                                 "$ref": "#/components/schemas/BranchRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -5610,8 +5673,7 @@
                                 "$ref": "#/components/schemas/DocumentRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -5703,8 +5765,7 @@
                                 "$ref": "#/components/schemas/DocumentRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -5840,8 +5901,7 @@
                                 "$ref": "#/components/schemas/DocumentRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -6045,8 +6105,7 @@
                                 "$ref": "#/components/schemas/FeeRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -6143,8 +6202,7 @@
                                 "$ref": "#/components/schemas/FeeRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -6290,8 +6348,7 @@
                                 "$ref": "#/components/schemas/FeeRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -6425,8 +6482,7 @@
                                 "$ref": "#/components/schemas/NoteCommentRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -6523,8 +6579,7 @@
                                 "$ref": "#/components/schemas/NoteCommentRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -7178,8 +7233,7 @@
                                 "$ref": "#/components/schemas/RepaymentRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -7276,8 +7330,7 @@
                                 "$ref": "#/components/schemas/RepaymentRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -7423,8 +7476,7 @@
                                 "$ref": "#/components/schemas/RepaymentRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -7580,8 +7632,7 @@
                                 "$ref": "#/components/schemas/ProductRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -7678,8 +7729,7 @@
                                 "$ref": "#/components/schemas/ProductRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -7897,8 +7947,7 @@
                                 "$ref": "#/components/schemas/ReminderRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -7995,8 +8044,7 @@
                                 "$ref": "#/components/schemas/ReminderRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -9486,78 +9534,69 @@
         "schemas": {
             "Address": {
                 "type": "object",
-                "description": "Serializer for address information",
+                "description": "Serializer for address information with optional fields for minimal data creation",
                 "properties": {
                     "street": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 255
                     },
                     "city": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "state": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "postal_code": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 20
                     },
                     "country": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 100
                     }
-                },
-                "required": [
-                    "city",
-                    "country",
-                    "postal_code",
-                    "state",
-                    "street"
-                ]
+                }
             },
             "AddressRequest": {
                 "type": "object",
-                "description": "Serializer for address information",
+                "description": "Serializer for address information with optional fields for minimal data creation",
                 "properties": {
                     "street": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 255
                     },
                     "city": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "state": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "postal_code": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 20
                     },
                     "country": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 100
                     }
-                },
-                "required": [
-                    "city",
-                    "country",
-                    "postal_code",
-                    "state",
-                    "street"
-                ]
+                }
             },
             "ApplicationCreate": {
                 "type": "object",
-                "description": "Serializer for creating new applications",
+                "description": "Serializer for creating new applications with comprehensive null/blank handling",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -9565,6 +9604,7 @@
                     },
                     "reference_number": {
                         "type": "string",
+                        "nullable": true,
                         "description": "Unique reference number for this application",
                         "maxLength": 20
                     },
@@ -9602,12 +9642,19 @@
                         "description": "General purpose of the application"
                     },
                     "repayment_frequency": {
-                        "allOf": [
+                        "nullable": true,
+                        "description": "How often repayments are made\n\n* `weekly` - Weekly\n* `fortnightly` - Fortnightly\n* `monthly` - Monthly\n* `quarterly` - Quarterly\n* `annually` - Annually",
+                        "oneOf": [
                             {
                                 "$ref": "#/components/schemas/RepaymentFrequencyEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
                             }
-                        ],
-                        "description": "How often repayments are made\n\n* `weekly` - Weekly\n* `fortnightly` - Fortnightly\n* `monthly` - Monthly\n* `quarterly` - Quarterly\n* `annually` - Annually"
+                        ]
                     },
                     "application_type": {
                         "nullable": true,
@@ -9642,12 +9689,19 @@
                         "description": "Expected settlement date"
                     },
                     "stage": {
-                        "allOf": [
+                        "nullable": true,
+                        "description": "Current stage of the application\n\n* `inquiry` - Inquiry\n* `sent_to_lender` - Sent to Lender\n* `funding_table_issued` - Funding Table Issued\n* `iloo_issued` - ILOO Issued\n* `iloo_signed` - ILOO Signed\n* `commitment_fee_paid` - Commitment Fee Paid\n* `app_submitted` - App Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Info Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Docs Instructed\n* `loan_docs_issued` - Loan Docs Issued\n* `loan_docs_signed` - Loan Docs Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `declined` - Declined\n* `withdrawn` - Withdrawn",
+                        "oneOf": [
                             {
                                 "$ref": "#/components/schemas/StageEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
                             }
-                        ],
-                        "description": "Current stage of the application\n\n* `inquiry` - Inquiry\n* `sent_to_lender` - Sent to Lender\n* `funding_table_issued` - Funding Table Issued\n* `iloo_issued` - ILOO Issued\n* `iloo_signed` - ILOO Signed\n* `commitment_fee_paid` - Commitment Fee Paid\n* `app_submitted` - App Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Info Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Docs Instructed\n* `loan_docs_issued` - Loan Docs Issued\n* `loan_docs_signed` - Loan Docs Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `declined` - Declined\n* `withdrawn` - Withdrawn"
+                        ]
                     },
                     "branch_id": {
                         "type": "integer",
@@ -9723,6 +9777,7 @@
                     },
                     "prior_application": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Whether there was a prior application"
                     },
                     "prior_application_details": {
@@ -9852,11 +9907,11 @@
             },
             "ApplicationCreateRequest": {
                 "type": "object",
-                "description": "Serializer for creating new applications",
+                "description": "Serializer for creating new applications with comprehensive null/blank handling",
                 "properties": {
                     "reference_number": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Unique reference number for this application",
                         "maxLength": 20
                     },
@@ -9894,12 +9949,19 @@
                         "description": "General purpose of the application"
                     },
                     "repayment_frequency": {
-                        "allOf": [
+                        "nullable": true,
+                        "description": "How often repayments are made\n\n* `weekly` - Weekly\n* `fortnightly` - Fortnightly\n* `monthly` - Monthly\n* `quarterly` - Quarterly\n* `annually` - Annually",
+                        "oneOf": [
                             {
                                 "$ref": "#/components/schemas/RepaymentFrequencyEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
                             }
-                        ],
-                        "description": "How often repayments are made\n\n* `weekly` - Weekly\n* `fortnightly` - Fortnightly\n* `monthly` - Monthly\n* `quarterly` - Quarterly\n* `annually` - Annually"
+                        ]
                     },
                     "application_type": {
                         "nullable": true,
@@ -9934,12 +9996,19 @@
                         "description": "Expected settlement date"
                     },
                     "stage": {
-                        "allOf": [
+                        "nullable": true,
+                        "description": "Current stage of the application\n\n* `inquiry` - Inquiry\n* `sent_to_lender` - Sent to Lender\n* `funding_table_issued` - Funding Table Issued\n* `iloo_issued` - ILOO Issued\n* `iloo_signed` - ILOO Signed\n* `commitment_fee_paid` - Commitment Fee Paid\n* `app_submitted` - App Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Info Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Docs Instructed\n* `loan_docs_issued` - Loan Docs Issued\n* `loan_docs_signed` - Loan Docs Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `declined` - Declined\n* `withdrawn` - Withdrawn",
+                        "oneOf": [
                             {
                                 "$ref": "#/components/schemas/StageEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
                             }
-                        ],
-                        "description": "Current stage of the application\n\n* `inquiry` - Inquiry\n* `sent_to_lender` - Sent to Lender\n* `funding_table_issued` - Funding Table Issued\n* `iloo_issued` - ILOO Issued\n* `iloo_signed` - ILOO Signed\n* `commitment_fee_paid` - Commitment Fee Paid\n* `app_submitted` - App Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Info Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Docs Instructed\n* `loan_docs_issued` - Loan Docs Issued\n* `loan_docs_signed` - Loan Docs Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `declined` - Declined\n* `withdrawn` - Withdrawn"
+                        ]
                     },
                     "valuer": {
                         "type": "integer",
@@ -10003,6 +10072,7 @@
                     },
                     "prior_application": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Whether there was a prior application"
                     },
                     "prior_application_details": {
@@ -10325,9 +10395,14 @@
                     },
                     "borrowers": {
                         "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/Borrower"
-                        },
+                        "items": {},
+                        "description": "Get individual borrowers (is_company=False) using prefetched data",
+                        "readOnly": true
+                    },
+                    "company_borrowers": {
+                        "type": "array",
+                        "items": {},
+                        "description": "Get company borrowers (is_company=True) using prefetched data",
                         "readOnly": true
                     },
                     "guarantors": {
@@ -10394,26 +10469,37 @@
                     "documents": {
                         "type": "array",
                         "items": {},
+                        "description": "Get documents using prefetched data",
                         "readOnly": true
                     },
                     "notes": {
                         "type": "array",
                         "items": {},
+                        "description": "Get notes using prefetched data",
                         "readOnly": true
                     },
                     "fees": {
                         "type": "array",
                         "items": {},
+                        "description": "Get fees using prefetched data",
                         "readOnly": true
                     },
                     "repayments": {
                         "type": "array",
                         "items": {},
+                        "description": "Get repayments using prefetched data",
                         "readOnly": true
                     },
                     "ledger_entries": {
                         "type": "array",
                         "items": {},
+                        "description": "Get ledger entries using prefetched data",
+                        "readOnly": true
+                    },
+                    "funding_calculation_history": {
+                        "type": "array",
+                        "items": {},
+                        "description": "Get funding calculation history using prefetched data",
                         "readOnly": true
                     },
                     "security_address": {
@@ -10541,9 +10627,11 @@
                     "borrowers",
                     "branch",
                     "broker",
+                    "company_borrowers",
                     "created_by_details",
                     "documents",
                     "fees",
+                    "funding_calculation_history",
                     "guarantors",
                     "id",
                     "ledger_entries",
@@ -10624,7 +10712,7 @@
                     "bg_type": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/ApplicationLiabilityBgTypeEnum"
+                                "$ref": "#/components/schemas/BgType856Enum"
                             }
                         ],
                         "description": "Indicates if this liability belongs to B/G1 or B/G2\n\n* `bg1` - B/G1\n* `bg2` - B/G2"
@@ -10636,14 +10724,6 @@
                     "id",
                     "liability_type"
                 ]
-            },
-            "ApplicationLiabilityBgTypeEnum": {
-                "enum": [
-                    "bg1",
-                    "bg2"
-                ],
-                "type": "string",
-                "description": "* `bg1` - B/G1\n* `bg2` - B/G2"
             },
             "ApplicationLiabilityRequest": {
                 "type": "object",
@@ -10670,7 +10750,7 @@
                     "bg_type": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/ApplicationLiabilityBgTypeEnum"
+                                "$ref": "#/components/schemas/BgType856Enum"
                             }
                         ],
                         "description": "Indicates if this liability belongs to B/G1 or B/G2\n\n* `bg1` - B/G1\n* `bg2` - B/G2"
@@ -11001,6 +11081,131 @@
                     "type_breakdown"
                 ]
             },
+            "Asset": {
+                "type": "object",
+                "description": "Serializer for borrower assets with null/blank handling for minimal data creation",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "asset_type": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/AssetTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "value": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "amount_owing": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "to_be_refinanced": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "address": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "bg_type": {
+                        "nullable": true,
+                        "description": "Indicates if this asset belongs to BG1 or BG2 (only for guarantor assets)\n\n* `BG1` - BG1\n* `BG2` - BG2",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/BgTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "id"
+                ]
+            },
+            "AssetRequest": {
+                "type": "object",
+                "description": "Serializer for borrower assets with null/blank handling for minimal data creation",
+                "properties": {
+                    "asset_type": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/AssetTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "value": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "amount_owing": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "to_be_refinanced": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "address": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "bg_type": {
+                        "nullable": true,
+                        "description": "Indicates if this asset belongs to BG1 or BG2 (only for guarantor assets)\n\n* `BG1` - BG1\n* `BG2` - BG2",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/BgTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    }
+                }
+            },
             "AssetTypeEnum": {
                 "enum": [
                     "Property",
@@ -11017,7 +11222,7 @@
             },
             "BDM": {
                 "type": "object",
-                "description": "Serializer for BDM information",
+                "description": "Serializer for BDM information with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -11025,6 +11230,7 @@
                     },
                     "name": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "email": {
@@ -11049,17 +11255,16 @@
                 },
                 "required": [
                     "branch",
-                    "id",
-                    "name"
+                    "id"
                 ]
             },
             "BDMRequest": {
                 "type": "object",
-                "description": "Serializer for BDM information",
+                "description": "Serializer for BDM information with null/blank handling for minimal data creation",
                 "properties": {
                     "name": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "email": {
@@ -11075,33 +11280,39 @@
                     },
                     "branch_id": {
                         "type": "integer",
-                        "writeOnly": true
+                        "writeOnly": true,
+                        "nullable": true
                     },
                     "branch_name": {
                         "type": "string",
                         "writeOnly": true,
-                        "minLength": 1
+                        "nullable": true
                     },
                     "address": {
                         "type": "string",
                         "writeOnly": true,
-                        "minLength": 1
+                        "nullable": true
                     },
                     "branch_phone": {
                         "type": "string",
                         "writeOnly": true,
-                        "minLength": 1
+                        "nullable": true
                     },
                     "branch_email": {
                         "type": "string",
                         "format": "email",
                         "writeOnly": true,
-                        "minLength": 1
+                        "nullable": true
                     }
-                },
-                "required": [
-                    "name"
-                ]
+                }
+            },
+            "BgType856Enum": {
+                "enum": [
+                    "bg1",
+                    "bg2"
+                ],
+                "type": "string",
+                "description": "* `bg1` - B/G1\n* `bg2` - B/G2"
             },
             "BgTypeEnum": {
                 "enum": [
@@ -11118,7 +11329,7 @@
             },
             "Borrower": {
                 "type": "object",
-                "description": "Serializer for individual borrowers",
+                "description": "Serializer for individual borrowers with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -11203,17 +11414,33 @@
                         "type": "string",
                         "nullable": true,
                         "maxLength": 255
+                    },
+                    "assets": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Asset"
+                        },
+                        "readOnly": true
+                    },
+                    "liabilities": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Liability"
+                        },
+                        "readOnly": true
                     }
                 },
                 "required": [
                     "address",
+                    "assets",
                     "employment_info",
-                    "id"
+                    "id",
+                    "liabilities"
                 ]
             },
             "BorrowerDetail": {
                 "type": "object",
-                "description": "Serializer for detailed borrower information",
+                "description": "Serializer for detailed borrower information with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -11383,7 +11610,8 @@
                         "nullable": true
                     },
                     "is_company": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "nullable": true
                     },
                     "company_name": {
                         "type": "string",
@@ -11494,7 +11722,7 @@
             },
             "BorrowerDetailRequest": {
                 "type": "object",
-                "description": "Serializer for detailed borrower information",
+                "description": "Serializer for detailed borrower information with null/blank handling for minimal data creation",
                 "properties": {
                     "first_name": {
                         "type": "string",
@@ -11652,7 +11880,8 @@
                         "nullable": true
                     },
                     "is_company": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "nullable": true
                     },
                     "company_name": {
                         "type": "string",
@@ -11747,7 +11976,7 @@
             },
             "BorrowerGuarantor": {
                 "type": "object",
-                "description": "Serializer for guarantor information",
+                "description": "Serializer for guarantor information with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -11762,7 +11991,18 @@
                         "readOnly": true
                     },
                     "guarantor_type": {
-                        "$ref": "#/components/schemas/GuarantorTypeEnum"
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/GuarantorTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
                     },
                     "title": {
                         "nullable": true,
@@ -11921,10 +12161,21 @@
             },
             "BorrowerGuarantorRequest": {
                 "type": "object",
-                "description": "Serializer for guarantor information",
+                "description": "Serializer for guarantor information with null/blank handling for minimal data creation",
                 "properties": {
                     "guarantor_type": {
-                        "$ref": "#/components/schemas/GuarantorTypeEnum"
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/GuarantorTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
                     },
                     "title": {
                         "nullable": true,
@@ -12137,7 +12388,7 @@
             },
             "BorrowerRequest": {
                 "type": "object",
-                "description": "Serializer for individual borrowers",
+                "description": "Serializer for individual borrowers with null/blank handling for minimal data creation",
                 "properties": {
                     "first_name": {
                         "type": "string",
@@ -12213,7 +12464,7 @@
             },
             "Branch": {
                 "type": "object",
-                "description": "Serializer for branch information",
+                "description": "Serializer for branch information with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -12221,6 +12472,7 @@
                     },
                     "name": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "address": {
@@ -12240,17 +12492,16 @@
                     }
                 },
                 "required": [
-                    "id",
-                    "name"
+                    "id"
                 ]
             },
             "BranchRequest": {
                 "type": "object",
-                "description": "Serializer for branch information",
+                "description": "Serializer for branch information with null/blank handling for minimal data creation",
                 "properties": {
                     "name": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "address": {
@@ -12268,14 +12519,11 @@
                         "nullable": true,
                         "maxLength": 254
                     }
-                },
-                "required": [
-                    "name"
-                ]
+                }
             },
             "BrokerDetail": {
                 "type": "object",
-                "description": "Serializer for detailed broker information",
+                "description": "Serializer for detailed broker information with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -12306,6 +12554,7 @@
                     },
                     "name": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "company": {
@@ -12369,17 +12618,16 @@
                     "created_at",
                     "created_by",
                     "id",
-                    "name",
                     "updated_at"
                 ]
             },
             "BrokerDetailRequest": {
                 "type": "object",
-                "description": "Serializer for detailed broker information",
+                "description": "Serializer for detailed broker information with null/blank handling for minimal data creation",
                 "properties": {
                     "name": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "company": {
@@ -12426,14 +12674,11 @@
                         "type": "integer",
                         "nullable": true
                     }
-                },
-                "required": [
-                    "name"
-                ]
+                }
             },
             "BrokerList": {
                 "type": "object",
-                "description": "Serializer for listing brokers with minimal information",
+                "description": "Serializer for listing brokers with minimal information and null/blank handling",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -12441,6 +12686,7 @@
                     },
                     "name": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "company": {
@@ -12461,8 +12707,7 @@
                     }
                 },
                 "required": [
-                    "id",
-                    "name"
+                    "id"
                 ]
             },
             "CompanyAsset": {
@@ -12542,7 +12787,7 @@
             },
             "CompanyBorrower": {
                 "type": "object",
-                "description": "Serializer for company borrower",
+                "description": "Serializer for company borrower with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -12582,6 +12827,9 @@
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
                         "nullable": true
+                    },
+                    "is_company": {
+                        "type": "boolean"
                     },
                     "registered_address_unit": {
                         "type": "string",
@@ -12635,7 +12883,7 @@
             },
             "CompanyBorrowerRequest": {
                 "type": "object",
-                "description": "Serializer for company borrower",
+                "description": "Serializer for company borrower with null/blank handling for minimal data creation",
                 "properties": {
                     "company_name": {
                         "type": "string",
@@ -12671,6 +12919,9 @@
                         "format": "decimal",
                         "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
                         "nullable": true
+                    },
+                    "is_company": {
+                        "type": "boolean"
                     },
                     "registered_address_unit": {
                         "type": "string",
@@ -12721,7 +12972,7 @@
             },
             "Director": {
                 "type": "object",
-                "description": "Serializer for company directors",
+                "description": "Serializer for company directors with optional fields for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -12729,10 +12980,12 @@
                     },
                     "name": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 255
                     },
                     "roles": {
                         "type": "string",
+                        "nullable": true,
                         "description": "Comma-separated list of roles",
                         "maxLength": 255
                     },
@@ -12743,23 +12996,21 @@
                     }
                 },
                 "required": [
-                    "id",
-                    "name",
-                    "roles"
+                    "id"
                 ]
             },
             "DirectorRequest": {
                 "type": "object",
-                "description": "Serializer for company directors",
+                "description": "Serializer for company directors with optional fields for minimal data creation",
                 "properties": {
                     "name": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 255
                     },
                     "roles": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Comma-separated list of roles",
                         "maxLength": 255
                     },
@@ -12768,15 +13019,11 @@
                         "nullable": true,
                         "maxLength": 50
                     }
-                },
-                "required": [
-                    "name",
-                    "roles"
-                ]
+                }
             },
             "Document": {
                 "type": "object",
-                "description": "Serializer for documents",
+                "description": "Serializer for documents with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -12804,11 +13051,23 @@
                         "nullable": true
                     },
                     "document_type": {
-                        "$ref": "#/components/schemas/DocumentTypeEnum"
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/DocumentTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
                     },
                     "file": {
                         "type": "string",
-                        "format": "uri"
+                        "format": "uri",
+                        "nullable": true
                     },
                     "file_name": {
                         "type": "string",
@@ -12864,7 +13123,6 @@
                     "created_by",
                     "created_by_name",
                     "document_type_display",
-                    "file",
                     "file_name",
                     "file_size",
                     "file_type",
@@ -12876,7 +13134,7 @@
             },
             "DocumentRequest": {
                 "type": "object",
-                "description": "Serializer for documents",
+                "description": "Serializer for documents with null/blank handling for minimal data creation",
                 "properties": {
                     "title": {
                         "type": "string",
@@ -12888,11 +13146,23 @@
                         "nullable": true
                     },
                     "document_type": {
-                        "$ref": "#/components/schemas/DocumentTypeEnum"
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/DocumentTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
                     },
                     "file": {
                         "type": "string",
-                        "format": "binary"
+                        "format": "binary",
+                        "nullable": true
                     },
                     "previous_version": {
                         "type": "integer",
@@ -12906,10 +13176,7 @@
                         "type": "integer",
                         "nullable": true
                     }
-                },
-                "required": [
-                    "file"
-                ]
+                }
             },
             "DocumentTypeEnum": {
                 "enum": [
@@ -12959,65 +13226,59 @@
             },
             "EmploymentInfo": {
                 "type": "object",
-                "description": "Serializer for employment information",
+                "description": "Serializer for employment information with optional fields for minimal data creation",
                 "properties": {
                     "employer": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 255
                     },
                     "position": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "income": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "years_employed": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     }
-                },
-                "required": [
-                    "employer",
-                    "income",
-                    "position",
-                    "years_employed"
-                ]
+                }
             },
             "EmploymentInfoRequest": {
                 "type": "object",
-                "description": "Serializer for employment information",
+                "description": "Serializer for employment information with optional fields for minimal data creation",
                 "properties": {
                     "employer": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 255
                     },
                     "position": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "income": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "years_employed": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     }
-                },
-                "required": [
-                    "employer",
-                    "income",
-                    "position",
-                    "years_employed"
-                ]
+                }
             },
             "EmploymentTypeEnum": {
                 "enum": [
@@ -13044,7 +13305,7 @@
             },
             "Fee": {
                 "type": "object",
-                "description": "Serializer for fees",
+                "description": "Serializer for fees with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -13067,7 +13328,18 @@
                         "readOnly": true
                     },
                     "fee_type": {
-                        "$ref": "#/components/schemas/FeeTypeEnum"
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/FeeTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
                     },
                     "description": {
                         "type": "string",
@@ -13076,7 +13348,8 @@
                     "amount": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "due_date": {
                         "type": "string",
@@ -13104,7 +13377,8 @@
                         "readOnly": true
                     },
                     "application": {
-                        "type": "integer"
+                        "type": "integer",
+                        "nullable": true
                     },
                     "created_by": {
                         "type": "integer",
@@ -13113,12 +13387,9 @@
                     }
                 },
                 "required": [
-                    "amount",
-                    "application",
                     "created_at",
                     "created_by",
                     "created_by_name",
-                    "fee_type",
                     "fee_type_display",
                     "id",
                     "invoice_url",
@@ -13128,10 +13399,21 @@
             },
             "FeeRequest": {
                 "type": "object",
-                "description": "Serializer for fees",
+                "description": "Serializer for fees with null/blank handling for minimal data creation",
                 "properties": {
                     "fee_type": {
-                        "$ref": "#/components/schemas/FeeTypeEnum"
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/FeeTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
                     },
                     "description": {
                         "type": "string",
@@ -13140,7 +13422,8 @@
                     "amount": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "due_date": {
                         "type": "string",
@@ -13158,14 +13441,10 @@
                         "nullable": true
                     },
                     "application": {
-                        "type": "integer"
+                        "type": "integer",
+                        "nullable": true
                     }
-                },
-                "required": [
-                    "amount",
-                    "application",
-                    "fee_type"
-                ]
+                }
             },
             "FeeTypeEnum": {
                 "enum": [
@@ -13181,7 +13460,7 @@
             },
             "FinancialInfo": {
                 "type": "object",
-                "description": "Serializer for borrower financial information",
+                "description": "Serializer for borrower financial information with optional fields for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer"
@@ -13189,26 +13468,30 @@
                     "annual_income": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "monthly_expenses": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "employment_status": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "employment_start_date": {
                         "type": "string",
-                        "format": "date"
+                        "format": "date",
+                        "nullable": true
                     }
                 }
             },
             "FinancialInfoRequest": {
                 "type": "object",
-                "description": "Serializer for borrower financial information",
+                "description": "Serializer for borrower financial information with optional fields for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer"
@@ -13216,134 +13499,157 @@
                     "annual_income": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "monthly_expenses": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "employment_status": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "employment_start_date": {
                         "type": "string",
-                        "format": "date"
+                        "format": "date",
+                        "nullable": true
                     }
                 }
             },
             "FundingCalculationInput": {
                 "type": "object",
-                "description": "Serializer for funding calculation input fields",
+                "description": "Serializer for funding calculation input fields with null handling for minimal data creation",
                 "properties": {
                     "establishment_fee_rate": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "capped_interest_months": {
                         "type": "integer",
                         "minimum": 1,
+                        "nullable": true,
                         "default": 9
                     },
                     "monthly_line_fee_rate": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "brokerage_fee_rate": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "application_fee": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "due_diligence_fee": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "legal_fee_before_gst": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "valuation_fee": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "monthly_account_fee": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "working_fee": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
                         "default": "0.00"
                     }
                 }
             },
             "FundingCalculationInputRequest": {
                 "type": "object",
-                "description": "Serializer for funding calculation input fields",
+                "description": "Serializer for funding calculation input fields with null handling for minimal data creation",
                 "properties": {
                     "establishment_fee_rate": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "capped_interest_months": {
                         "type": "integer",
                         "minimum": 1,
+                        "nullable": true,
                         "default": 9
                     },
                     "monthly_line_fee_rate": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "brokerage_fee_rate": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "application_fee": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "due_diligence_fee": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "legal_fee_before_gst": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "valuation_fee": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "monthly_account_fee": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "working_fee": {
                         "type": "string",
                         "format": "decimal",
                         "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
                         "default": "0.00"
                     }
                 }
@@ -13385,11 +13691,25 @@
             },
             "Guarantor": {
                 "type": "object",
-                "description": "Serializer for guarantor",
+                "description": "Serializer for guarantor with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
                         "readOnly": true
+                    },
+                    "guarantor_type": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/GuarantorTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
                     },
                     "first_name": {
                         "type": "string",
@@ -13412,11 +13732,6 @@
                         "nullable": true,
                         "maxLength": 20
                     },
-                    "home_phone": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
                     "date_of_birth": {
                         "type": "string",
                         "format": "date",
@@ -13424,6 +13739,12 @@
                     },
                     "address": {
                         "$ref": "#/components/schemas/Address"
+                    },
+                    "employment_info": {
+                        "$ref": "#/components/schemas/EmploymentInfo"
+                    },
+                    "financial_info": {
+                        "$ref": "#/components/schemas/FinancialInfo"
                     },
                     "assets": {
                         "type": "array",
@@ -13438,12 +13759,6 @@
                             "$ref": "#/components/schemas/ApplicationLiability"
                         },
                         "readOnly": true
-                    },
-                    "employment_info": {
-                        "$ref": "#/components/schemas/EmploymentInfo"
-                    },
-                    "financial_info": {
-                        "$ref": "#/components/schemas/FinancialInfo"
                     }
                 },
                 "required": [
@@ -13563,8 +13878,22 @@
             },
             "GuarantorRequest": {
                 "type": "object",
-                "description": "Serializer for guarantor",
+                "description": "Serializer for guarantor with null/blank handling for minimal data creation",
                 "properties": {
+                    "guarantor_type": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/GuarantorTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    },
                     "first_name": {
                         "type": "string",
                         "nullable": true,
@@ -13582,11 +13911,6 @@
                         "maxLength": 254
                     },
                     "mobile": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
-                    "home_phone": {
                         "type": "string",
                         "nullable": true,
                         "maxLength": 20
@@ -13637,17 +13961,29 @@
             },
             "Ledger": {
                 "type": "object",
-                "description": "Serializer for ledger entries",
+                "description": "Serializer for ledger entries with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
                         "readOnly": true
                     },
                     "application": {
-                        "type": "integer"
+                        "type": "integer",
+                        "nullable": true
                     },
                     "transaction_type": {
-                        "$ref": "#/components/schemas/TransactionTypeEnum"
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/TransactionTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
                     },
                     "transaction_type_display": {
                         "type": "string",
@@ -13656,10 +13992,12 @@
                     "amount": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "description": {
-                        "type": "string"
+                        "type": "string",
+                        "nullable": true
                     },
                     "transaction_date": {
                         "type": "string",
@@ -13693,16 +14031,139 @@
                     }
                 },
                 "required": [
-                    "amount",
-                    "application",
                     "created_at",
                     "created_by_name",
-                    "description",
                     "id",
                     "related_fee_type",
-                    "transaction_type",
                     "transaction_type_display"
                 ]
+            },
+            "Liability": {
+                "type": "object",
+                "description": "Serializer for borrower liabilities with null/blank handling for minimal data creation",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "liability_type": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/LiabilityTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "lender": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 100
+                    },
+                    "monthly_payment": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "to_be_refinanced": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "bg_type": {
+                        "nullable": true,
+                        "description": "Indicates if this liability belongs to B/G1 or B/G2\n\n* `bg1` - B/G1\n* `bg2` - B/G2",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/BgType856Enum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "id"
+                ]
+            },
+            "LiabilityRequest": {
+                "type": "object",
+                "description": "Serializer for borrower liabilities with null/blank handling for minimal data creation",
+                "properties": {
+                    "liability_type": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/LiabilityTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "amount": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "lender": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 100
+                    },
+                    "monthly_payment": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "to_be_refinanced": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "bg_type": {
+                        "nullable": true,
+                        "description": "Indicates if this liability belongs to B/G1 or B/G2\n\n* `bg1` - B/G1\n* `bg2` - B/G2",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/BgType856Enum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    }
+                }
             },
             "LiabilityTypeEnum": {
                 "enum": [
@@ -13733,7 +14194,7 @@
             },
             "LoanRequirement": {
                 "type": "object",
-                "description": "Serializer for loan requirements",
+                "description": "Serializer for loan requirements with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -13759,7 +14220,7 @@
             },
             "LoanRequirementRequest": {
                 "type": "object",
-                "description": "Serializer for loan requirements",
+                "description": "Serializer for loan requirements with null/blank handling for minimal data creation",
                 "properties": {
                     "description": {
                         "type": "string",
@@ -13888,7 +14349,7 @@
             },
             "Note": {
                 "type": "object",
-                "description": "Serializer for notes",
+                "description": "Serializer for notes with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -13963,17 +14424,19 @@
             },
             "NoteComment": {
                 "type": "object",
-                "description": "Serializer for note comments",
+                "description": "Serializer for note comments with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
                         "readOnly": true
                     },
                     "note": {
-                        "type": "integer"
+                        "type": "integer",
+                        "nullable": true
                     },
                     "content": {
-                        "type": "string"
+                        "type": "string",
+                        "nullable": true
                     },
                     "created_by": {
                         "type": "integer",
@@ -13996,35 +14459,30 @@
                     }
                 },
                 "required": [
-                    "content",
                     "created_at",
                     "created_by",
                     "created_by_name",
                     "id",
-                    "note",
                     "updated_at"
                 ]
             },
             "NoteCommentRequest": {
                 "type": "object",
-                "description": "Serializer for note comments",
+                "description": "Serializer for note comments with null/blank handling for minimal data creation",
                 "properties": {
                     "note": {
-                        "type": "integer"
+                        "type": "integer",
+                        "nullable": true
                     },
                     "content": {
                         "type": "string",
-                        "minLength": 1
+                        "nullable": true
                     }
-                },
-                "required": [
-                    "content",
-                    "note"
-                ]
+                }
             },
             "NoteRequest": {
                 "type": "object",
-                "description": "Serializer for notes",
+                "description": "Serializer for notes with null/blank handling for minimal data creation",
                 "properties": {
                     "title": {
                         "type": "string",
@@ -14951,11 +15409,11 @@
             },
             "PatchedBDMRequest": {
                 "type": "object",
-                "description": "Serializer for BDM information",
+                "description": "Serializer for BDM information with null/blank handling for minimal data creation",
                 "properties": {
                     "name": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "email": {
@@ -14971,34 +15429,35 @@
                     },
                     "branch_id": {
                         "type": "integer",
-                        "writeOnly": true
+                        "writeOnly": true,
+                        "nullable": true
                     },
                     "branch_name": {
                         "type": "string",
                         "writeOnly": true,
-                        "minLength": 1
+                        "nullable": true
                     },
                     "address": {
                         "type": "string",
                         "writeOnly": true,
-                        "minLength": 1
+                        "nullable": true
                     },
                     "branch_phone": {
                         "type": "string",
                         "writeOnly": true,
-                        "minLength": 1
+                        "nullable": true
                     },
                     "branch_email": {
                         "type": "string",
                         "format": "email",
                         "writeOnly": true,
-                        "minLength": 1
+                        "nullable": true
                     }
                 }
             },
             "PatchedBorrowerDetailRequest": {
                 "type": "object",
-                "description": "Serializer for detailed borrower information",
+                "description": "Serializer for detailed borrower information with null/blank handling for minimal data creation",
                 "properties": {
                     "first_name": {
                         "type": "string",
@@ -15156,7 +15615,8 @@
                         "nullable": true
                     },
                     "is_company": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "nullable": true
                     },
                     "company_name": {
                         "type": "string",
@@ -15251,10 +15711,21 @@
             },
             "PatchedBorrowerGuarantorRequest": {
                 "type": "object",
-                "description": "Serializer for guarantor information",
+                "description": "Serializer for guarantor information with null/blank handling for minimal data creation",
                 "properties": {
                     "guarantor_type": {
-                        "$ref": "#/components/schemas/GuarantorTypeEnum"
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/GuarantorTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
                     },
                     "title": {
                         "nullable": true,
@@ -15397,11 +15868,11 @@
             },
             "PatchedBranchRequest": {
                 "type": "object",
-                "description": "Serializer for branch information",
+                "description": "Serializer for branch information with null/blank handling for minimal data creation",
                 "properties": {
                     "name": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "address": {
@@ -15423,11 +15894,11 @@
             },
             "PatchedBrokerDetailRequest": {
                 "type": "object",
-                "description": "Serializer for detailed broker information",
+                "description": "Serializer for detailed broker information with null/blank handling for minimal data creation",
                 "properties": {
                     "name": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 100
                     },
                     "company": {
@@ -15510,7 +15981,7 @@
             },
             "PatchedDocumentRequest": {
                 "type": "object",
-                "description": "Serializer for documents",
+                "description": "Serializer for documents with null/blank handling for minimal data creation",
                 "properties": {
                     "title": {
                         "type": "string",
@@ -15522,11 +15993,23 @@
                         "nullable": true
                     },
                     "document_type": {
-                        "$ref": "#/components/schemas/DocumentTypeEnum"
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/DocumentTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
                     },
                     "file": {
                         "type": "string",
-                        "format": "binary"
+                        "format": "binary",
+                        "nullable": true
                     },
                     "previous_version": {
                         "type": "integer",
@@ -15544,10 +16027,21 @@
             },
             "PatchedFeeRequest": {
                 "type": "object",
-                "description": "Serializer for fees",
+                "description": "Serializer for fees with null/blank handling for minimal data creation",
                 "properties": {
                     "fee_type": {
-                        "$ref": "#/components/schemas/FeeTypeEnum"
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/FeeTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
                     },
                     "description": {
                         "type": "string",
@@ -15556,7 +16050,8 @@
                     "amount": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "due_date": {
                         "type": "string",
@@ -15574,7 +16069,8 @@
                         "nullable": true
                     },
                     "application": {
-                        "type": "integer"
+                        "type": "integer",
+                        "nullable": true
                     }
                 }
             },
@@ -15624,20 +16120,21 @@
             },
             "PatchedNoteCommentRequest": {
                 "type": "object",
-                "description": "Serializer for note comments",
+                "description": "Serializer for note comments with null/blank handling for minimal data creation",
                 "properties": {
                     "note": {
-                        "type": "integer"
+                        "type": "integer",
+                        "nullable": true
                     },
                     "content": {
                         "type": "string",
-                        "minLength": 1
+                        "nullable": true
                     }
                 }
             },
             "PatchedNoteRequest": {
                 "type": "object",
-                "description": "Serializer for notes",
+                "description": "Serializer for notes with null/blank handling for minimal data creation",
                 "properties": {
                     "title": {
                         "type": "string",
@@ -15669,59 +16166,62 @@
             },
             "PatchedProductRequest": {
                 "type": "object",
-                "description": "Serializer for the Product model",
+                "description": "Serializer for the Product model with null/blank handling for minimal data creation",
                 "properties": {
                     "name": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 255
                     },
                     "applications": {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "integer",
+                            "nullable": true
                         }
                     },
                     "documents": {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "integer",
+                            "nullable": true
                         }
                     },
                     "borrowers": {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "integer",
+                            "nullable": true
                         }
                     }
                 }
             },
             "PatchedQuantitySurveyorRequest": {
                 "type": "object",
-                "description": "Serializer for QuantitySurveyor model",
+                "description": "Serializer for QuantitySurveyor model with null/blank handling for minimal data creation",
                 "properties": {
                     "company_name": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Name of the company/firm",
                         "maxLength": 255
                     },
                     "contact_name": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Name of the primary contact person",
                         "maxLength": 255
                     },
                     "phone": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Primary contact phone number",
                         "maxLength": 20
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Primary contact email address",
                         "maxLength": 254
                     },
@@ -15737,34 +16237,47 @@
                     },
                     "is_active": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Whether this contact is currently active"
                     }
                 }
             },
             "PatchedReminderRequest": {
                 "type": "object",
-                "description": "Serializer for reminders",
+                "description": "Serializer for reminders with null/blank handling for minimal data creation",
                 "properties": {
                     "recipient_type": {
-                        "$ref": "#/components/schemas/RecipientTypeEnum"
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/RecipientTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
                     },
                     "recipient_email": {
                         "type": "string",
                         "format": "email",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 254
                     },
                     "send_datetime": {
                         "type": "string",
-                        "format": "date-time"
+                        "format": "date-time",
+                        "nullable": true
                     },
                     "email_body": {
                         "type": "string",
-                        "minLength": 1
+                        "nullable": true
                     },
                     "subject": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 255
                     },
                     "send_as_user": {
@@ -15787,12 +16300,13 @@
             },
             "PatchedRepaymentRequest": {
                 "type": "object",
-                "description": "Serializer for repayments",
+                "description": "Serializer for repayments with null/blank handling for minimal data creation",
                 "properties": {
                     "amount": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "due_date": {
                         "type": "string",
@@ -15810,7 +16324,8 @@
                         "nullable": true
                     },
                     "application": {
-                        "type": "integer"
+                        "type": "integer",
+                        "nullable": true
                     }
                 }
             },
@@ -15845,30 +16360,30 @@
             },
             "PatchedValuerRequest": {
                 "type": "object",
-                "description": "Serializer for Valuer model",
+                "description": "Serializer for Valuer model with null/blank handling for minimal data creation",
                 "properties": {
                     "company_name": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Name of the company/firm",
                         "maxLength": 255
                     },
                     "contact_name": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Name of the primary contact person",
                         "maxLength": 255
                     },
                     "phone": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Primary contact phone number",
                         "maxLength": 20
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Primary contact email address",
                         "maxLength": 254
                     },
@@ -15884,13 +16399,14 @@
                     },
                     "is_active": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Whether this contact is currently active"
                     }
                 }
             },
             "Product": {
                 "type": "object",
-                "description": "Serializer for the Product model",
+                "description": "Serializer for the Product model with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -15898,24 +16414,28 @@
                     },
                     "name": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 255
                     },
                     "applications": {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "integer",
+                            "nullable": true
                         }
                     },
                     "documents": {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "integer",
+                            "nullable": true
                         }
                     },
                     "borrowers": {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "integer",
+                            "nullable": true
                         }
                     },
                     "created_at": {
@@ -15932,41 +16452,40 @@
                 "required": [
                     "created_at",
                     "id",
-                    "name",
                     "updated_at"
                 ]
             },
             "ProductRequest": {
                 "type": "object",
-                "description": "Serializer for the Product model",
+                "description": "Serializer for the Product model with null/blank handling for minimal data creation",
                 "properties": {
                     "name": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 255
                     },
                     "applications": {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "integer",
+                            "nullable": true
                         }
                     },
                     "documents": {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "integer",
+                            "nullable": true
                         }
                     },
                     "borrowers": {
                         "type": "array",
                         "items": {
-                            "type": "integer"
+                            "type": "integer",
+                            "nullable": true
                         }
                     }
-                },
-                "required": [
-                    "name"
-                ]
+                }
             },
             "PropertyTypeEnum": {
                 "enum": [
@@ -15983,7 +16502,7 @@
             },
             "QuantitySurveyor": {
                 "type": "object",
-                "description": "Serializer for QuantitySurveyor model",
+                "description": "Serializer for QuantitySurveyor model with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -15991,22 +16510,26 @@
                     },
                     "company_name": {
                         "type": "string",
+                        "nullable": true,
                         "description": "Name of the company/firm",
                         "maxLength": 255
                     },
                     "contact_name": {
                         "type": "string",
+                        "nullable": true,
                         "description": "Name of the primary contact person",
                         "maxLength": 255
                     },
                     "phone": {
                         "type": "string",
+                        "nullable": true,
                         "description": "Primary contact phone number",
                         "maxLength": 20
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
+                        "nullable": true,
                         "description": "Primary contact email address",
                         "maxLength": 254
                     },
@@ -16022,6 +16545,7 @@
                     },
                     "is_active": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Whether this contact is currently active"
                     },
                     "created_by": {
@@ -16057,14 +16581,10 @@
                 },
                 "required": [
                     "application_count",
-                    "company_name",
-                    "contact_name",
                     "created_at",
                     "created_by",
                     "created_by_details",
-                    "email",
                     "id",
-                    "phone",
                     "updated_at"
                 ]
             },
@@ -16117,30 +16637,30 @@
             },
             "QuantitySurveyorRequest": {
                 "type": "object",
-                "description": "Serializer for QuantitySurveyor model",
+                "description": "Serializer for QuantitySurveyor model with null/blank handling for minimal data creation",
                 "properties": {
                     "company_name": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Name of the company/firm",
                         "maxLength": 255
                     },
                     "contact_name": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Name of the primary contact person",
                         "maxLength": 255
                     },
                     "phone": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Primary contact phone number",
                         "maxLength": 20
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Primary contact email address",
                         "maxLength": 254
                     },
@@ -16156,15 +16676,10 @@
                     },
                     "is_active": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Whether this contact is currently active"
                     }
-                },
-                "required": [
-                    "company_name",
-                    "contact_name",
-                    "email",
-                    "phone"
-                ]
+                }
             },
             "RecipientTypeEnum": {
                 "enum": [
@@ -16178,29 +16693,44 @@
             },
             "Reminder": {
                 "type": "object",
-                "description": "Serializer for reminders",
+                "description": "Serializer for reminders with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
                         "readOnly": true
                     },
                     "recipient_type": {
-                        "$ref": "#/components/schemas/RecipientTypeEnum"
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/RecipientTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
                     },
                     "recipient_email": {
                         "type": "string",
                         "format": "email",
+                        "nullable": true,
                         "maxLength": 254
                     },
                     "send_datetime": {
                         "type": "string",
-                        "format": "date-time"
+                        "format": "date-time",
+                        "nullable": true
                     },
                     "email_body": {
-                        "type": "string"
+                        "type": "string",
+                        "nullable": true
                     },
                     "subject": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 255
                     },
                     "created_by": {
@@ -16265,44 +16795,51 @@
                     "created_at",
                     "created_by",
                     "created_by_name",
-                    "email_body",
                     "error_message",
                     "id",
                     "is_sent",
-                    "recipient_email",
-                    "recipient_type",
                     "reply_to_user_email",
                     "send_as_user_email",
-                    "send_datetime",
                     "sent_at",
-                    "subject",
                     "updated_at"
                 ]
             },
             "ReminderRequest": {
                 "type": "object",
-                "description": "Serializer for reminders",
+                "description": "Serializer for reminders with null/blank handling for minimal data creation",
                 "properties": {
                     "recipient_type": {
-                        "$ref": "#/components/schemas/RecipientTypeEnum"
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/RecipientTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
                     },
                     "recipient_email": {
                         "type": "string",
                         "format": "email",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 254
                     },
                     "send_datetime": {
                         "type": "string",
-                        "format": "date-time"
+                        "format": "date-time",
+                        "nullable": true
                     },
                     "email_body": {
                         "type": "string",
-                        "minLength": 1
+                        "nullable": true
                     },
                     "subject": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "maxLength": 255
                     },
                     "send_as_user": {
@@ -16321,18 +16858,11 @@
                         "type": "integer",
                         "nullable": true
                     }
-                },
-                "required": [
-                    "email_body",
-                    "recipient_email",
-                    "recipient_type",
-                    "send_datetime",
-                    "subject"
-                ]
+                }
             },
             "Repayment": {
                 "type": "object",
-                "description": "Serializer for repayments",
+                "description": "Serializer for repayments with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -16353,7 +16883,8 @@
                     "amount": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "due_date": {
                         "type": "string",
@@ -16397,7 +16928,8 @@
                         "readOnly": true
                     },
                     "application": {
-                        "type": "integer"
+                        "type": "integer",
+                        "nullable": true
                     },
                     "created_by": {
                         "type": "integer",
@@ -16406,8 +16938,6 @@
                     }
                 },
                 "required": [
-                    "amount",
-                    "application",
                     "created_at",
                     "created_by",
                     "created_by_name",
@@ -16493,12 +17023,13 @@
             },
             "RepaymentRequest": {
                 "type": "object",
-                "description": "Serializer for repayments",
+                "description": "Serializer for repayments with null/blank handling for minimal data creation",
                 "properties": {
                     "amount": {
                         "type": "string",
                         "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
                     },
                     "due_date": {
                         "type": "string",
@@ -16516,13 +17047,10 @@
                         "nullable": true
                     },
                     "application": {
-                        "type": "integer"
+                        "type": "integer",
+                        "nullable": true
                     }
-                },
-                "required": [
-                    "amount",
-                    "application"
-                ]
+                }
             },
             "ResidencyStatusEnum": {
                 "enum": [
@@ -16546,7 +17074,7 @@
             },
             "SecurityProperty": {
                 "type": "object",
-                "description": "Serializer for security properties",
+                "description": "Serializer for security properties with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -16684,7 +17212,7 @@
             },
             "SecurityPropertyRequest": {
                 "type": "object",
-                "description": "Serializer for security properties",
+                "description": "Serializer for security properties with null/blank handling for minimal data creation",
                 "properties": {
                     "property_type": {
                         "nullable": true,
@@ -16924,7 +17452,7 @@
             },
             "UserCreate": {
                 "type": "object",
-                "description": "Serializer for creating users",
+                "description": "Serializer for creating users with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -16938,14 +17466,27 @@
                     },
                     "first_name": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 150
                     },
                     "last_name": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 150
                     },
                     "role": {
-                        "$ref": "#/components/schemas/RoleEnum"
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/RoleEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
                     },
                     "phone": {
                         "type": "string",
@@ -16953,7 +17494,8 @@
                         "maxLength": 20
                     },
                     "username": {
-                        "type": "string"
+                        "type": "string",
+                        "nullable": true
                     }
                 },
                 "required": [
@@ -16963,7 +17505,7 @@
             },
             "UserCreateRequest": {
                 "type": "object",
-                "description": "Serializer for creating users",
+                "description": "Serializer for creating users with null/blank handling for minimal data creation",
                 "properties": {
                     "email": {
                         "type": "string",
@@ -16979,14 +17521,27 @@
                     },
                     "first_name": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 150
                     },
                     "last_name": {
                         "type": "string",
+                        "nullable": true,
                         "maxLength": 150
                     },
                     "role": {
-                        "$ref": "#/components/schemas/RoleEnum"
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/RoleEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
                     },
                     "phone": {
                         "type": "string",
@@ -16995,11 +17550,12 @@
                     },
                     "username": {
                         "type": "string",
-                        "minLength": 1
+                        "nullable": true
                     },
                     "branch_id": {
                         "type": "integer",
-                        "writeOnly": true
+                        "writeOnly": true,
+                        "nullable": true
                     }
                 },
                 "required": [
@@ -17060,7 +17616,7 @@
             },
             "Valuer": {
                 "type": "object",
-                "description": "Serializer for Valuer model",
+                "description": "Serializer for Valuer model with null/blank handling for minimal data creation",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -17068,22 +17624,26 @@
                     },
                     "company_name": {
                         "type": "string",
+                        "nullable": true,
                         "description": "Name of the company/firm",
                         "maxLength": 255
                     },
                     "contact_name": {
                         "type": "string",
+                        "nullable": true,
                         "description": "Name of the primary contact person",
                         "maxLength": 255
                     },
                     "phone": {
                         "type": "string",
+                        "nullable": true,
                         "description": "Primary contact phone number",
                         "maxLength": 20
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
+                        "nullable": true,
                         "description": "Primary contact email address",
                         "maxLength": 254
                     },
@@ -17099,6 +17659,7 @@
                     },
                     "is_active": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Whether this contact is currently active"
                     },
                     "created_by": {
@@ -17134,14 +17695,10 @@
                 },
                 "required": [
                     "application_count",
-                    "company_name",
-                    "contact_name",
                     "created_at",
                     "created_by",
                     "created_by_details",
-                    "email",
                     "id",
-                    "phone",
                     "updated_at"
                 ]
             },
@@ -17194,30 +17751,30 @@
             },
             "ValuerRequest": {
                 "type": "object",
-                "description": "Serializer for Valuer model",
+                "description": "Serializer for Valuer model with null/blank handling for minimal data creation",
                 "properties": {
                     "company_name": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Name of the company/firm",
                         "maxLength": 255
                     },
                     "contact_name": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Name of the primary contact person",
                         "maxLength": 255
                     },
                     "phone": {
                         "type": "string",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Primary contact phone number",
                         "maxLength": 20
                     },
                     "email": {
                         "type": "string",
                         "format": "email",
-                        "minLength": 1,
+                        "nullable": true,
                         "description": "Primary contact email address",
                         "maxLength": 254
                     },
@@ -17233,15 +17790,10 @@
                     },
                     "is_active": {
                         "type": "boolean",
+                        "nullable": true,
                         "description": "Whether this contact is currently active"
                     }
-                },
-                "required": [
-                    "company_name",
-                    "contact_name",
-                    "email",
-                    "phone"
-                ]
+                }
             }
         },
         "securitySchemes": {

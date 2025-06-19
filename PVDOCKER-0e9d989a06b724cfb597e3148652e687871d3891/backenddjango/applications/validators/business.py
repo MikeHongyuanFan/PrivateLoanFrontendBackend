@@ -72,24 +72,23 @@ def validate_acn(acn):
 
 def validate_company_borrower(company_data):
     """
-    Validate company borrower information
+    Validate company borrower information - permissive for minimal data creation
     """
     errors = {}
     
-    # Validate required fields and identifiers
-    errors.update(_validate_required_fields(company_data))
+    # Only validate identifiers if provided (don't require them)
     errors.update(_validate_identifiers(company_data))
     
-    # Validate business type and years
+    # Validate business type and years (only if provided)
     errors.update(_validate_business_details(company_data))
     
-    # Validate financial information
+    # Validate financial information (only if provided)
     errors.update(_validate_financial_info(company_data))
     
-    # Validate address information
-    errors.update(_validate_address(company_data))
+    # Skip address validation for minimal data creation
+    # errors.update(_validate_address(company_data))
     
-    # Validate directors information
+    # Validate directors information (only if provided)
     errors.update(_validate_directors(company_data))
     
     return errors
@@ -98,23 +97,23 @@ def validate_company_borrower(company_data):
 def _validate_required_fields(company_data):
     """Validate optional company fields - no fields are required anymore"""
     errors = {}
-    # All fields are now optional - no validation needed
+    # All fields are now optional for minimal data creation
     return errors
 
 
 def _validate_identifiers(company_data):
-    """Validate ABN and ACN"""
+    """Validate ABN and ACN only if provided"""
     errors = {}
     
-    # ABN validation
-    if company_data.get('company_abn'):
+    # ABN validation (only if provided)
+    if company_data.get('company_abn') and company_data['company_abn'].strip():
         try:
             validate_abn(company_data['company_abn'])
         except ValidationError as e:
             errors['company_abn'] = str(e)
     
-    # ACN validation
-    if company_data.get('company_acn'):
+    # ACN validation (only if provided)
+    if company_data.get('company_acn') and company_data['company_acn'].strip():
         try:
             validate_acn(company_data['company_acn'])
         except ValidationError as e:
@@ -124,17 +123,18 @@ def _validate_identifiers(company_data):
 
 
 def _validate_business_details(company_data):
-    """Validate business type and years in business"""
+    """Validate business type and years in business only if provided"""
     errors = {}
     
-    # Industry type validation
-    from borrowers.models import Borrower
-    valid_industry_types = [choice[0] for choice in Borrower.INDUSTRY_TYPE_CHOICES]
-    if company_data.get('industry_type') and company_data['industry_type'] not in valid_industry_types:
-        errors['industry_type'] = 'Invalid industry type'
+    # Industry type validation (only if provided)
+    if company_data.get('industry_type') and company_data['industry_type'].strip():
+        from borrowers.models import Borrower
+        valid_industry_types = [choice[0] for choice in Borrower.INDUSTRY_TYPE_CHOICES]
+        if company_data['industry_type'] not in valid_industry_types:
+            errors['industry_type'] = 'Invalid industry type'
     
-    # Annual company income validation
-    if company_data.get('annual_company_income'):
+    # Annual company income validation (only if provided)
+    if company_data.get('annual_company_income') is not None:
         try:
             income = float(company_data['annual_company_income'])
             if income < 0:
@@ -146,13 +146,13 @@ def _validate_business_details(company_data):
 
 
 def _validate_financial_info(company_data):
-    """Validate financial information"""
+    """Validate financial information only if provided"""
     errors = {}
     
-    financial_fields = ['annual_revenue', 'net_profit', 'assets', 'liabilities']
-    if 'financial_info' in company_data:
+    if company_data.get('financial_info'):
+        financial_fields = ['annual_revenue', 'net_profit', 'assets', 'liabilities']
         for field in financial_fields:
-            if field in company_data['financial_info'] and company_data['financial_info'][field]:
+            if field in company_data['financial_info'] and company_data['financial_info'][field] is not None:
                 try:
                     amount = float(company_data['financial_info'][field])
                     if field != 'net_profit' and amount < 0:
@@ -164,19 +164,16 @@ def _validate_financial_info(company_data):
 
 
 def _validate_address(company_data):
-    """Validate company address"""
+    """Validate company address - made optional for minimal data creation"""
     errors = {}
     
-    # Check if at least street name, suburb, state, and postcode are provided
-    address_fields = ['registered_address_street_name', 'registered_address_suburb', 
-                     'registered_address_state', 'registered_address_postcode']
+    # Skip address validation for minimal data creation
+    # Address fields are now completely optional
     
-    for field in address_fields:
-        if not company_data.get(field):
-            errors[field] = f'{field.replace("registered_address_", "").replace("_", " ").title()} is required'
-    
-    # Postal code validation for Australia
-    if company_data.get('registered_address_state', '').lower() in ['nsw', 'vic', 'qld', 'sa', 'wa', 'tas', 'nt', 'act'] and company_data.get('registered_address_postcode'):
+    # Only validate postal code format if provided
+    if (company_data.get('registered_address_state', '').lower() in 
+        ['nsw', 'vic', 'qld', 'sa', 'wa', 'tas', 'nt', 'act'] and 
+        company_data.get('registered_address_postcode')):
         if not re.match(r'^\d{4}$', str(company_data['registered_address_postcode'])):
             errors['registered_address_postcode'] = 'Australian postal code must be 4 digits'
                 
@@ -184,21 +181,20 @@ def _validate_address(company_data):
 
 
 def _validate_directors(company_data):
-    """Validate company directors"""
+    """Validate company directors only if provided"""
     errors = {}
     
-    if 'directors' in company_data and company_data['directors']:
+    if company_data.get('directors'):
         for i, director in enumerate(company_data['directors']):
-            if not director.get('name'):
-                errors[f'directors[{i}].name'] = 'Director name is required'
-            
-            # Validate roles
-            if director.get('roles'):
-                valid_roles = ['director', 'secretary', 'public_officer', 'shareholder']
-                roles = director['roles'].split(',')
-                for role in roles:
-                    role = role.strip().lower()
-                    if role and role not in valid_roles:
-                        errors[f'directors[{i}].roles'] = f'Invalid role: {role}'
-                
+            # Only validate directors that have names (skip empty ones)
+            if director.get('name') and director['name'].strip():
+                # Validate roles if provided
+                if director.get('roles'):
+                    valid_roles = ['director', 'secretary', 'public_officer', 'shareholder']
+                    roles = director['roles'].split(',')
+                    for role in roles:
+                        role = role.strip().lower()
+                        if role not in valid_roles:
+                            errors[f'directors[{i}].roles'] = f'Invalid role: {role}. Valid roles are: {", ".join(valid_roles)}'
+                    
     return errors 

@@ -39,16 +39,23 @@ class UserSerializer(serializers.ModelSerializer):
 
 class UserCreateSerializer(serializers.ModelSerializer):
     """
-    Serializer for creating users
+    Serializer for creating users with null/blank handling for minimal data creation
     """
     password = serializers.CharField(write_only=True)
-    username = serializers.CharField(required=False)
-    branch_id = serializers.IntegerField(required=False, write_only=True)
+    username = serializers.CharField(required=False, allow_null=True, allow_blank=True)
+    branch_id = serializers.IntegerField(required=False, write_only=True, allow_null=True)
     
     class Meta:
         model = User
         fields = ['id', 'email', 'password', 'first_name', 'last_name', 'role', 'phone', 'username', 'branch_id']
         read_only_fields = ['id']
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'first_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'last_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'role': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'phone': {'required': False, 'allow_null': True, 'allow_blank': True},
+        }
     
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -74,20 +81,28 @@ class UserCreateSerializer(serializers.ModelSerializer):
                 if branch_id:
                     branch = Branch.objects.get(id=branch_id)
                 
-                # Create BDM profile
+                # Create BDM profile with safe string concatenation
+                first_name = str(user.first_name) if user.first_name else ""
+                last_name = str(user.last_name) if user.last_name else ""
+                full_name = f"{first_name} {last_name}".strip()
+                
                 BDM.objects.create(
                     user=user,
-                    name=f"{user.first_name} {user.last_name}".strip() or user.email,
+                    name=full_name or user.email,
                     email=user.email,
                     phone=user.phone,
                     branch=branch,
                     created_by=self.context.get('request').user if self.context.get('request') else None
                 )
             except Branch.DoesNotExist:
-                # If branch doesn't exist, still create BDM but without branch
+                # If branch doesn't exist, still create BDM but without branch with safe string concatenation
+                first_name = str(user.first_name) if user.first_name else ""
+                last_name = str(user.last_name) if user.last_name else ""
+                full_name = f"{first_name} {last_name}".strip()
+                
                 BDM.objects.create(
                     user=user,
-                    name=f"{user.first_name} {user.last_name}".strip() or user.email,
+                    name=full_name or user.email,
                     email=user.email,
                     phone=user.phone,
                     created_by=self.context.get('request').user if self.context.get('request') else None

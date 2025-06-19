@@ -4,27 +4,40 @@ from users.serializers import UserSerializer
 
 
 class BranchSerializer(serializers.ModelSerializer):
-    """Serializer for branch information"""
+    """Serializer for branch information with null/blank handling for minimal data creation"""
     class Meta:
         model = Branch
         fields = ['id', 'name', 'address', 'phone', 'email']
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'address': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'phone': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'email': {'required': False, 'allow_null': True, 'allow_blank': True},
+        }
 
 
 class BDMSerializer(serializers.ModelSerializer):
-    """Serializer for BDM information"""
+    """Serializer for BDM information with null/blank handling for minimal data creation"""
     branch = BranchSerializer(read_only=True)
-    branch_id = serializers.IntegerField(write_only=True, required=False)
+    branch_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     
     # Branch address fields (write-only)
-    branch_name = serializers.CharField(write_only=True, required=False)
-    address = serializers.CharField(write_only=True, required=False)
-    branch_phone = serializers.CharField(write_only=True, required=False)
-    branch_email = serializers.EmailField(write_only=True, required=False)
+    branch_name = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
+    address = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
+    branch_phone = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
+    branch_email = serializers.EmailField(write_only=True, required=False, allow_null=True, allow_blank=True)
     
     class Meta:
         model = BDM
         fields = ['id', 'name', 'email', 'phone', 'branch', 'branch_id', 
                  'branch_name', 'address', 'branch_phone', 'branch_email']
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'email': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'phone': {'required': False, 'allow_null': True, 'allow_blank': True},
+        }
     
     def create(self, validated_data):
         branch_id = validated_data.pop('branch_id', None)
@@ -98,14 +111,21 @@ class BDMSerializer(serializers.ModelSerializer):
 
 
 class BrokerListSerializer(serializers.ModelSerializer):
-    """Serializer for listing brokers with minimal information"""
+    """Serializer for listing brokers with minimal information and null/blank handling"""
     class Meta:
         model = Broker
         fields = ['id', 'name', 'company', 'email', 'phone']
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'company': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'email': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'phone': {'required': False, 'allow_null': True, 'allow_blank': True},
+        }
 
 
 class BrokerDetailSerializer(serializers.ModelSerializer):
-    """Serializer for detailed broker information"""
+    """Serializer for detailed broker information with null/blank handling for minimal data creation"""
     branch = BranchSerializer(read_only=True)
     bdms = BDMSerializer(many=True, read_only=True)
     created_by = UserSerializer(read_only=True)
@@ -114,3 +134,18 @@ class BrokerDetailSerializer(serializers.ModelSerializer):
         model = Broker
         fields = '__all__'
         read_only_fields = ['created_at', 'updated_at', 'created_by']
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'company': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'email': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'phone': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'address': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'abn': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'acn': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'aggregator': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'credit_rep_number': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'commission_structure': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'notes': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'is_active': {'required': False, 'allow_null': True},
+        }

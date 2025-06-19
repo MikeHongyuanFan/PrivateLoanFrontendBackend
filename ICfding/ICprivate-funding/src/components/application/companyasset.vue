@@ -1,37 +1,132 @@
 <template>
     <div class="content">
-        <el-table v-loading="loading" :data="assets" style="width: 100%">
-            <el-table-column prop="asset_type" label="Asset Type" min-width="120">
-                <template #default="{ row }">{{ row.asset_type || '-' }}</template>
-            </el-table-column>
-            <el-table-column prop="description" label="Description" min-width="200">
-                <template #default="{ row }">{{ row.description || '-' }}</template>
-            </el-table-column>
-            <el-table-column prop="value" label="Value" min-width="120">
-                <template #default="{ row }">{{ formatCurrency(row.value) }}</template>
-            </el-table-column>
-            <el-table-column prop="amount_owing" label="Amount Owing" min-width="120">
-                <template #default="{ row }">{{ formatCurrency(row.amount_owing) }}</template>
-            </el-table-column>
-            <el-table-column prop="to_be_refinanced" label="To Be Refinanced" min-width="120">
-                <template #default="{ row }">{{ row.to_be_refinanced ? 'Yes' : 'No' }}</template>
-            </el-table-column>
-            <el-table-column prop="address" label="Address" min-width="200">
-                <template #default="{ row }">{{ row.address || '-' }}</template>
-            </el-table-column>
-        </el-table>
-        <div v-if="error" class="error-message">{{ error }}</div>
-        <div v-if="!loading && (!assets || assets.length === 0)" class="empty-state">No assets found</div>
+        <!-- Enhanced Asset Summary from Cascade Data -->
+        <div v-if="summary && summary.length > 0" class="asset_summary">
+            <div class="summary_header">
+                <h2>💰 Assets & Liabilities Overview</h2>
+            </div>
+            <div class="borrower_assets">
+                <div v-for="(borrower, index) in summary" :key="index" class="borrower_section">
+                    <div class="borrower_header">
+                        <h3>{{ borrower.is_company ? borrower.company_name : `${borrower.first_name} ${borrower.last_name}` }}</h3>
+                        <div class="financial_totals">
+                            <span class="total_assets">Assets: ${{ borrower.total_assets?.toLocaleString() || '0' }}</span>
+                            <span class="total_liabilities">Liabilities: ${{ borrower.total_liabilities?.toLocaleString() || '0' }}</span>
+                            <span class="net_worth" :class="{ 'positive': borrower.net_worth >= 0, 'negative': borrower.net_worth < 0 }">
+                                Net Worth: ${{ borrower.net_worth?.toLocaleString() || '0' }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Assets Table -->
+                    <div v-if="borrower.assets && borrower.assets.length > 0" class="assets_section">
+                        <h4>Assets ({{ borrower.assets.length }})</h4>
+                        <el-table :data="borrower.assets" style="width: 100%" class="assets_table">
+                            <el-table-column prop="asset_type" label="Asset Type" min-width="120">
+                                <template #default="{ row }">{{ row.asset_type || '-' }}</template>
+                            </el-table-column>
+                            <el-table-column prop="description" label="Description" min-width="200">
+                                <template #default="{ row }">{{ row.description || '-' }}</template>
+                            </el-table-column>
+                            <el-table-column prop="value" label="Value" min-width="120">
+                                <template #default="{ row }">{{ formatCurrency(row.value) }}</template>
+                            </el-table-column>
+                            <el-table-column prop="amount_owing" label="Amount Owing" min-width="120">
+                                <template #default="{ row }">{{ formatCurrency(row.amount_owing) }}</template>
+                            </el-table-column>
+                            <el-table-column prop="to_be_refinanced" label="To Be Refinanced" min-width="120">
+                                <template #default="{ row }">{{ row.to_be_refinanced ? 'Yes' : 'No' }}</template>
+                            </el-table-column>
+                            <el-table-column prop="address" label="Address" min-width="200">
+                                <template #default="{ row }">{{ row.address || '-' }}</template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                    
+                    <!-- Liabilities Table -->
+                    <div v-if="borrower.liabilities && borrower.liabilities.length > 0" class="liabilities_section">
+                        <h4>Liabilities ({{ borrower.liabilities.length }})</h4>
+                        <el-table :data="borrower.liabilities" style="width: 100%" class="liabilities_table">
+                            <el-table-column prop="liability_type" label="Liability Type" min-width="120">
+                                <template #default="{ row }">{{ row.liability_type || '-' }}</template>
+                            </el-table-column>
+                            <el-table-column prop="description" label="Description" min-width="200">
+                                <template #default="{ row }">{{ row.description || '-' }}</template>
+                            </el-table-column>
+                            <el-table-column prop="amount" label="Amount" min-width="120">
+                                <template #default="{ row }">{{ formatCurrency(row.amount) }}</template>
+                            </el-table-column>
+                            <el-table-column prop="monthly_payment" label="Monthly Payment" min-width="120">
+                                <template #default="{ row }">{{ formatCurrency(row.monthly_payment) }}</template>
+                            </el-table-column>
+                            <el-table-column prop="to_be_refinanced" label="To Be Refinanced" min-width="120">
+                                <template #default="{ row }">{{ row.to_be_refinanced ? 'Yes' : 'No' }}</template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                    
+                    <!-- No Data Messages -->
+                    <div v-if="(!borrower.assets || borrower.assets.length === 0) && (!borrower.liabilities || borrower.liabilities.length === 0)" class="no_data">
+                        <p>No assets or liabilities found for this borrower</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Legacy Single Borrower View (if needed) -->
+        <div v-else-if="borrowerId" class="legacy_view">
+            <el-table v-loading="loading" :data="assets" style="width: 100%">
+                <el-table-column prop="asset_type" label="Asset Type" min-width="120">
+                    <template #default="{ row }">{{ row.asset_type || '-' }}</template>
+                </el-table-column>
+                <el-table-column prop="description" label="Description" min-width="200">
+                    <template #default="{ row }">{{ row.description || '-' }}</template>
+                </el-table-column>
+                <el-table-column prop="value" label="Value" min-width="120">
+                    <template #default="{ row }">{{ formatCurrency(row.value) }}</template>
+                </el-table-column>
+                <el-table-column prop="amount_owing" label="Amount Owing" min-width="120">
+                    <template #default="{ row }">{{ formatCurrency(row.amount_owing) }}</template>
+                </el-table-column>
+                <el-table-column prop="to_be_refinanced" label="To Be Refinanced" min-width="120">
+                    <template #default="{ row }">{{ row.to_be_refinanced ? 'Yes' : 'No' }}</template>
+                </el-table-column>
+                <el-table-column prop="address" label="Address" min-width="200">
+                    <template #default="{ row }">{{ row.address || '-' }}</template>
+                </el-table-column>
+            </el-table>
+            <div v-if="error" class="error-message">{{ error }}</div>
+            <div v-if="!loading && (!assets || assets.length === 0)" class="empty-state">No assets found</div>
+        </div>
+
+        <!-- No Data Message -->
+        <div v-else class="no_data">
+            <p>No borrower asset information available</p>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { api } from '@/api'
 
 const props = defineProps({
-    borrowerId: { type: Number, required: true }
+    borrowerId: { 
+        type: Number, 
+        required: false,
+        default: null
+    },
+    detail: {
+        type: Object,
+        required: false,
+        default: () => ({})
+    },
+    summary: {
+        type: Array,
+        required: false,
+        default: () => []
+    }
 })
 
 const assets = ref([])
@@ -44,6 +139,8 @@ const formatCurrency = (value) => {
 }
 
 const fetchAssets = async () => {
+    if (!props.borrowerId) return
+    
     loading.value = true
     error.value = null
     try {
@@ -62,7 +159,9 @@ const fetchAssets = async () => {
 }
 
 onMounted(() => {
-    if (props.borrowerId) fetchAssets()
+    if (props.borrowerId && (!props.summary || props.summary.length === 0)) {
+        fetchAssets()
+    }
 })
 </script>
 
@@ -71,6 +170,99 @@ onMounted(() => {
     padding: 20px;
     border-radius: 6px;
     background: #FFF;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Asset Summary Styles */
+.asset_summary {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+.summary_header h2 {
+    color: #384144;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+}
+.borrower_assets {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+.borrower_section {
+    border: 1px solid #E8EBEE;
+    border-radius: 8px;
+    padding: 20px;
+    background: #FAFAFA;
+}
+.borrower_header {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #E8EBEE;
+}
+.borrower_header h3 {
+    color: #2984DE;
+    font-size: 1rem;
+    font-weight: 600;
+    margin: 0;
+}
+.financial_totals {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+.total_assets, .total_liabilities, .net_worth {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 5px 10px;
+    border-radius: 4px;
+    background: #FFF;
+    border: 1px solid #E8EBEE;
+}
+.total_assets {
+    color: #14A105;
+}
+.total_liabilities {
+    color: #E74C3C;
+}
+.net_worth.positive {
+    color: #14A105;
+    border-color: #14A105;
+}
+.net_worth.negative {
+    color: #E74C3C;
+    border-color: #E74C3C;
+}
+
+/* Section Styles */
+.assets_section, .liabilities_section {
+    margin-bottom: 20px;
+}
+.assets_section h4, .liabilities_section h4 {
+    color: #384144;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin: 0 0 10px 0;
+}
+
+/* Table Styles */
+.assets_table, .liabilities_table {
+    background: #FFF;
+    border-radius: 6px;
+}
+
+/* Legacy and Error Styles */
+.legacy_view {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
 }
 .error-message {
     color: #f56c6c;
@@ -78,12 +270,18 @@ onMounted(() => {
     margin-top: 10px;
     text-align: center;
 }
-.empty-state {
+.empty-state, .no_data {
     color: #909399;
     font-size: 14px;
     text-align: center;
-    padding: 20px;
+    padding: 40px;
+    font-style: italic;
 }
+.no_data p {
+    margin: 0;
+}
+
+/* Element Plus Table Overrides */
 :deep(.el-table) {
     --el-table-border-color: #E8EBEE;
     --el-table-header-bg-color: #F8F9FA;
@@ -98,5 +296,16 @@ onMounted(() => {
 :deep(.el-table td) {
     color: #384144;
     font-size: 12px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .financial_totals {
+        flex-direction: column;
+        gap: 10px;
+    }
+    .borrower_header {
+        align-items: flex-start;
+    }
 }
 </style>
