@@ -967,6 +967,269 @@ paths:
                     working_fee: 0
                   summary: Example Request
           description: ''
+  /api/applications/quantity-surveyors/:
+    get:
+      operationId: applications_quantity_surveyors_list
+      description: API endpoint for managing quantity surveyors
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedQuantitySurveyorListList'
+          description: ''
+    post:
+      operationId: applications_quantity_surveyors_create
+      description: API endpoint for managing quantity surveyors
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuantitySurveyorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/QuantitySurveyorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/QuantitySurveyorRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuantitySurveyor'
+          description: ''
+  /api/applications/quantity-surveyors/{id}/:
+    get:
+      operationId: applications_quantity_surveyors_retrieve
+      description: API endpoint for managing quantity surveyors
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Quantity Surveyor.
+        required: true
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuantitySurveyor'
+          description: ''
+    put:
+      operationId: applications_quantity_surveyors_update
+      description: API endpoint for managing quantity surveyors
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Quantity Surveyor.
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuantitySurveyorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/QuantitySurveyorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/QuantitySurveyorRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuantitySurveyor'
+          description: ''
+    patch:
+      operationId: applications_quantity_surveyors_partial_update
+      description: API endpoint for managing quantity surveyors
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Quantity Surveyor.
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedQuantitySurveyorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedQuantitySurveyorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedQuantitySurveyorRequest'
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuantitySurveyor'
+          description: ''
+    delete:
+      operationId: applications_quantity_surveyors_destroy
+      description: API endpoint for managing quantity surveyors
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Quantity Surveyor.
+        required: true
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '204':
+          description: No response body
+  /api/applications/quantity-surveyors/{id}/activate/:
+    post:
+      operationId: applications_quantity_surveyors_activate_create
+      description: Activate a quantity surveyor
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Quantity Surveyor.
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuantitySurveyorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/QuantitySurveyorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/QuantitySurveyorRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuantitySurveyor'
+          description: ''
+  /api/applications/quantity-surveyors/{id}/applications/:
+    get:
+      operationId: applications_quantity_surveyors_applications_retrieve
+      description: Get all applications using this quantity surveyor
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Quantity Surveyor.
+        required: true
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuantitySurveyor'
+          description: ''
+  /api/applications/quantity-surveyors/{id}/deactivate/:
+    post:
+      operationId: applications_quantity_surveyors_deactivate_create
+      description: Deactivate a quantity surveyor (soft delete)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Quantity Surveyor.
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuantitySurveyorRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/QuantitySurveyorRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/QuantitySurveyorRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QuantitySurveyor'
+          description: ''
   /api/applications/validate-schema/:
     post:
       operationId: applications_validate_schema_create
@@ -993,6 +1256,269 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApplicationList'
+          description: ''
+  /api/applications/valuers/:
+    get:
+      operationId: applications_valuers_list
+      description: API endpoint for managing valuers
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedValuerListList'
+          description: ''
+    post:
+      operationId: applications_valuers_create
+      description: API endpoint for managing valuers
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValuerRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ValuerRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ValuerRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Valuer'
+          description: ''
+  /api/applications/valuers/{id}/:
+    get:
+      operationId: applications_valuers_retrieve
+      description: API endpoint for managing valuers
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Valuer.
+        required: true
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Valuer'
+          description: ''
+    put:
+      operationId: applications_valuers_update
+      description: API endpoint for managing valuers
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Valuer.
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValuerRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ValuerRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ValuerRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Valuer'
+          description: ''
+    patch:
+      operationId: applications_valuers_partial_update
+      description: API endpoint for managing valuers
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Valuer.
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedValuerRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedValuerRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedValuerRequest'
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Valuer'
+          description: ''
+    delete:
+      operationId: applications_valuers_destroy
+      description: API endpoint for managing valuers
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Valuer.
+        required: true
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '204':
+          description: No response body
+  /api/applications/valuers/{id}/activate/:
+    post:
+      operationId: applications_valuers_activate_create
+      description: Activate a valuer
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Valuer.
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValuerRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ValuerRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ValuerRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Valuer'
+          description: ''
+  /api/applications/valuers/{id}/applications/:
+    get:
+      operationId: applications_valuers_applications_retrieve
+      description: Get all applications using this valuer
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Valuer.
+        required: true
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Valuer'
+          description: ''
+  /api/applications/valuers/{id}/deactivate/:
+    post:
+      operationId: applications_valuers_deactivate_create
+      description: Deactivate a valuer (soft delete)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Valuer.
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValuerRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ValuerRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ValuerRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Valuer'
           description: ''
   /api/borrowers/borrowers/:
     get:
@@ -4930,6 +5456,12 @@ components:
           minimum: 0
           nullable: true
           description: Loan term in months
+        capitalised_interest_term:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Capitalised Interest Term in months
         interest_rate:
           type: string
           format: decimal
@@ -4946,6 +5478,10 @@ components:
           - $ref: '#/components/schemas/ApplicationTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        application_type_other:
+          type: string
+          nullable: true
+          description: Details for 'Other' application type
         product_id:
           type: string
           nullable: true
@@ -4964,6 +5500,14 @@ components:
           type: integer
           nullable: true
           readOnly: true
+        valuer:
+          type: integer
+          nullable: true
+          description: Selected valuer for this application
+        quantity_surveyor:
+          type: integer
+          nullable: true
+          description: Selected quantity surveyor for this application
         borrowers:
           type: array
           items:
@@ -5104,6 +5648,12 @@ components:
           minimum: 0
           nullable: true
           description: Loan term in months
+        capitalised_interest_term:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Capitalised Interest Term in months
         interest_rate:
           type: string
           format: decimal
@@ -5120,6 +5670,10 @@ components:
           - $ref: '#/components/schemas/ApplicationTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        application_type_other:
+          type: string
+          nullable: true
+          description: Details for 'Other' application type
         product_id:
           type: string
           nullable: true
@@ -5130,6 +5684,14 @@ components:
           nullable: true
         stage:
           $ref: '#/components/schemas/StageEnum'
+        valuer:
+          type: integer
+          nullable: true
+          description: Selected valuer for this application
+        quantity_surveyor:
+          type: integer
+          nullable: true
+          description: Selected quantity surveyor for this application
         borrowers:
           type: array
           items:
@@ -5268,6 +5830,12 @@ components:
           minimum: 0
           nullable: true
           description: Loan term in months
+        capitalised_interest_term:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Capitalised Interest Term in months
         interest_rate:
           type: string
           format: decimal
@@ -5284,6 +5852,10 @@ components:
           - $ref: '#/components/schemas/ApplicationTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        application_type_other:
+          type: string
+          nullable: true
+          description: Details for 'Other' application type
         product_id:
           type: string
           nullable: true
@@ -5388,6 +5960,14 @@ components:
         branch:
           allOf:
           - $ref: '#/components/schemas/Branch'
+          readOnly: true
+        valuer:
+          allOf:
+          - $ref: '#/components/schemas/ValuerList'
+          readOnly: true
+        quantity_surveyor:
+          allOf:
+          - $ref: '#/components/schemas/QuantitySurveyorList'
           readOnly: true
         security_properties:
           type: array
@@ -5513,10 +6093,12 @@ components:
       - ledger_entries
       - loan_requirements
       - notes
+      - quantity_surveyor
       - repayments
       - security_properties
       - stage_display
       - updated_at
+      - valuer
     ApplicationLedger:
       type: object
       description: Serializer for application ledger summary
@@ -5653,6 +6235,18 @@ components:
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+        loan_term:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Loan term in months
+        capitalised_interest_term:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Capitalised Interest Term in months
         estimated_settlement_date:
           type: string
           format: date
@@ -5707,6 +6301,18 @@ components:
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+        loan_term:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Loan term in months
+        capitalised_interest_term:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Capitalised Interest Term in months
         estimated_settlement_date:
           type: string
           format: date
@@ -5759,20 +6365,22 @@ components:
       - total_withdrawn
     ApplicationTypeEnum:
       enum:
-      - residential
-      - commercial
-      - construction
+      - acquisition
       - refinance
-      - investment
-      - smsf
+      - equity_release
+      - refinance_equity_release
+      - second_mortgage
+      - caveat
+      - other
       type: string
       description: |-
-        * `residential` - Residential
-        * `commercial` - Commercial
-        * `construction` - Construction
+        * `acquisition` - Acquisition
         * `refinance` - Refinance
-        * `investment` - Investment
-        * `smsf` - SMSF
+        * `equity_release` - Equity Release
+        * `refinance_equity_release` - Refinance & Equity Release
+        * `second_mortgage` - 2nd Mortgage
+        * `caveat` - Caveat
+        * `other` - Other
     ApplicationVolumeReport:
       type: object
       description: Serializer for application volume report data
@@ -8858,6 +9466,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Product'
+    PaginatedQuantitySurveyorListList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/QuantitySurveyorList'
     PaginatedReminderList:
       type: object
       properties:
@@ -8918,6 +9546,26 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/User'
+    PaginatedValuerListList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValuerList'
     PasswordResetConfirmRequest:
       type: object
       description: Serializer for password reset confirmation
@@ -8960,6 +9608,18 @@ components:
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+        loan_term:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Loan term in months
+        capitalised_interest_term:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Capitalised Interest Term in months
         estimated_settlement_date:
           type: string
           format: date
@@ -9517,6 +10177,42 @@ components:
           type: array
           items:
             type: integer
+    PatchedQuantitySurveyorRequest:
+      type: object
+      description: Serializer for QuantitySurveyor model
+      properties:
+        company_name:
+          type: string
+          minLength: 1
+          description: Name of the QS company
+          maxLength: 255
+        contact_name:
+          type: string
+          minLength: 1
+          description: Name of the contact person
+          maxLength: 255
+        phone:
+          type: string
+          minLength: 1
+          description: Contact phone number
+          maxLength: 20
+        email:
+          type: string
+          format: email
+          minLength: 1
+          description: Contact email address
+          maxLength: 254
+        address:
+          type: string
+          nullable: true
+          description: Company address
+        notes:
+          type: string
+          nullable: true
+          description: Additional notes about this QS
+        is_active:
+          type: boolean
+          description: Whether this QS is active
     PatchedReminderRequest:
       type: object
       description: Serializer for reminders
@@ -9594,6 +10290,42 @@ components:
           type: string
           nullable: true
           maxLength: 20
+    PatchedValuerRequest:
+      type: object
+      description: Serializer for Valuer model
+      properties:
+        company_name:
+          type: string
+          minLength: 1
+          description: Name of the valuation company
+          maxLength: 255
+        contact_name:
+          type: string
+          minLength: 1
+          description: Name of the contact person
+          maxLength: 255
+        phone:
+          type: string
+          minLength: 1
+          description: Contact phone number
+          maxLength: 20
+        email:
+          type: string
+          format: email
+          minLength: 1
+          description: Contact email address
+          maxLength: 254
+        address:
+          type: string
+          nullable: true
+          description: Company address
+        notes:
+          type: string
+          nullable: true
+          description: Additional notes about this valuer
+        is_active:
+          type: boolean
+          description: Whether this valuer is active
     Product:
       type: object
       description: Serializer for the Product model
@@ -9669,6 +10401,149 @@ components:
         * `land` - Land
         * `rural` - Rural
         * `other` - Other
+    QuantitySurveyor:
+      type: object
+      description: Serializer for QuantitySurveyor model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        company_name:
+          type: string
+          description: Name of the QS company
+          maxLength: 255
+        contact_name:
+          type: string
+          description: Name of the contact person
+          maxLength: 255
+        phone:
+          type: string
+          description: Contact phone number
+          maxLength: 20
+        email:
+          type: string
+          format: email
+          description: Contact email address
+          maxLength: 254
+        address:
+          type: string
+          nullable: true
+          description: Company address
+        notes:
+          type: string
+          nullable: true
+          description: Additional notes about this QS
+        is_active:
+          type: boolean
+          description: Whether this QS is active
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+        created_by_details:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        application_count:
+          type: string
+          readOnly: true
+      required:
+      - application_count
+      - company_name
+      - contact_name
+      - created_at
+      - created_by
+      - created_by_details
+      - email
+      - id
+      - phone
+      - updated_at
+    QuantitySurveyorList:
+      type: object
+      description: Simplified serializer for QuantitySurveyor listing (dropdown options)
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        company_name:
+          type: string
+          description: Name of the QS company
+          maxLength: 255
+        contact_name:
+          type: string
+          description: Name of the contact person
+          maxLength: 255
+        phone:
+          type: string
+          description: Contact phone number
+          maxLength: 20
+        email:
+          type: string
+          format: email
+          description: Contact email address
+          maxLength: 254
+        display_name:
+          type: string
+          readOnly: true
+        is_active:
+          type: boolean
+          description: Whether this QS is active
+      required:
+      - company_name
+      - contact_name
+      - display_name
+      - email
+      - id
+      - phone
+    QuantitySurveyorRequest:
+      type: object
+      description: Serializer for QuantitySurveyor model
+      properties:
+        company_name:
+          type: string
+          minLength: 1
+          description: Name of the QS company
+          maxLength: 255
+        contact_name:
+          type: string
+          minLength: 1
+          description: Name of the contact person
+          maxLength: 255
+        phone:
+          type: string
+          minLength: 1
+          description: Contact phone number
+          maxLength: 20
+        email:
+          type: string
+          format: email
+          minLength: 1
+          description: Contact email address
+          maxLength: 254
+        address:
+          type: string
+          nullable: true
+          description: Company address
+        notes:
+          type: string
+          nullable: true
+          description: Additional notes about this QS
+        is_active:
+          type: boolean
+          description: Whether this QS is active
+      required:
+      - company_name
+      - contact_name
+      - email
+      - phone
     RecipientTypeEnum:
       enum:
       - client
@@ -10408,6 +11283,149 @@ components:
           maxLength: 20
       required:
       - email
+    Valuer:
+      type: object
+      description: Serializer for Valuer model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        company_name:
+          type: string
+          description: Name of the valuation company
+          maxLength: 255
+        contact_name:
+          type: string
+          description: Name of the contact person
+          maxLength: 255
+        phone:
+          type: string
+          description: Contact phone number
+          maxLength: 20
+        email:
+          type: string
+          format: email
+          description: Contact email address
+          maxLength: 254
+        address:
+          type: string
+          nullable: true
+          description: Company address
+        notes:
+          type: string
+          nullable: true
+          description: Additional notes about this valuer
+        is_active:
+          type: boolean
+          description: Whether this valuer is active
+        created_by:
+          type: integer
+          readOnly: true
+          nullable: true
+        created_by_details:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        application_count:
+          type: string
+          readOnly: true
+      required:
+      - application_count
+      - company_name
+      - contact_name
+      - created_at
+      - created_by
+      - created_by_details
+      - email
+      - id
+      - phone
+      - updated_at
+    ValuerList:
+      type: object
+      description: Simplified serializer for Valuer listing (dropdown options)
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        company_name:
+          type: string
+          description: Name of the valuation company
+          maxLength: 255
+        contact_name:
+          type: string
+          description: Name of the contact person
+          maxLength: 255
+        phone:
+          type: string
+          description: Contact phone number
+          maxLength: 20
+        email:
+          type: string
+          format: email
+          description: Contact email address
+          maxLength: 254
+        display_name:
+          type: string
+          readOnly: true
+        is_active:
+          type: boolean
+          description: Whether this valuer is active
+      required:
+      - company_name
+      - contact_name
+      - display_name
+      - email
+      - id
+      - phone
+    ValuerRequest:
+      type: object
+      description: Serializer for Valuer model
+      properties:
+        company_name:
+          type: string
+          minLength: 1
+          description: Name of the valuation company
+          maxLength: 255
+        contact_name:
+          type: string
+          minLength: 1
+          description: Name of the contact person
+          maxLength: 255
+        phone:
+          type: string
+          minLength: 1
+          description: Contact phone number
+          maxLength: 20
+        email:
+          type: string
+          format: email
+          minLength: 1
+          description: Contact email address
+          maxLength: 254
+        address:
+          type: string
+          nullable: true
+          description: Company address
+        notes:
+          type: string
+          nullable: true
+          description: Additional notes about this valuer
+        is_active:
+          type: boolean
+          description: Whether this valuer is active
+      required:
+      - company_name
+      - contact_name
+      - email
+      - phone
   securitySchemes:
     Bearer:
       type: http

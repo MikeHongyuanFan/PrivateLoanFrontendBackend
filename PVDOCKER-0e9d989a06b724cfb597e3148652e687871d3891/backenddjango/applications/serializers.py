@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Application, Document, Fee, Repayment, FundingCalculationHistory, SecurityProperty, LoanRequirement
+from .models import Application, Document, Fee, Repayment, FundingCalculationHistory, SecurityProperty, LoanRequirement, Valuer, QuantitySurveyor
 from borrowers.models import Borrower, Guarantor, Director, Asset, Liability
 from .validators import validate_company_borrower
 from django.db import transaction
@@ -7,6 +7,86 @@ from users.serializers import UserSerializer
 from brokers.serializers import BrokerDetailSerializer as BrokerSerializer, BDMSerializer, BranchSerializer
 from documents.serializers import DocumentSerializer, NoteSerializer, FeeSerializer, RepaymentSerializer, LedgerSerializer
 from decimal import Decimal
+
+
+class ValuerSerializer(serializers.ModelSerializer):
+    """
+    Serializer for Valuer model
+    """
+    created_by_details = UserSerializer(source='created_by', read_only=True)
+    application_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Valuer
+        fields = [
+            'id', 'company_name', 'contact_name', 'phone', 'email', 'address', 'notes', 
+            'is_active', 'created_by', 'created_by_details', 'created_at', 'updated_at',
+            'application_count'
+        ]
+        read_only_fields = ['created_by', 'created_at', 'updated_at']
+    
+    def get_application_count(self, obj):
+        """Get the number of applications using this valuer"""
+        return obj.applications.count()
+    
+    def create(self, validated_data):
+        # Set the created_by field to the current user
+        validated_data['created_by'] = self.context['request'].user
+        return super().create(validated_data)
+
+
+class QuantitySurveyorSerializer(serializers.ModelSerializer):
+    """
+    Serializer for QuantitySurveyor model
+    """
+    created_by_details = UserSerializer(source='created_by', read_only=True)
+    application_count = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = QuantitySurveyor
+        fields = [
+            'id', 'company_name', 'contact_name', 'phone', 'email', 'address', 'notes', 
+            'is_active', 'created_by', 'created_by_details', 'created_at', 'updated_at',
+            'application_count'
+        ]
+        read_only_fields = ['created_by', 'created_at', 'updated_at']
+    
+    def get_application_count(self, obj):
+        """Get the number of applications using this quantity surveyor"""
+        return obj.applications.count()
+    
+    def create(self, validated_data):
+        # Set the created_by field to the current user
+        validated_data['created_by'] = self.context['request'].user
+        return super().create(validated_data)
+
+
+class ValuerListSerializer(serializers.ModelSerializer):
+    """
+    Simplified serializer for Valuer listing (dropdown options)
+    """
+    display_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Valuer
+        fields = ['id', 'company_name', 'contact_name', 'phone', 'email', 'display_name', 'is_active']
+    
+    def get_display_name(self, obj):
+        return f"{obj.company_name} - {obj.contact_name}"
+
+
+class QuantitySurveyorListSerializer(serializers.ModelSerializer):
+    """
+    Simplified serializer for QuantitySurveyor listing (dropdown options)
+    """
+    display_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = QuantitySurveyor
+        fields = ['id', 'company_name', 'contact_name', 'phone', 'email', 'display_name', 'is_active']
+    
+    def get_display_name(self, obj):
+        return f"{obj.company_name} - {obj.contact_name}"
 
 class SolvencyEnquiriesSerializer(serializers.Serializer):
     """
@@ -353,7 +433,7 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
             'id', 'reference_number', 'loan_amount', 'loan_term', 'capitalised_interest_term',
             'interest_rate', 'purpose', 'repayment_frequency',
             'application_type', 'application_type_other', 'product_id', 'estimated_settlement_date',
-            'stage', 'branch_id', 'bd_id', 'borrowers', 'guarantors',
+            'stage', 'branch_id', 'bd_id', 'valuer', 'quantity_surveyor', 'borrowers', 'guarantors',
             'company_borrowers', 'security_properties', 'loan_requirements',
             'loan_purpose', 'additional_comments', 'prior_application',
             'prior_application_details', 'exit_strategy', 'exit_strategy_details',
@@ -536,6 +616,8 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
     broker = BrokerSerializer(read_only=True)
     bd = BDMSerializer(read_only=True)
     branch = BranchSerializer(read_only=True)
+    valuer = ValuerListSerializer(read_only=True)
+    quantity_surveyor = QuantitySurveyorListSerializer(read_only=True)
     
     # Status information
     stage_display = serializers.CharField(source='get_stage_display', read_only=True)
@@ -564,7 +646,7 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
             
             # Related entities
             'borrowers', 'guarantors', 'broker', 'bd', 'branch',
-            'security_properties', 'loan_requirements',
+            'valuer', 'quantity_surveyor', 'security_properties', 'loan_requirements',
             
             # Documents and notes
             'documents', 'notes',

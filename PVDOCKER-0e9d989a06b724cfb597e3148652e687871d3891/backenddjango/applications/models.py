@@ -13,6 +13,62 @@ def generate_reference_number():
     return f"{prefix}-{random_suffix}"
 
 
+class Valuer(models.Model):
+    """
+    Model for reusable valuer contacts
+    """
+    company_name = models.CharField(max_length=255, help_text="Name of the valuation company")
+    contact_name = models.CharField(max_length=255, help_text="Name of the contact person")
+    phone = models.CharField(max_length=20, help_text="Contact phone number")
+    email = models.EmailField(help_text="Contact email address")
+    
+    # Additional fields for better management
+    address = models.TextField(null=True, blank=True, help_text="Company address")
+    notes = models.TextField(null=True, blank=True, help_text="Additional notes about this valuer")
+    is_active = models.BooleanField(default=True, help_text="Whether this valuer is active")
+    
+    # Metadata
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='created_valuers')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['company_name', 'contact_name']
+        verbose_name = "Valuer"
+        verbose_name_plural = "Valuers"
+    
+    def __str__(self):
+        return f"{self.company_name} - {self.contact_name}"
+
+
+class QuantitySurveyor(models.Model):
+    """
+    Model for reusable quantity surveyor contacts
+    """
+    company_name = models.CharField(max_length=255, help_text="Name of the QS company")
+    contact_name = models.CharField(max_length=255, help_text="Name of the contact person")
+    phone = models.CharField(max_length=20, help_text="Contact phone number")
+    email = models.EmailField(help_text="Contact email address")
+    
+    # Additional fields for better management
+    address = models.TextField(null=True, blank=True, help_text="Company address")
+    notes = models.TextField(null=True, blank=True, help_text="Additional notes about this QS")
+    is_active = models.BooleanField(default=True, help_text="Whether this QS is active")
+    
+    # Metadata
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, related_name='created_quantity_surveyors')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['company_name', 'contact_name']
+        verbose_name = "Quantity Surveyor"
+        verbose_name_plural = "Quantity Surveyors"
+    
+    def __str__(self):
+        return f"{self.company_name} - {self.contact_name}"
+
+
 class Application(models.Model):
     """
     Model for loan applications
@@ -123,12 +179,16 @@ class Application(models.Model):
     borrowers = models.ManyToManyField('borrowers.Borrower', related_name='borrower_applications')
     guarantors = models.ManyToManyField('borrowers.Guarantor', related_name='guaranteed_applications', blank=True)
     
+    # NEW: Valuer and QS relationships
+    valuer = models.ForeignKey(Valuer, on_delete=models.SET_NULL, null=True, blank=True, related_name='applications', help_text="Selected valuer for this application")
+    quantity_surveyor = models.ForeignKey(QuantitySurveyor, on_delete=models.SET_NULL, null=True, blank=True, related_name='applications', help_text="Selected quantity surveyor for this application")
+    
     # Signature and document info
     signed_by = models.CharField(max_length=255, null=True, blank=True)
     signature_date = models.DateField(null=True, blank=True)
     uploaded_pdf_path = models.FileField(upload_to='applications/signed_forms/', null=True, blank=True)
     
-    # Valuer information (flat fields)
+    # Valuer information (legacy flat fields - kept for backward compatibility)
     valuer_company_name = models.CharField(max_length=255, null=True, blank=True)
     valuer_contact_name = models.CharField(max_length=255, null=True, blank=True)
     valuer_phone = models.CharField(max_length=20, null=True, blank=True)
@@ -136,7 +196,7 @@ class Application(models.Model):
     valuation_date = models.DateField(null=True, blank=True)
     valuation_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     
-    # Quantity Surveyor information (flat fields)
+    # Quantity Surveyor information (legacy flat fields - kept for backward compatibility)
     qs_company_name = models.CharField(max_length=255, null=True, blank=True)
     qs_contact_name = models.CharField(max_length=255, null=True, blank=True)
     qs_phone = models.CharField(max_length=20, null=True, blank=True)
