@@ -201,14 +201,22 @@ onMounted(async () => {
         isLoading.value = true;
         console.log("Fetching application data for ID:", props.applicationId);
         
-        const [err, res] = await api.application(props.applicationId);
+        const [err, res] = await api.applicationWithCascade(props.applicationId);
         if (err) {
             throw new Error(err.message || 'Failed to fetch application data');
         }
         
-        // Ensure company_borrowers is initialized as an array
+        // Ensure company_borrowers is initialized as an array with proper structure
         if (!res.company_borrowers) {
             res.company_borrowers = [];
+        } else {
+            // Ensure each company borrower has the required fields
+            res.company_borrowers.forEach(company => {
+                if (!company.annual_company_income) company.annual_company_income = "";
+                if (!company.assets) company.assets = [];
+                if (!company.liabilities) company.liabilities = [];
+                if (!company.directors) company.directors = [];
+            });
         }
         
         // Ensure borrowers is initialized as an array
@@ -346,6 +354,16 @@ const handleSave = async () => {
 
 // Add/remove handlers
 const addDirector = () => {
+    // Ensure company_borrowers array exists and has at least one element
+    if (!application.value.company_borrowers || application.value.company_borrowers.length === 0) {
+        application.value.company_borrowers = [{
+            annual_company_income: "",
+            assets: [],
+            liabilities: [],
+            directors: []
+        }];
+    }
+    
     if (!application.value.company_borrowers[0].directors) {
         application.value.company_borrowers[0].directors = [];
     }
@@ -357,10 +375,24 @@ const addDirector = () => {
 };
 
 const removeDirector = (idx) => {
-    application.value.company_borrowers[0].directors.splice(idx, 1);
+    if (application.value.company_borrowers && 
+        application.value.company_borrowers[0] && 
+        application.value.company_borrowers[0].directors) {
+        application.value.company_borrowers[0].directors.splice(idx, 1);
+    }
 };
 
 const addAsset = () => {
+    // Ensure company_borrowers array exists and has at least one element
+    if (!application.value.company_borrowers || application.value.company_borrowers.length === 0) {
+        application.value.company_borrowers = [{
+            annual_company_income: "",
+            assets: [],
+            liabilities: [],
+            directors: []
+        }];
+    }
+    
     if (!application.value.company_borrowers[0].assets) {
         application.value.company_borrowers[0].assets = [];
     }
@@ -375,10 +407,24 @@ const addAsset = () => {
 };
 
 const removeAsset = (idx) => {
-    application.value.company_borrowers[0].assets.splice(idx, 1);
+    if (application.value.company_borrowers && 
+        application.value.company_borrowers[0] && 
+        application.value.company_borrowers[0].assets) {
+        application.value.company_borrowers[0].assets.splice(idx, 1);
+    }
 };
 
 const addLiability = () => {
+    // Ensure company_borrowers array exists and has at least one element
+    if (!application.value.company_borrowers || application.value.company_borrowers.length === 0) {
+        application.value.company_borrowers = [{
+            annual_company_income: "",
+            assets: [],
+            liabilities: [],
+            directors: []
+        }];
+    }
+    
     if (!application.value.company_borrowers[0].liabilities) {
         application.value.company_borrowers[0].liabilities = [];
     }
@@ -394,7 +440,11 @@ const addLiability = () => {
 };
 
 const removeLiability = (idx) => {
-    application.value.company_borrowers[0].liabilities.splice(idx, 1);
+    if (application.value.company_borrowers && 
+        application.value.company_borrowers[0] && 
+        application.value.company_borrowers[0].liabilities) {
+        application.value.company_borrowers[0].liabilities.splice(idx, 1);
+    }
 };
 
 const addBorrower = () => {

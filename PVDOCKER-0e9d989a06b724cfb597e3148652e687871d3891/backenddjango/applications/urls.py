@@ -59,4 +59,7 @@ urlpatterns = [
     
     # Application partial update with cascade
     path('<int:pk>/partial-update-cascade/', ApplicationViewSet.as_view({'patch': 'partial_update_with_cascade'}), name='application-partial-update-cascade'),
+    
+    # Application retrieve with cascade
+    path('<int:pk>/retrieve-cascade/', ApplicationViewSet.as_view({'get': 'retrieve_with_cascade'}), name='application-retrieve-cascade'),
 ]

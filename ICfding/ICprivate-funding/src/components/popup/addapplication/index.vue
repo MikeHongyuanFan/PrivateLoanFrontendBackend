@@ -405,13 +405,13 @@
     
     // Watch for changes in computed totals and update financial_info
     watch(totalAsset, (newValue) => {
-        if (application.value.company_borrowers && application.value.company_borrowers.length > 0) {
+        if (application.value.company_borrowers && application.value.company_borrowers.length > 0 && application.value.company_borrowers[0].financial_info) {
             application.value.company_borrowers[0].financial_info.assets = newValue;
         }
     });
     
     watch(totalLiability, (newValue) => {
-        if (application.value.company_borrowers && application.value.company_borrowers.length > 0) {
+        if (application.value.company_borrowers && application.value.company_borrowers.length > 0 && application.value.company_borrowers[0].financial_info) {
             application.value.company_borrowers[0].financial_info.liabilities = newValue;
         }
     });    
@@ -718,13 +718,12 @@
                     company.industry_type = "other";
                 }
                 
-                // Format financial values
-                if (company.financial_info) {
-                    company.financial_info = {
-                        ...company.financial_info,
-                        annual_revenue: parseFloat(company.financial_info.annual_revenue) || 0,
-                        net_profit: parseFloat(company.financial_info.net_profit) || 0
-                    };
+                // Ensure annual_company_income is properly formatted
+                if (company.annual_company_income) {
+                    company.annual_company_income = parseFloat(company.annual_company_income) || 0;
+                } else if (company.financial_info && company.financial_info.annual_revenue) {
+                    // Transform from financial_info if it exists
+                    company.annual_company_income = parseFloat(company.financial_info.annual_revenue) || 0;
                 }
                 
                 // Validate assets
@@ -902,18 +901,24 @@
             // Transform guarantor assets from frontend format to backend format
             applicationData.guarantors = transformGuarantorAssets(guarantorAsset.value, applicationData.guarantors);
             
-            // Manually compute and add the financial totals for API submission
+            // Transform financial_info to backend-compatible fields for API submission
             if (applicationData.company_borrowers && applicationData.company_borrowers.length > 0) {
                 applicationData.company_borrowers.forEach(company => {
-                    // Manually calculate assets total
-                    company.financial_info.assets = company.assets
-                        .map(a => parseFloat(a.value) || 0)
-                        .reduce((sum, v) => sum + v, 0);
+                    // Convert financial_info structure to backend fields
+                    if (company.financial_info) {
+                        // Map financial_info.annual_revenue to annual_company_income
+                        if (company.financial_info.annual_revenue) {
+                            company.annual_company_income = parseFloat(company.financial_info.annual_revenue) || 0;
+                        }
+                        
+                        // Remove financial_info as backend doesn't expect it
+                        delete company.financial_info;
+                    }
                     
-                    // Manually calculate liabilities total
-                    company.financial_info.liabilities = company.liabilities
-                        .map(l => parseFloat(l.amount) || 0)
-                        .reduce((sum, v) => sum + v, 0);
+                    // Ensure annual_company_income is set
+                    if (!company.annual_company_income) {
+                        company.annual_company_income = 0;
+                    }
                 });
             }
             

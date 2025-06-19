@@ -64,13 +64,41 @@ class BorrowerListSerializer(serializers.ModelSerializer):
 
 
 class BorrowerDetailSerializer(serializers.ModelSerializer):
-    """Serializer for detailed borrower information"""
+    """Serializer for detailed borrower information with null/blank handling for minimal data creation"""
     created_by = UserSerializer(read_only=True)
     
     class Meta:
         model = Borrower
         fields = '__all__'
         read_only_fields = ['created_at', 'updated_at', 'created_by']
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'first_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'last_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'email': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'phone': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'date_of_birth': {'required': False, 'allow_null': True},
+            'tax_id': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'marital_status': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'residency_status': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'employment_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'employer_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'job_title': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'annual_income': {'required': False, 'allow_null': True},
+            'employment_duration': {'required': False, 'allow_null': True},
+            'residential_address': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'mailing_address': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'referral_source': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'tags': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'notes': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'is_company': {'required': False, 'allow_null': True},
+            'company_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'company_abn': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'company_acn': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'company_address': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'industry_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'borrower_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+        }
     
     def create(self, validated_data):
         # Set the created_by field to the current user
@@ -93,13 +121,37 @@ from drf_spectacular.utils import extend_schema_serializer
 
 @extend_schema_serializer(component_name="BorrowerGuarantor")
 class GuarantorSerializer(serializers.ModelSerializer):
-    """Serializer for guarantor information"""
+    """Serializer for guarantor information with null/blank handling for minimal data creation"""
     created_by = UserSerializer(read_only=True)
     
     class Meta:
         model = Guarantor
         fields = '__all__'
         read_only_fields = ['created_at', 'updated_at', 'created_by']
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'guarantor_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'first_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'last_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'company_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'email': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'mobile': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'home_phone': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'date_of_birth': {'required': False, 'allow_null': True},
+            'address_street_no': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'address_street_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'address_suburb': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'address_state': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'address_postcode': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'employment_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'employer_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'annual_income': {'required': False, 'allow_null': True},
+            'company_abn': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'company_acn': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'borrower': {'required': False, 'allow_null': True},
+            'application': {'required': False, 'allow_null': True},
+            'notes': {'required': False, 'allow_null': True, 'allow_blank': True},
+        }
     
     def create(self, validated_data):
         # Set the created_by field to the current user
@@ -109,15 +161,18 @@ class GuarantorSerializer(serializers.ModelSerializer):
     
     def validate(self, data):
         """
-        Validate that the appropriate fields are provided based on guarantor type
+        Validate that the appropriate fields are provided based on guarantor type - made optional for minimal data creation
         """
         guarantor_type = data.get('guarantor_type')
         
+        # Only validate if guarantor_type is provided - allow minimal data creation
         if guarantor_type == 'individual':
-            if not data.get('first_name') or not data.get('last_name'):
-                raise serializers.ValidationError("First name and last name are required for individual guarantors")
+            if not data.get('first_name') and not data.get('last_name'):
+                # Allow creation with minimal data - no strict validation for minimal data scenarios
+                pass
         elif guarantor_type == 'company':
             if not data.get('company_name'):
-                raise serializers.ValidationError("Company name is required for company guarantors")
+                # Allow creation with minimal data - no strict validation for minimal data scenarios
+                pass
         
         return data

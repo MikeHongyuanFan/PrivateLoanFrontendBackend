@@ -4,7 +4,7 @@ from .models import Document, Note, Fee, Repayment, Ledger, NoteComment
 
 class DocumentSerializer(serializers.ModelSerializer):
     """
-    Serializer for documents
+    Serializer for documents with null/blank handling for minimal data creation
     """
     document_type_display = serializers.CharField(source='get_document_type_display', read_only=True)
     created_by_name = serializers.StringRelatedField(source='created_by')
@@ -14,6 +14,21 @@ class DocumentSerializer(serializers.ModelSerializer):
         model = Document
         fields = '__all__'
         read_only_fields = ['file_name', 'file_size', 'file_type', 'version', 'created_by', 'created_at', 'updated_at']
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'title': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'description': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'document_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'file': {'required': False, 'allow_null': True},
+            'application': {'required': False, 'allow_null': True},
+            'borrower': {'required': False, 'allow_null': True},
+            'guarantor': {'required': False, 'allow_null': True},
+            'uploaded_by': {'required': False, 'allow_null': True},
+            'tags': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'notes': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'is_signed': {'required': False, 'allow_null': True},
+            'signed_date': {'required': False, 'allow_null': True},
+        }
     
     def get_file_url(self, obj) -> str:
         if obj.file:
@@ -25,7 +40,7 @@ class DocumentSerializer(serializers.ModelSerializer):
 
 class NoteCommentSerializer(serializers.ModelSerializer):
     """
-    Serializer for note comments
+    Serializer for note comments with null/blank handling for minimal data creation
     """
     created_by_name = serializers.StringRelatedField(source='created_by')
     
@@ -33,11 +48,16 @@ class NoteCommentSerializer(serializers.ModelSerializer):
         model = NoteComment
         fields = ['id', 'note', 'content', 'created_by', 'created_by_name', 'created_at', 'updated_at']
         read_only_fields = ['created_by', 'created_at', 'updated_at']
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'content': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'note': {'required': False, 'allow_null': True},
+        }
 
 
 class NoteSerializer(serializers.ModelSerializer):
     """
-    Serializer for notes
+    Serializer for notes with null/blank handling for minimal data creation
     """
     created_by_name = serializers.StringRelatedField(source='created_by')
     assigned_to_name = serializers.StringRelatedField(source='assigned_to')
@@ -47,11 +67,25 @@ class NoteSerializer(serializers.ModelSerializer):
         model = Note
         fields = '__all__'
         read_only_fields = ['created_by', 'created_at', 'updated_at']
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'title': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'content': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'priority': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'category': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'application': {'required': False, 'allow_null': True},
+            'borrower': {'required': False, 'allow_null': True},
+            'guarantor': {'required': False, 'allow_null': True},
+            'assigned_to': {'required': False, 'allow_null': True},
+            'due_date': {'required': False, 'allow_null': True},
+            'is_completed': {'required': False, 'allow_null': True},
+            'completed_date': {'required': False, 'allow_null': True},
+        }
 
 
 class FeeSerializer(serializers.ModelSerializer):
     """
-    Serializer for fees
+    Serializer for fees with null/blank handling for minimal data creation
     """
     fee_type_display = serializers.CharField(source='get_fee_type_display', read_only=True)
     created_by_name = serializers.StringRelatedField(source='created_by')
@@ -62,6 +96,19 @@ class FeeSerializer(serializers.ModelSerializer):
         model = Fee
         fields = '__all__'
         read_only_fields = ['created_by', 'created_at', 'updated_at']
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'fee_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'amount': {'required': False, 'allow_null': True},
+            'description': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'due_date': {'required': False, 'allow_null': True},
+            'paid_date': {'required': False, 'allow_null': True},
+            'paid_amount': {'required': False, 'allow_null': True},
+            'invoice': {'required': False, 'allow_null': True},
+            'application': {'required': False, 'allow_null': True},
+            'borrower': {'required': False, 'allow_null': True},
+            'notes': {'required': False, 'allow_null': True, 'allow_blank': True},
+        }
     
     def get_status(self, obj) -> str:
         if obj.paid_date:
@@ -78,7 +125,7 @@ class FeeSerializer(serializers.ModelSerializer):
 
 class RepaymentSerializer(serializers.ModelSerializer):
     """
-    Serializer for repayments
+    Serializer for repayments with null/blank handling for minimal data creation
     """
     created_by_name = serializers.StringRelatedField(source='created_by')
     status = serializers.SerializerMethodField()
@@ -88,6 +135,18 @@ class RepaymentSerializer(serializers.ModelSerializer):
         model = Repayment
         fields = '__all__'
         read_only_fields = ['created_by', 'created_at', 'updated_at', 'reminder_sent', 'overdue_3_day_sent', 'overdue_7_day_sent', 'overdue_10_day_sent']
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'amount': {'required': False, 'allow_null': True},
+            'due_date': {'required': False, 'allow_null': True},
+            'paid_date': {'required': False, 'allow_null': True},
+            'paid_amount': {'required': False, 'allow_null': True},
+            'description': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'payment_method': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'invoice': {'required': False, 'allow_null': True},
+            'application': {'required': False, 'allow_null': True},
+            'notes': {'required': False, 'allow_null': True, 'allow_blank': True},
+        }
     
     def get_status(self, obj) -> str:
         if obj.paid_date:
@@ -117,7 +176,7 @@ class RepaymentSerializer(serializers.ModelSerializer):
 
 class LedgerSerializer(serializers.ModelSerializer):
     """
-    Serializer for ledger entries
+    Serializer for ledger entries with null/blank handling for minimal data creation
     """
     transaction_type_display = serializers.CharField(source='get_transaction_type_display', read_only=True)
     related_fee_type = serializers.CharField(source='related_fee.get_fee_type_display', read_only=True)
@@ -130,6 +189,16 @@ class LedgerSerializer(serializers.ModelSerializer):
             'amount', 'description', 'transaction_date', 'related_fee',
             'related_fee_type', 'related_repayment', 'created_by', 'created_by_name', 'created_at'
         ]
+        extra_kwargs = {
+            # Make most fields optional and allow null/blank values for minimal data creation
+            'transaction_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'amount': {'required': False, 'allow_null': True},
+            'description': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'transaction_date': {'required': False, 'allow_null': True},
+            'application': {'required': False, 'allow_null': True},
+            'related_fee': {'required': False, 'allow_null': True},
+            'related_repayment': {'required': False, 'allow_null': True},
+        }
 
 
 class ApplicationLedgerSerializer(serializers.Serializer):
