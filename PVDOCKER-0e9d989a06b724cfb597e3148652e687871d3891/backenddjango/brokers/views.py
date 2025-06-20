@@ -8,7 +8,10 @@ from .serializers import (
     BrokerListSerializer,
     BrokerDetailSerializer,
     BranchSerializer,
-    BDMSerializer
+    BDMSerializer,
+    BrokerDropdownSerializer,
+    BDMDropdownSerializer,
+    BranchDropdownSerializer
 )
 from .filters import BrokerFilter, BranchFilter, BDMFilter
 from users.permissions import IsAdmin, IsAdminOrBD
@@ -54,6 +57,15 @@ class BranchViewSet(viewsets.ModelViewSet):
         branch = self.get_object()
         bdms = branch.branch_bdms.all()
         serializer = BDMSerializer(bdms, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'])
+    def dropdown(self, request):
+        """
+        Get all branches in dropdown format for application creation
+        """
+        queryset = self.get_queryset().filter(is_active=True) if hasattr(Branch, 'is_active') else self.get_queryset()
+        serializer = BranchDropdownSerializer(queryset, many=True)
         return Response(serializer.data)
 
 
@@ -140,6 +152,18 @@ class BrokerViewSet(viewsets.ModelViewSet):
             'applications_by_stage': stage_stats,
             'applications_by_type': type_stats
         })
+    
+    @action(detail=False, methods=['get'])
+    def dropdown(self, request):
+        """
+        Get all brokers in dropdown format for application creation
+        """
+        queryset = self.get_queryset()
+        # For admins, show all brokers; for others, follow existing permissions
+        if request.user.role == 'admin':
+            queryset = Broker.objects.all().order_by('name')
+        serializer = BrokerDropdownSerializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class BDMViewSet(viewsets.ModelViewSet):
@@ -258,3 +282,15 @@ class BDMViewSet(viewsets.ModelViewSet):
         )
         
         return Response({"message": "Application claimed successfully"}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['get'])
+    def dropdown(self, request):
+        """
+        Get all BDMs in dropdown format for application creation
+        """
+        queryset = self.get_queryset()
+        # For admins, show all BDMs; for others, follow existing permissions
+        if request.user.role == 'admin':
+            queryset = BDM.objects.all().order_by('name')
+        serializer = BDMDropdownSerializer(queryset, many=True)
+        return Response(serializer.data)

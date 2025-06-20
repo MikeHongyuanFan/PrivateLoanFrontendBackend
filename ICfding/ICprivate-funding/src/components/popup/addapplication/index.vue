@@ -21,6 +21,15 @@
         <el-scrollbar>
             <div class="popup_content">
                 <el-collapse v-model="activeNames" accordion style="--el-collapse-border-color: none;">
+                    <el-collapse-item name="0">
+                        <template #title>
+                            <div class="title">
+                                <el-icon style="font-size: 20px" :color="isBrokerSelectionValid ? '#2984DE' : '#E1E1E1'"><SuccessFilled /></el-icon>
+                                <p :style="{color: isBrokerSelectionValid ? '#2984DE' : '#272727'}">Broker & BDM Assignment</p>
+                            </div>
+                        </template>
+                        <BrokerSelection :selection="application" @update:selection="updateBrokerSelection"></BrokerSelection>
+                    </el-collapse-item>
                     <el-collapse-item name="1">
                         <template #title>
                             <div class="title">
@@ -28,7 +37,7 @@
                                 <p :style="{color: isCompanyValid ? '#2984DE' : '#272727'}">Company Borrower Details</p>
                             </div>
                         </template>
-                        <Company :company="application.company_borrowers" @add="addDirector" @remove="removeDirector"></Company>
+                        <Company :company="application.company_borrowers" @add="addCompany" @remove="removeCompany"></Company>
                     </el-collapse-item>
                     <el-collapse-item name="2">
                         <template #title>
@@ -37,13 +46,7 @@
                                 <p :style="{color: isCompanyAssetValid ? '#2984DE' : '#272727'}">Company Assets & Liabilities</p>
                             </div>
                         </template>
-                        <CompanyAssets 
-                            :company="application.company_borrowers"
-                            @addAsset="addAsset"
-                            @removeAsset="removeAsset"
-                            @addLiability="addLiability"
-                            @removeLiability="removeLiability"
-                        ></CompanyAssets>
+                        <CompanyAssets :companyasset="application.company_borrowers" @add="addAsset" @remove="removeAsset" @addLiability="addLiability" @removeLiability="removeLiability"></CompanyAssets>
                     </el-collapse-item>
                     <el-collapse-item name="3">
                         <template #title>
@@ -106,17 +109,13 @@
                                 <p :style="{color: isRequirementValid ? '#2984DE' : '#272727'}">Loan Requirements</p>
                             </div>
                         </template>
-                        <LoanRequirement 
-                            :requirement="application.loan_requirements"
-                            @add="addRequirement"
-                            @remove="removeRequirement"
-                        ></LoanRequirement>
+                        <LoanRequirement :requirement="application.loan_requirements" @add="addRequirement" @remove="removeRequirement"></LoanRequirement>
                     </el-collapse-item>
                     <el-collapse-item name="10">
                         <template #title>
                             <div class="title">
-                                <el-icon style="font-size: 20px" :color="isExitValid ? '#2984DE' : '#E1E1E1'"><SuccessFilled /></el-icon>
-                                <p :style="{color: isExitValid ? '#2984DE' : '#272727'}">Funding Calculation Input</p>
+                                <el-icon style="font-size: 20px" :color="true ? '#2984DE' : '#E1E1E1'"><SuccessFilled /></el-icon>
+                                <p :style="{color: true ? '#2984DE' : '#272727'}">Funding Calculation</p>
                             </div>
                         </template>
                         <Calculation :detail="application.funding_calculation_input"></Calculation>
@@ -166,6 +165,7 @@
     import Save from '@/components/buttons/save.vue';
     import Next from '@/components/buttons/next.vue';
     import Previous from '@/components/buttons/previous.vue';
+    import BrokerSelection from './brokerselection.vue';
 
     const props = defineProps({
         action: String
@@ -173,31 +173,32 @@
     
     console.log("AddApplication component initialized with props:", props);
     
-    const activeNames = ref("1")
+    const activeNames = ref("0")  // Start with broker selection (step 0)
     const isSubmitting = ref(false)
     
     // Step navigation logic
-    const totalSteps = 11
-    const currentStep = computed(() => parseInt(activeNames.value) || 1)
-    const isFirstStep = computed(() => currentStep.value === 1)
-    const isLastStep = computed(() => currentStep.value === totalSteps)
+    const totalSteps = 12  // Updated to include broker selection step
+    const currentStep = computed(() => parseInt(activeNames.value) || 0)
+    const isFirstStep = computed(() => currentStep.value === 0)
+    const isLastStep = computed(() => currentStep.value === totalSteps - 1)
     
     // Step names for better UX
     const stepNames = [
-        'Company Details',
-        'Company Assets',
-        'Company Liabilities', 
-        'General Solvency',
+        'Broker & BDM Assignment',
+        'Company Borrower Details',
+        'Company Assets & Liabilities', 
+        'Individual Borrower Details',
+        'General Solvency Enquiries',
         'Guarantor Details',
-        'Guarantor Assets',
-        'Security Properties',
-        'Loan Details',
+        'Guarantor Assets & Liability',
+        'Proposed Security Details',
+        'Loan Details & Purpose',
         'Loan Requirements',
-        'Funding Calculation',
+        'Funding Calculation', 
         'Exit Strategy'
     ]
     
-    const currentStepName = computed(() => stepNames[currentStep.value - 1] || 'Unknown Step')
+    const currentStepName = computed(() => stepNames[currentStep.value] || 'Unknown Step')
     
     const createDirector = () => {
         return {
@@ -343,6 +344,9 @@
         product_id: "",
         estimated_settlement_date: "",
         stage: "inquiry",
+        broker: null,
+        bd_id: null,
+        branch_id: null,
         borrowers: [createBorrower()],
         guarantors: [createGuarantor()],
         company_borrowers: [createCompany()],
@@ -472,11 +476,11 @@
     const handleMinimize = () => {
         emit('minimize')
     }
-    const addDirector = () => {
-        application.value.company_borrowers[0].directors.push(createDirector())
+    const addCompany = () => {
+        application.value.company_borrowers.push(createCompany())
     }
-    const removeDirector = (idx) => {
-        application.value.company_borrowers[0].directors.splice(idx, 1)
+    const removeCompany = (idx) => {
+        application.value.company_borrowers.splice(idx, 1)
     }
     const addAsset = () => {
         application.value.company_borrowers[0].assets.push(createCompanyAsset())
@@ -514,6 +518,25 @@
     const removeRequirement = () => {
         application.value.loan_requirements.pop()
     }
+    
+    // Broker selection validation and handler
+    const isBrokerSelectionValid = computed(() => {
+        // Broker is required for application creation
+        return application.value.broker !== null && application.value.broker !== undefined;
+    })
+    
+    const updateBrokerSelection = (selection) => {
+        // Update the application object with broker selection
+        application.value.broker = selection.broker;
+        application.value.bd_id = selection.bd_id;
+        application.value.branch_id = selection.branch_id;
+        console.log('Broker selection updated:', {
+            broker: application.value.broker,
+            bd_id: application.value.bd_id,
+            branch_id: application.value.branch_id
+        });
+    }
+    
     const isCompanyValid = computed(() => {
         // All fields are now optional - always return true if section has any data
         if (!application.value?.company_borrowers?.[0]) return true;
@@ -867,7 +890,7 @@
 
     // Optional: Auto-advance to next step when current section is valid
     const goToStep = (stepNumber) => {
-        if (stepNumber >= 1 && stepNumber <= totalSteps) {
+        if (stepNumber >= 0 && stepNumber < totalSteps) {
             activeNames.value = stepNumber.toString();
             console.log(`Navigated to step ${stepNumber}`);
         }

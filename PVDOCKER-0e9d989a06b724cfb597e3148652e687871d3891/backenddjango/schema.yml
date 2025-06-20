@@ -3097,6 +3097,22 @@ paths:
               schema:
                 $ref: '#/components/schemas/BDM'
           description: ''
+  /api/brokers/bdms/dropdown/:
+    get:
+      operationId: brokers_bdms_dropdown_retrieve
+      description: Get all BDMs in dropdown format for application creation
+      tags:
+      - brokers
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BDM'
+          description: ''
   /api/brokers/branches/:
     get:
       operationId: brokers_branches_list
@@ -3304,6 +3320,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Branch'
+          description: ''
+  /api/brokers/branches/dropdown/:
+    get:
+      operationId: brokers_branches_dropdown_retrieve
+      description: Get all branches in dropdown format for application creation
+      tags:
+      - brokers
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Branch'
+          description: ''
+  /api/brokers/dropdown/:
+    get:
+      operationId: brokers_dropdown_retrieve
+      description: Get all brokers in dropdown format for application creation
+      tags:
+      - brokers
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrokerDetail'
           description: ''
   /api/documents/applications/{application_id}/ledger/:
     get:
@@ -5852,16 +5900,10 @@ components:
           - $ref: '#/components/schemas/StageEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
-        branch_id:
+        broker:
           type: integer
           nullable: true
-          description: Branch associated with this application
-          readOnly: true
-        bd_id:
-          type: integer
-          nullable: true
-          description: Business Development Manager for this application
-          readOnly: true
+          description: Broker handling this application
         valuer:
           type: integer
           nullable: true
@@ -6020,8 +6062,6 @@ components:
           nullable: true
           description: Additional details for any 'Yes' answers to solvency enquiries
       required:
-      - bd_id
-      - branch_id
       - id
     ApplicationCreateRequest:
       type: object
@@ -6133,6 +6173,18 @@ components:
           - $ref: '#/components/schemas/StageEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        broker:
+          type: integer
+          nullable: true
+          description: Broker handling this application
+        branch_id:
+          type: integer
+          writeOnly: true
+          nullable: true
+        bd_id:
+          type: integer
+          writeOnly: true
+          nullable: true
         valuer:
           type: integer
           nullable: true
@@ -6825,6 +6877,14 @@ components:
           type: string
           description: Get the BDM name
           readOnly: true
+        broker_name:
+          type: string
+          description: Get the broker name
+          readOnly: true
+        branch_name:
+          type: string
+          description: Get the branch name
+          readOnly: true
         guarantor_name:
           type: string
           description: Get the guarantor name(s)
@@ -6899,6 +6959,8 @@ components:
       - bdm_name
       - borrower_count
       - borrower_name
+      - branch_name
+      - broker_name
       - guarantor_name
       - id
       - product_name
@@ -8399,6 +8461,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CompanyAsset'
+        liabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/Liability'
       required:
       - id
     CompanyBorrowerRequest:
@@ -8465,6 +8531,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/CompanyAssetRequest'
+        liabilities:
+          type: array
+          items:
+            $ref: '#/components/schemas/LiabilityRequest'
     Director:
       type: object
       description: Serializer for company directors with optional fields for minimal

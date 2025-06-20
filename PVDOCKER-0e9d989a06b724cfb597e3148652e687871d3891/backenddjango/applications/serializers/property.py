@@ -43,6 +43,55 @@ class SecurityPropertySerializer(serializers.ModelSerializer):
             'building_size': {'required': False, 'allow_null': True},
             'land_size': {'required': False, 'allow_null': True},
         }
+        
+    def to_internal_value(self, data):
+        """
+        Transform incoming data to ensure numeric fields are properly converted.
+        This handles the case where frontend sends string values that need to be integers.
+        """
+        # Create a copy of the data to avoid modifying the original
+        data = dict(data)
+        
+        # Convert bedrooms, bathrooms, car_spaces from string to integer or null
+        for field in ['bedrooms', 'bathrooms', 'car_spaces']:
+            if field in data:
+                value = data[field]
+                if value == "" or value is None:
+                    data[field] = None
+                elif isinstance(value, str):
+                    try:
+                        data[field] = int(value) if value.strip() else None
+                    except (ValueError, AttributeError):
+                        # Let the parent validation handle the error
+                        pass
+        
+        # Convert decimal fields from string to decimal or null
+        for field in ['estimated_value', 'purchase_price', 'current_debt_position', 'building_size', 'land_size']:
+            if field in data:
+                value = data[field]
+                if value == "" or value is None:
+                    data[field] = None
+                elif isinstance(value, str):
+                    try:
+                        data[field] = float(value) if value.strip() else None
+                    except (ValueError, AttributeError):
+                        # Let the parent validation handle the error
+                        pass
+        
+        # Convert boolean fields from string to boolean or null
+        for field in ['is_single_story', 'has_garage', 'has_carport', 'has_off_street_parking']:
+            if field in data:
+                value = data[field]
+                if value == "" or value is None:
+                    data[field] = None
+                elif isinstance(value, str):
+                    if value.lower() in ['true', '1', 'yes']:
+                        data[field] = True
+                    elif value.lower() in ['false', '0', 'no']:
+                        data[field] = False
+                    # Otherwise let parent validation handle it
+        
+        return super().to_internal_value(data)
 
 
 class LoanRequirementSerializer(serializers.ModelSerializer):

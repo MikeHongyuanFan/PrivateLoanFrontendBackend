@@ -123,13 +123,17 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
     # Add funding calculation input fields
     funding_calculation_input = FundingCalculationInputSerializer(required=False)
     
+    # CRITICAL FIX: Explicitly define branch_id and bd_id as write-only fields
+    branch_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    bd_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    
     class Meta:
         model = Application
         fields = [
             'id', 'reference_number', 'loan_amount', 'loan_term', 'capitalised_interest_term',
             'interest_rate', 'purpose', 'repayment_frequency',
             'application_type', 'application_type_other', 'product_id', 'estimated_settlement_date',
-            'stage', 'branch_id', 'bd_id', 'valuer', 'quantity_surveyor', 'borrowers', 'guarantors',
+            'stage', 'broker', 'branch_id', 'bd_id', 'valuer', 'quantity_surveyor', 'borrowers', 'guarantors',
             'company_borrowers', 'security_properties', 'loan_requirements',
             'loan_purpose', 'additional_comments', 'prior_application',
             'prior_application_details', 'exit_strategy', 'exit_strategy_details',
@@ -155,6 +159,7 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
             'product_id': {'required': False, 'allow_null': True, 'allow_blank': True},
             'estimated_settlement_date': {'required': False, 'allow_null': True},
             'stage': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'broker': {'required': False, 'allow_null': True},
             'branch_id': {'required': False, 'allow_null': True},
             'bd_id': {'required': False, 'allow_null': True},
             'valuer': {'required': False, 'allow_null': True},
@@ -184,6 +189,66 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
             'solvency_enquiries_details': {'required': False, 'allow_null': True, 'allow_blank': True},
         }
     
+    def validate_broker(self, value):
+        """
+        Validate that the broker ID exists in the database
+        """
+        if value is not None:
+            from brokers.models import Broker
+            try:
+                Broker.objects.get(id=value.id if hasattr(value, 'id') else value)
+            except Broker.DoesNotExist:
+                raise serializers.ValidationError(f"Broker with ID {value.id if hasattr(value, 'id') else value} does not exist.")
+        return value
+    
+    def validate_bd_id(self, value):
+        """
+        Validate that the BDM ID exists in the database
+        """
+        if value is not None:
+            from brokers.models import BDM
+            try:
+                BDM.objects.get(id=value)
+            except BDM.DoesNotExist:
+                raise serializers.ValidationError(f"BDM with ID {value} does not exist.")
+        return value
+    
+    def validate_branch_id(self, value):
+        """
+        Validate that the branch ID exists in the database
+        """
+        if value is not None:
+            from brokers.models import Branch
+            try:
+                Branch.objects.get(id=value)
+            except Branch.DoesNotExist:
+                raise serializers.ValidationError(f"Branch with ID {value} does not exist.")
+        return value
+    
+    def validate_valuer(self, value):
+        """
+        Validate that the valuer ID exists in the database
+        """
+        if value is not None:
+            from ..models import Valuer
+            try:
+                Valuer.objects.get(id=value.id if hasattr(value, 'id') else value)
+            except Valuer.DoesNotExist:
+                raise serializers.ValidationError(f"Valuer with ID {value.id if hasattr(value, 'id') else value} does not exist.")
+        return value
+    
+    def validate_quantity_surveyor(self, value):
+        """
+        Validate that the quantity surveyor ID exists in the database
+        """
+        if value is not None:
+            from ..models import QuantitySurveyor
+            try:
+                QuantitySurveyor.objects.get(id=value.id if hasattr(value, 'id') else value)
+            except QuantitySurveyor.DoesNotExist:
+                raise serializers.ValidationError(f"Quantity Surveyor with ID {value.id if hasattr(value, 'id') else value} does not exist.")
+        return value
+
     def create(self, validated_data):
         borrowers_data = validated_data.pop('borrowers', [])
         guarantors_data = validated_data.pop('guarantors', [])
@@ -194,6 +259,28 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
         
         # Process new_borrowers data if present in the request
         new_borrowers = validated_data.pop('new_borrowers', [])
+        
+        # CRITICAL FIX: Handle branch_id and bd_id conversion to foreign key objects
+        branch_id = validated_data.pop('branch_id', None)
+        bd_id = validated_data.pop('bd_id', None)
+        
+        # Convert branch_id to branch object
+        if branch_id:
+            from brokers.models import Branch
+            try:
+                branch = Branch.objects.get(id=branch_id)
+                validated_data['branch'] = branch
+            except Branch.DoesNotExist:
+                pass  # Already validated in validate_branch_id
+        
+        # Convert bd_id to bd object  
+        if bd_id:
+            from brokers.models import BDM
+            try:
+                bd = BDM.objects.get(id=bd_id)
+                validated_data['bd'] = bd
+            except BDM.DoesNotExist:
+                pass  # Already validated in validate_bd_id
         
         # Clean and validate company borrowers data
         cleaned_company_borrowers = []
@@ -497,6 +584,8 @@ class ApplicationListSerializer(serializers.ModelSerializer):
     borrower_name = serializers.SerializerMethodField()
     guarantor_name = serializers.SerializerMethodField()
     bdm_name = serializers.SerializerMethodField()
+    broker_name = serializers.SerializerMethodField()
+    branch_name = serializers.SerializerMethodField()
     security_address = serializers.SerializerMethodField()
     purpose = serializers.CharField(source='loan_purpose', read_only=True)
     product_name = serializers.SerializerMethodField()
@@ -507,7 +596,7 @@ class ApplicationListSerializer(serializers.ModelSerializer):
         model = Application
         fields = [
             'id', 'reference_number', 'borrower_name', 'stage', 'stage_display',
-            'bdm_name', 'guarantor_name', 'purpose', 'product_name', 'security_address',
+            'bdm_name', 'broker_name', 'branch_name', 'guarantor_name', 'purpose', 'product_name', 'security_address',
             'loan_amount', 'loan_term', 'capitalised_interest_term', 'estimated_settlement_date', 'updated_at', 'created_at',
             'application_type', 'borrower_count', 'solvency_issues'
         ]
@@ -555,6 +644,18 @@ class ApplicationListSerializer(serializers.ModelSerializer):
         """Get the BDM name"""
         if hasattr(obj, 'bd') and obj.bd:
             return obj.bd.name
+        return ""
+    
+    def get_broker_name(self, obj) -> str:
+        """Get the broker name"""
+        if hasattr(obj, 'broker') and obj.broker:
+            return obj.broker.name
+        return ""
+    
+    def get_branch_name(self, obj) -> str:
+        """Get the branch name"""
+        if hasattr(obj, 'branch') and obj.branch:
+            return obj.branch.name
         return ""
     
     def get_security_address(self, obj) -> str:
@@ -619,13 +720,17 @@ class ApplicationPartialUpdateSerializer(serializers.ModelSerializer):
     # Add funding calculation input fields
     funding_calculation_input = FundingCalculationInputSerializer(required=False)
     
+    # CRITICAL FIX: Explicitly define branch_id and bd_id as write-only fields
+    branch_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    bd_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
+    
     class Meta:
         model = Application
         fields = [
             'id', 'reference_number', 'loan_amount', 'loan_term', 'capitalised_interest_term',
             'interest_rate', 'purpose', 'repayment_frequency',
             'application_type', 'application_type_other', 'product_id', 'estimated_settlement_date',
-            'stage', 'branch_id', 'bd_id', 'valuer', 'quantity_surveyor', 'borrowers', 'guarantors',
+            'stage', 'broker', 'branch_id', 'bd_id', 'valuer', 'quantity_surveyor', 'borrowers', 'guarantors',
             'company_borrowers', 'security_properties', 'loan_requirements',
             'loan_purpose', 'additional_comments', 'prior_application',
             'prior_application_details', 'exit_strategy', 'exit_strategy_details',
@@ -643,7 +748,7 @@ class ApplicationPartialUpdateSerializer(serializers.ModelSerializer):
                 'id', 'reference_number', 'loan_amount', 'loan_term', 'capitalised_interest_term',
                 'interest_rate', 'purpose', 'repayment_frequency',
                 'application_type', 'application_type_other', 'product_id', 'estimated_settlement_date',
-                'stage', 'branch_id', 'bd_id', 'valuer', 'quantity_surveyor',
+                'stage', 'broker', 'branch_id', 'bd_id', 'valuer', 'quantity_surveyor',
                 'loan_purpose', 'additional_comments', 'prior_application',
                 'prior_application_details', 'exit_strategy', 'exit_strategy_details',
                 'valuer_company_name', 'valuer_contact_name', 'valuer_phone',
@@ -654,6 +759,66 @@ class ApplicationPartialUpdateSerializer(serializers.ModelSerializer):
             ]
         }
     
+    def validate_broker(self, value):
+        """
+        Validate that the broker ID exists in the database
+        """
+        if value is not None:
+            from brokers.models import Broker
+            try:
+                Broker.objects.get(id=value.id if hasattr(value, 'id') else value)
+            except Broker.DoesNotExist:
+                raise serializers.ValidationError(f"Broker with ID {value.id if hasattr(value, 'id') else value} does not exist.")
+        return value
+    
+    def validate_bd_id(self, value):
+        """
+        Validate that the BDM ID exists in the database
+        """
+        if value is not None:
+            from brokers.models import BDM
+            try:
+                BDM.objects.get(id=value)
+            except BDM.DoesNotExist:
+                raise serializers.ValidationError(f"BDM with ID {value} does not exist.")
+        return value
+    
+    def validate_branch_id(self, value):
+        """
+        Validate that the branch ID exists in the database
+        """
+        if value is not None:
+            from brokers.models import Branch
+            try:
+                Branch.objects.get(id=value)
+            except Branch.DoesNotExist:
+                raise serializers.ValidationError(f"Branch with ID {value} does not exist.")
+        return value
+    
+    def validate_valuer(self, value):
+        """
+        Validate that the valuer ID exists in the database
+        """
+        if value is not None:
+            from ..models import Valuer
+            try:
+                Valuer.objects.get(id=value.id if hasattr(value, 'id') else value)
+            except Valuer.DoesNotExist:
+                raise serializers.ValidationError(f"Valuer with ID {value.id if hasattr(value, 'id') else value} does not exist.")
+        return value
+    
+    def validate_quantity_surveyor(self, value):
+        """
+        Validate that the quantity surveyor ID exists in the database
+        """
+        if value is not None:
+            from ..models import QuantitySurveyor
+            try:
+                QuantitySurveyor.objects.get(id=value.id if hasattr(value, 'id') else value)
+            except QuantitySurveyor.DoesNotExist:
+                raise serializers.ValidationError(f"Quantity Surveyor with ID {value.id if hasattr(value, 'id') else value} does not exist.")
+        return value
+
     def update(self, instance, validated_data):
         """
         Update the application with cascade support for related objects
@@ -664,6 +829,28 @@ class ApplicationPartialUpdateSerializer(serializers.ModelSerializer):
         security_properties_data = validated_data.pop('security_properties', None)
         loan_requirements_data = validated_data.pop('loan_requirements', None)
         funding_calculation_input = validated_data.pop('funding_calculation_input', None)
+        
+        # CRITICAL FIX: Handle branch_id and bd_id conversion to foreign key objects for updates
+        branch_id = validated_data.pop('branch_id', None)
+        bd_id = validated_data.pop('bd_id', None)
+        
+        # Convert branch_id to branch object
+        if branch_id:
+            from brokers.models import Branch
+            try:
+                branch = Branch.objects.get(id=branch_id)
+                validated_data['branch'] = branch
+            except Branch.DoesNotExist:
+                pass  # Already validated in validate_branch_id
+        
+        # Convert bd_id to bd object  
+        if bd_id:
+            from brokers.models import BDM
+            try:
+                bd = BDM.objects.get(id=bd_id)
+                validated_data['bd'] = bd
+            except BDM.DoesNotExist:
+                pass  # Already validated in validate_bd_id
         
         # Use transaction to ensure atomicity
         with transaction.atomic():
@@ -696,51 +883,201 @@ class ApplicationPartialUpdateSerializer(serializers.ModelSerializer):
                         **loan_requirement_data
                     )
             
-            # Handle borrowers update (many-to-many)
+            # CRITICAL FIX: Handle borrowers and company borrowers update with enhanced validation and error recovery
+            individual_borrowers_to_keep = []
+            company_borrowers_to_keep = []
+            
+            # STEP 1: Get existing borrowers as fallback
+            existing_individual_borrowers = list(instance.borrowers.filter(is_company=False))
+            existing_company_borrowers = list(instance.borrowers.filter(is_company=True))
+            
+            import logging
+            logger = logging.getLogger(__name__)
+            
+            # STEP 2: Process individual borrowers data with enhanced error handling
             if borrowers_data is not None:
+                logger.info(f"Processing {len(borrowers_data)} individual borrowers for application {instance.id}")
+                
                 try:
-                    # Track borrowers to keep
-                    borrowers_to_keep = []
-                    
-                    # Process borrowers data
-                    for borrower_data in borrowers_data:
+                    for idx, borrower_data in enumerate(borrowers_data):
                         if not borrower_data:  # Skip empty dictionaries
+                            logger.warning(f"Skipping empty borrower data at index {idx}")
                             continue
                             
-                        if 'id' in borrower_data and borrower_data['id']:
-                            # Update existing borrower
-                            try:
+                        try:
+                            if 'id' in borrower_data and borrower_data['id']:
+                                # Update existing borrower
                                 borrower_id = borrower_data['id']
-                                borrower = Borrower.objects.get(id=borrower_id)
-                                # Update borrower with provided data
-                                for attr, value in borrower_data.items():
-                                    if attr != 'id' and hasattr(borrower, attr):  # Skip the ID field and validate attribute
-                                        setattr(borrower, attr, value)
-                                borrower.save()
-                                borrowers_to_keep.append(borrower)
-                            except Borrower.DoesNotExist:
-                                # Create new borrower if ID doesn't exist
-                                new_data = {k: v for k, v in borrower_data.items() if k != 'id'}
-                                if new_data:  # Only create if there's actual data
-                                    borrower_serializer = BorrowerSerializer(data=new_data)
+                                logger.info(f"Updating existing individual borrower ID: {borrower_id}")
+                                
+                                try:
+                                    borrower = Borrower.objects.get(id=borrower_id, is_company=False)
+                                    
+                                    # Validate this borrower belongs to this application or is being added
+                                    if borrower not in existing_individual_borrowers:
+                                        logger.warning(f"Borrower {borrower_id} not currently associated with application {instance.id}, adding...")
+                                    
+                                    # Update borrower with provided data using serializer for proper validation
+                                    borrower_serializer = BorrowerSerializer(borrower, data=borrower_data, partial=True)
                                     if borrower_serializer.is_valid():
                                         borrower = borrower_serializer.save()
-                                        borrowers_to_keep.append(borrower)
-                        else:
-                            # Create new borrower
-                            if borrower_data:  # Only create if there's actual data
-                                borrower_serializer = BorrowerSerializer(data=borrower_data)
-                                if borrower_serializer.is_valid():
-                                    borrower = borrower_serializer.save()
-                                    borrowers_to_keep.append(borrower)
-                    
-                    # Update the borrowers relationship
-                    instance.borrowers.set(borrowers_to_keep)
+                                        individual_borrowers_to_keep.append(borrower)
+                                        logger.info(f"Successfully updated individual borrower {borrower_id}")
+                                    else:
+                                        logger.error(f"Individual borrower validation failed for ID {borrower_id}: {borrower_serializer.errors}")
+                                        # Still keep the original borrower if update fails
+                                        individual_borrowers_to_keep.append(borrower)
+                                        logger.warning(f"Keeping original individual borrower {borrower_id} due to validation failure")
+                                except Borrower.DoesNotExist:
+                                    logger.warning(f"Individual borrower with ID {borrower_id} not found, creating new...")
+                                    # Create new borrower if ID doesn't exist
+                                    new_data = {k: v for k, v in borrower_data.items() if k != 'id'}
+                                    if new_data:
+                                        # Set created_by for new borrowers
+                                        if 'request' in self.context:
+                                            new_data['created_by'] = self.context['request'].user
+                                        
+                                        borrower_serializer = BorrowerSerializer(data=new_data)
+                                        if borrower_serializer.is_valid():
+                                            borrower = borrower_serializer.save()
+                                            individual_borrowers_to_keep.append(borrower)
+                                            logger.info(f"Created new individual borrower with ID {borrower.id}")
+                                        else:
+                                            logger.error(f"Failed to create new individual borrower: {borrower_serializer.errors}")
+                            else:
+                                # Create new borrower
+                                logger.info(f"Creating new individual borrower from data: {borrower_data}")
+                                if borrower_data:
+                                    # Set created_by for new borrowers
+                                    if 'request' in self.context:
+                                        borrower_data['created_by'] = self.context['request'].user
+                                    
+                                    borrower_serializer = BorrowerSerializer(data=borrower_data)
+                                    if borrower_serializer.is_valid():
+                                        borrower = borrower_serializer.save()
+                                        individual_borrowers_to_keep.append(borrower)
+                                        logger.info(f"Created new individual borrower with ID {borrower.id}")
+                                    else:
+                                        logger.error(f"Failed to create new individual borrower: {borrower_serializer.errors}")
+                        except Exception as e:
+                            logger.error(f"Error processing individual borrower at index {idx}: {type(e).__name__}: {str(e)}")
+                            # Continue processing other borrowers
+                            
                 except Exception as e:
-                    # Log the error but don't fail the entire update
-                    import logging
-                    logger = logging.getLogger(__name__)
-                    logger.error(f"Error updating borrowers: {type(e).__name__}: {str(e)}")
+                    logger.error(f"Critical error in individual borrowers processing: {type(e).__name__}: {str(e)}")
+                    # If there's a critical error, preserve existing borrowers
+                    individual_borrowers_to_keep = existing_individual_borrowers
+                    logger.warning("Falling back to existing individual borrowers due to processing error")
+            else:
+                # If no individual borrowers data provided, keep existing ones
+                individual_borrowers_to_keep = existing_individual_borrowers
+                logger.info(f"No individual borrowers data provided, keeping {len(existing_individual_borrowers)} existing")
+            
+            # STEP 3: Process company borrowers data with enhanced error handling
+            if company_borrowers_data is not None:
+                logger.info(f"Processing {len(company_borrowers_data)} company borrowers for application {instance.id}")
+                
+                try:
+                    for idx, company_data in enumerate(company_borrowers_data):
+                        if not company_data:  # Skip empty dictionaries
+                            logger.warning(f"Skipping empty company data at index {idx}")
+                            continue
+                            
+                        try:
+                            if 'id' in company_data and company_data['id']:
+                                # Update existing company borrower
+                                company_id = company_data['id']
+                                logger.info(f"Updating existing company borrower ID: {company_id}")
+                                
+                                try:
+                                    company = Borrower.objects.get(id=company_id, is_company=True)
+                                    
+                                    # Validate this company belongs to this application or is being added
+                                    if company not in existing_company_borrowers:
+                                        logger.warning(f"Company borrower {company_id} not currently associated with application {instance.id}, adding...")
+                                    
+                                    # Use the CompanyBorrowerSerializer to handle the update properly
+                                    company_serializer = CompanyBorrowerSerializer(company, data=company_data, partial=True)
+                                    if company_serializer.is_valid():
+                                        company = company_serializer.save()
+                                        company_borrowers_to_keep.append(company)
+                                        logger.info(f"Successfully updated company borrower {company_id}")
+                                    else:
+                                        logger.error(f"Company borrower validation failed for ID {company_id}: {company_serializer.errors}")
+                                        # Still keep the original company if update fails
+                                        company_borrowers_to_keep.append(company)
+                                        logger.warning(f"Keeping original company borrower {company_id} due to validation failure")
+                                        
+                                except Borrower.DoesNotExist:
+                                    logger.warning(f"Company borrower with ID {company_id} not found, creating new...")
+                                    # Create new company borrower if ID doesn't exist
+                                    new_data = {k: v for k, v in company_data.items() if k != 'id'}
+                                    if new_data:
+                                        # Set created_by for new company borrowers
+                                        if 'request' in self.context:
+                                            new_data['created_by'] = self.context['request'].user
+                                        
+                                        company_serializer = CompanyBorrowerSerializer(data=new_data)
+                                        if company_serializer.is_valid():
+                                            company = company_serializer.save()
+                                            company_borrowers_to_keep.append(company)
+                                            logger.info(f"Created new company borrower with ID {company.id}")
+                                        else:
+                                            logger.error(f"Failed to create new company borrower: {company_serializer.errors}")
+                            else:
+                                # Create new company borrower
+                                logger.info(f"Creating new company borrower from data")
+                                if company_data:
+                                    # Set created_by for new company borrowers
+                                    if 'request' in self.context:
+                                        company_data['created_by'] = self.context['request'].user
+                                    
+                                    company_serializer = CompanyBorrowerSerializer(data=company_data)
+                                    if company_serializer.is_valid():
+                                        company = company_serializer.save()
+                                        company_borrowers_to_keep.append(company)
+                                        logger.info(f"Created new company borrower with ID {company.id}")
+                                    else:
+                                        logger.error(f"Failed to create new company borrower: {company_serializer.errors}")
+                        except Exception as e:
+                            logger.error(f"Error processing company borrower at index {idx}: {type(e).__name__}: {str(e)}")
+                            # Continue processing other company borrowers
+                            
+                except Exception as e:
+                    logger.error(f"Critical error in company borrowers processing: {type(e).__name__}: {str(e)}")
+                    import traceback
+                    logger.error(f"Traceback: {traceback.format_exc()}")
+                    # If there's a critical error, preserve existing company borrowers
+                    company_borrowers_to_keep = existing_company_borrowers
+                    logger.warning("Falling back to existing company borrowers due to processing error")
+            else:
+                # If no company borrowers data provided, keep existing ones
+                company_borrowers_to_keep = existing_company_borrowers
+                logger.info(f"No company borrowers data provided, keeping {len(existing_company_borrowers)} existing")
+            
+            # STEP 4: Update the borrowers relationship with enhanced validation
+            if borrowers_data is not None or company_borrowers_data is not None:
+                all_borrowers = individual_borrowers_to_keep + company_borrowers_to_keep
+                
+                logger.info(f"Updating borrowers relationship: {len(individual_borrowers_to_keep)} individual + {len(company_borrowers_to_keep)} company = {len(all_borrowers)} total")
+                
+                # Validate that we haven't lost borrowers compared to the original count
+                original_count = len(existing_individual_borrowers) + len(existing_company_borrowers)
+                
+                if len(all_borrowers) < original_count:
+                    logger.warning(f"POTENTIAL DATA LOSS: Original borrower count was {original_count}, now {len(all_borrowers)}")
+                    
+                    # If we've lost borrowers, provide detailed info for debugging
+                    original_ids = set([b.id for b in existing_individual_borrowers + existing_company_borrowers])
+                    new_ids = set([b.id for b in all_borrowers])
+                    lost_ids = original_ids - new_ids
+                    
+                    if lost_ids:
+                        logger.error(f"LOST BORROWER IDs: {list(lost_ids)}")
+                        # Optionally, you could restore the lost borrowers here if needed
+                        
+                instance.borrowers.set(all_borrowers)
+                logger.info(f"Successfully updated borrowers relationship for application {instance.id}")
             
             # Handle guarantors update (many-to-many with application reference)
             if guarantors_data is not None:
@@ -758,12 +1095,16 @@ class ApplicationPartialUpdateSerializer(serializers.ModelSerializer):
                             try:
                                 guarantor_id = guarantor_data['id']
                                 guarantor = Guarantor.objects.get(id=guarantor_id)
-                                # Update guarantor with provided data
-                                for attr, value in guarantor_data.items():
-                                    if attr != 'id' and hasattr(guarantor, attr):  # Skip the ID field and validate attribute
-                                        setattr(guarantor, attr, value)
-                                guarantor.save()
-                                guarantors_to_keep.append(guarantor)
+                                # Update guarantor with provided data using serializer for proper validation
+                                guarantor_serializer = GuarantorSerializer(guarantor, data=guarantor_data, partial=True)
+                                if guarantor_serializer.is_valid():
+                                    guarantor = guarantor_serializer.save()
+                                    guarantors_to_keep.append(guarantor)
+                                else:
+                                    logger.error(f"Guarantor validation failed for ID {guarantor_id}: {guarantor_serializer.errors}")
+                                    # Still keep the original guarantor if update fails
+                                    guarantors_to_keep.append(guarantor)
+                                    logger.warning(f"Keeping original guarantor {guarantor_id} due to validation failure")
                             except Guarantor.DoesNotExist:
                                 # Create new guarantor if ID doesn't exist
                                 new_data = {k: v for k, v in guarantor_data.items() if k != 'id'}
@@ -784,58 +1125,7 @@ class ApplicationPartialUpdateSerializer(serializers.ModelSerializer):
                     instance.guarantors.set(guarantors_to_keep)
                 except Exception as e:
                     # Log the error but don't fail the entire update
-                    import logging
-                    logger = logging.getLogger(__name__)
                     logger.error(f"Error updating guarantors: {type(e).__name__}: {str(e)}")
-            
-            # Handle company borrowers update
-            if company_borrowers_data is not None:
-                try:
-                    # Track company borrowers to keep
-                    company_borrowers_to_keep = []
-                    
-                    # Process company borrowers data
-                    for company_data in company_borrowers_data:
-                        if not company_data:  # Skip empty dictionaries
-                            continue
-                            
-                        if 'id' in company_data and company_data['id']:
-                            # Update existing company borrower
-                            try:
-                                company_id = company_data['id']
-                                company = Borrower.objects.get(id=company_id, is_company=True)
-                                # Update company with provided data
-                                for attr, value in company_data.items():
-                                    if attr != 'id' and hasattr(company, attr):  # Skip the ID field and validate attribute
-                                        setattr(company, attr, value)
-                                company.save()
-                                company_borrowers_to_keep.append(company)
-                            except Borrower.DoesNotExist:
-                                # Create new company borrower if ID doesn't exist
-                                new_data = {k: v for k, v in company_data.items() if k != 'id'}
-                                if new_data:  # Only create if there's actual data
-                                    company_serializer = CompanyBorrowerSerializer(data=new_data)
-                                    if company_serializer.is_valid():
-                                        company = company_serializer.save()
-                                        company_borrowers_to_keep.append(company)
-                        else:
-                            # Create new company borrower
-                            if company_data:  # Only create if there's actual data
-                                company_serializer = CompanyBorrowerSerializer(data=company_data)
-                                if company_serializer.is_valid():
-                                    company = company_serializer.save()
-                                    company_borrowers_to_keep.append(company)
-                    
-                    # Get existing non-company borrowers
-                    individual_borrowers = list(instance.borrowers.filter(is_company=False))
-                    
-                    # Update the borrowers relationship to include both individual and company borrowers
-                    instance.borrowers.set(individual_borrowers + company_borrowers_to_keep)
-                except Exception as e:
-                    # Log the error but don't fail the entire update
-                    import logging
-                    logger = logging.getLogger(__name__)
-                    logger.error(f"Error updating company borrowers: {type(e).__name__}: {str(e)}")
             
             # Perform funding calculation if input is provided and loan amount is available
             if funding_calculation_input and instance.loan_amount:
@@ -856,8 +1146,6 @@ class ApplicationPartialUpdateSerializer(serializers.ModelSerializer):
                     )
                 except Exception as e:
                     # Log the error but don't fail the update
-                    import logging
-                    logger = logging.getLogger(__name__)
                     logger.error(f"Error performing funding calculation during update: {type(e).__name__}: {str(e)}")
             
             return instance 

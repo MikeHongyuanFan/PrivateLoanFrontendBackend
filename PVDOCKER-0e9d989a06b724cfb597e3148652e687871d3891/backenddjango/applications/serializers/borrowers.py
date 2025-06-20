@@ -190,6 +190,19 @@ class BorrowerSerializer(serializers.ModelSerializer):
             'income': obj.annual_income or 0,
             'years_employed': obj.employment_duration or 0
         }
+    
+    def create(self, validated_data):
+        """
+        Create borrower with proper created_by attribution
+        """
+        # Ensure is_company is False for individual borrowers
+        validated_data['is_company'] = False
+        
+        # Set created_by if not already provided and available from context
+        if 'created_by' not in validated_data and hasattr(self, 'context') and 'request' in self.context:
+            validated_data['created_by'] = self.context['request'].user
+        
+        return super().create(validated_data)
 
 
 class BorrowerUpdateSerializer(serializers.ModelSerializer):
@@ -319,6 +332,7 @@ class CompanyBorrowerSerializer(serializers.ModelSerializer):
     directors = DirectorSerializer(many=True, required=False)
     address = AddressSerializer(required=False)
     assets = CompanyAssetSerializer(many=True, required=False)
+    liabilities = LiabilitySerializer(many=True, required=False)
     
     class Meta:
         model = Borrower
@@ -327,7 +341,7 @@ class CompanyBorrowerSerializer(serializers.ModelSerializer):
             'annual_company_income', 'is_company',
             'registered_address_unit', 'registered_address_street_no', 'registered_address_street_name',
             'registered_address_suburb', 'registered_address_state', 'registered_address_postcode',
-            'directors', 'address', 'assets'
+            'directors', 'address', 'assets', 'liabilities'
         ]
         extra_kwargs = {
             # Make most fields optional and allow null/blank values for minimal data creation
@@ -344,7 +358,96 @@ class CompanyBorrowerSerializer(serializers.ModelSerializer):
             'registered_address_postcode': {'required': False, 'allow_null': True, 'allow_blank': True},
         }
     
+    def to_internal_value(self, data):
+        # Filter out empty nested objects before validation
+        if isinstance(data, dict):
+            # Make a copy to avoid modifying the original data
+            data = data.copy()
+            
+            # Filter out empty directors
+            if 'directors' in data and isinstance(data['directors'], list):
+                data['directors'] = [
+                    director for director in data['directors'] 
+                    if isinstance(director, dict) and director.get('name') and str(director.get('name', '')).strip()
+                ]
+            
+            # Filter out empty/invalid assets
+            if 'assets' in data and isinstance(data['assets'], list):
+                valid_assets = []
+                for asset in data['assets']:
+                    if isinstance(asset, dict):
+                        asset_type = asset.get('asset_type', '').strip()
+                        if asset_type and asset_type in [choice[0] for choice in Asset.ASSET_TYPE_CHOICES]:
+                            # Convert to_be_refinanced to proper boolean
+                            to_be_refinanced = asset.get('to_be_refinanced', False)
+                            if isinstance(to_be_refinanced, str):
+                                if to_be_refinanced.lower() in ['true', '1', 'yes']:
+                                    asset['to_be_refinanced'] = True
+                                else:
+                                    asset['to_be_refinanced'] = False
+                            valid_assets.append(asset)
+                data['assets'] = valid_assets
+            
+            # Filter out empty/invalid liabilities
+            if 'liabilities' in data and isinstance(data['liabilities'], list):
+                valid_liabilities = []
+                for liability in data['liabilities']:
+                    if isinstance(liability, dict):
+                        liability_type = liability.get('liability_type', '').strip()
+                        if liability_type and liability_type in [choice[0] for choice in Liability.LIABILITY_TYPE_CHOICES]:
+                            # Convert to_be_refinanced to proper boolean
+                            to_be_refinanced = liability.get('to_be_refinanced', False)
+                            if isinstance(to_be_refinanced, str):
+                                if to_be_refinanced.lower() in ['true', '1', 'yes']:
+                                    liability['to_be_refinanced'] = True
+                                else:
+                                    liability['to_be_refinanced'] = False
+                            valid_liabilities.append(liability)
+                data['liabilities'] = valid_liabilities
+        
+        return super().to_internal_value(data)
+
     def validate(self, data):
+        # Filter out empty nested objects before validation
+        # Filter out empty directors
+        if 'directors' in data:
+            data['directors'] = [
+                director for director in data['directors'] 
+                if director.get('name') and str(director.get('name', '')).strip()
+            ]
+        
+        # Filter out empty/invalid assets
+        if 'assets' in data:
+            valid_assets = []
+            for asset in data['assets']:
+                asset_type = asset.get('asset_type', '').strip()
+                if asset_type and asset_type in [choice[0] for choice in Asset.ASSET_TYPE_CHOICES]:
+                    # Convert to_be_refinanced to proper boolean
+                    to_be_refinanced = asset.get('to_be_refinanced', False)
+                    if isinstance(to_be_refinanced, str):
+                        if to_be_refinanced.lower() in ['true', '1', 'yes']:
+                            asset['to_be_refinanced'] = True
+                        else:
+                            asset['to_be_refinanced'] = False
+                    valid_assets.append(asset)
+            data['assets'] = valid_assets
+        
+        # Filter out empty/invalid liabilities
+        if 'liabilities' in data:
+            valid_liabilities = []
+            for liability in data['liabilities']:
+                liability_type = liability.get('liability_type', '').strip()
+                if liability_type and liability_type in [choice[0] for choice in Liability.LIABILITY_TYPE_CHOICES]:
+                    # Convert to_be_refinanced to proper boolean
+                    to_be_refinanced = liability.get('to_be_refinanced', False)
+                    if isinstance(to_be_refinanced, str):
+                        if to_be_refinanced.lower() in ['true', '1', 'yes']:
+                            liability['to_be_refinanced'] = True
+                        else:
+                            liability['to_be_refinanced'] = False
+                    valid_liabilities.append(liability)
+            data['liabilities'] = valid_liabilities
+        
         # Use the custom validator for company borrower
         errors = validate_company_borrower(data)
         if errors:
@@ -356,21 +459,83 @@ class CompanyBorrowerSerializer(serializers.ModelSerializer):
             # Handle nested data
             directors_data = validated_data.pop('directors', [])
             assets_data = validated_data.pop('assets', [])
+            liabilities_data = validated_data.pop('liabilities', [])
             
             # Set is_company flag to True for company borrowers
             validated_data['is_company'] = True
             
+            # Set created_by if not already provided and available from context
+            if 'created_by' not in validated_data and hasattr(self, 'context') and 'request' in self.context:
+                validated_data['created_by'] = self.context['request'].user
+            
             # Create the borrower
             borrower = Borrower.objects.create(**validated_data)
             
-            # Create directors
+            # Get created_by for nested objects
+            created_by = validated_data.get('created_by') or (
+                self.context['request'].user if hasattr(self, 'context') and 'request' in self.context else None
+            )
+            
+            # Create directors (already filtered in validate method)
             for director_data in directors_data:
                 director_data['borrower'] = borrower
+                if created_by:
+                    director_data['created_by'] = created_by
                 Director.objects.create(**director_data)
             
-            # Create assets
+            # Create assets (already filtered in validate method)
             for asset_data in assets_data:
                 asset_data['borrower'] = borrower
+                if created_by:
+                    asset_data['created_by'] = created_by
                 Asset.objects.create(**asset_data)
+            
+            # Create liabilities (already filtered in validate method)
+            for liability_data in liabilities_data:
+                liability_data['borrower'] = borrower
+                if created_by:
+                    liability_data['created_by'] = created_by
+                Liability.objects.create(**liability_data)
         
-        return borrower 
+        return borrower
+    
+    def update(self, instance, validated_data):
+        """
+        Update company borrower instance with nested directors, assets, and liabilities
+        """
+        with transaction.atomic():
+            # Handle nested data
+            directors_data = validated_data.pop('directors', None)
+            assets_data = validated_data.pop('assets', None)
+            liabilities_data = validated_data.pop('liabilities', None)
+            
+            # Update main borrower fields
+            for attr, value in validated_data.items():
+                setattr(instance, attr, value)
+            instance.save()
+            
+            # Update directors if provided
+            if directors_data is not None:
+                # Clear existing directors and create new ones
+                instance.directors.all().delete()
+                for director_data in directors_data:
+                    director_data['borrower'] = instance
+                    Director.objects.create(**director_data)
+            
+            # Update assets if provided
+            if assets_data is not None:
+                # Clear existing assets and create new ones
+                instance.assets.all().delete()
+                for asset_data in assets_data:
+                    asset_data['borrower'] = instance
+                    Asset.objects.create(**asset_data)
+            
+            # Update liabilities if provided
+            if liabilities_data is not None:
+                # Clear existing liabilities and create new ones
+                instance.liabilities.all().delete()
+                for liability_data in liabilities_data:
+                    liability_data['borrower'] = instance
+                    Liability.objects.create(**liability_data)
+        
+        return instance 
