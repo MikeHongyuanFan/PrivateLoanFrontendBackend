@@ -3,7 +3,17 @@
         <div class="long_item">
             <h1>Company Details</h1>
         </div>
-        <div v-for="(item, index) in company" :key="index" class="company">
+        <div v-if="companyList.length === 0" class="no-company">
+            <p>No company borrowers added yet.</p>
+            <div class="add-company">
+                <el-button type="primary" @click="$emit('addCompany')">Add Company Borrower</el-button>
+            </div>
+        </div>
+        <div v-for="(item, index) in companyList" :key="`company-${index}`" class="company">
+            <div class="company-header" v-if="companyList.length > 1">
+                <h2>Company {{ index + 1 }}</h2>
+                <el-button type="danger" size="small" @click="$emit('removeCompany', index)">Remove Company</el-button>
+            </div>
             <div class="item">
                 <p>Company Name <span class="optional">(optional)</span></p >
                 <el-input v-model="item.company_name" placeholder="Enter company name" />
@@ -136,17 +146,26 @@
                 <el-button type="primary" @click="$emit('add')">Add Director</el-button>
             </div>
         </div>
+        <div v-if="companyList.length > 0" class="add-company">
+            <el-button type="primary" @click="$emit('addCompany')">Add Another Company Borrower</el-button>
+        </div>
     </div>
 </template>
 
 <script setup>
-    import { onMounted, watch } from 'vue';
+    import { onMounted, watch, computed } from 'vue';
 
     const props = defineProps({
-        company: Array
+        company: {
+            type: Array,
+            default: () => []
+        }
     });
 
-    defineEmits(['add', 'remove']);
+    const emit = defineEmits(['add', 'remove', 'addCompany', 'removeCompany']);
+
+    // Computed property to ensure reactivity
+    const companyList = computed(() => props.company || []);
 
     // Function to update the roles string from the selected roles array
     const updateRoles = (director) => {
@@ -154,8 +173,8 @@
     };
 
     // Initialize the selectedRoles array for each director based on the roles string
-    onMounted(() => {
-        props.company.forEach(company => {
+    const initializeDirectorRoles = () => {
+        companyList.value.forEach(company => {
             if (company.directors) {
                 company.directors.forEach(director => {
                     // Initialize selectedRoles array if it doesn't exist
@@ -170,26 +189,25 @@
                 });
             }
         });
+    };
+    
+    onMounted(() => {
+        console.log("Company component mounted with data:", props.company);
+        initializeDirectorRoles();
     });
 
-    // Watch for changes in the company array (e.g., when adding new directors)
+    // Watch for changes in the company array (e.g., when adding new directors or companies)
     watch(() => props.company, (newCompany) => {
-        newCompany.forEach(company => {
-            if (company.directors) {
-                company.directors.forEach(director => {
-                    // Initialize selectedRoles array for new directors
-                    if (!director.selectedRoles) {
-                        director.selectedRoles = director.roles ? director.roles.split(',').map(role => role.trim()) : ['director'];
-                        
-                        // If roles is not set, initialize it with the default value
-                        if (!director.roles) {
-                            director.roles = 'director';
-                        }
-                    }
-                });
-            }
-        });
-    }, { deep: true });
+        console.log("Company data changed:", newCompany);
+        if (newCompany) {
+            initializeDirectorRoles();
+        }
+    }, { deep: true, immediate: true });
+
+    // Watch for changes in company array length to detect additions/removals
+    watch(() => props.company?.length, (newLength, oldLength) => {
+        console.log(`Company array length changed from ${oldLength} to ${newLength}`);
+    });
 </script>
 
 <style scoped>
@@ -202,6 +220,37 @@
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 15px;
+    }
+    .company-header {
+        grid-column: 1 / 4;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 0;
+        border-bottom: 1px solid #e1e1e1;
+        margin-bottom: 15px;
+    }
+    .company-header h2 {
+        color: #384144;
+        font-size: 1rem;
+        margin: 0;
+    }
+    .no-company {
+        text-align: center;
+        padding: 40px 20px;
+        border: 2px dashed #e1e1e1;
+        border-radius: 8px;
+        background-color: #fafafa;
+    }
+    .no-company p {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+    }
+    .add-company {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
     }
     .item {
         display: flex;

@@ -72,6 +72,7 @@
                 <EditApplication v-else
                     :applicationId="editApplicationId"
                     @close="close"
+                    @saved="handleApplicationSaved"
                 ></EditApplication>
             </div>
         </transition>
@@ -168,6 +169,7 @@ const addApplication = () => {
 }
 const close = () => {
     popup.value = false;
+    
     // Reset the edit mode and application ID when closing the popup
     editApplicationId.value = null;
     isEditMode.value = false;
@@ -221,6 +223,19 @@ const filteredApplications = computed(() => {
     }
     return applications.value.filter(app => app.stage_display === activeTab.value)
 })
+
+const handleApplicationSaved = (savedData) => {
+    console.log("Application saved successfully:", savedData);
+    
+    // Refresh the applications list to show updated data
+    getApplications();
+    
+    // Optionally, you could update the specific application in the list without refetching all:
+    // const appIndex = applications.value.findIndex(app => app.id === savedData.id);
+    // if (appIndex !== -1) {
+    //     applications.value[appIndex] = { ...applications.value[appIndex], ...savedData.data };
+    // }
+};
 </script>
 
 <style lang="scss" scoped>

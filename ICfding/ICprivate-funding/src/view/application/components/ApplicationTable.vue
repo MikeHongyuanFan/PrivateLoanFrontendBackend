@@ -52,7 +52,9 @@
         <el-table-column prop="reference_number" label="Reference Number" sortable width="200" />
         <el-table-column prop="borrower_name" label="Borrower" width="150" />
         <el-table-column prop="stage" label="Status" width="150" />
+        <el-table-column prop="broker_name" label="Broker" width="120" />
         <el-table-column prop="bdm_name" label="BDM" width="100" />
+        <el-table-column prop="branch_name" label="Branch" width="120" />
         <el-table-column prop="guarantor_name" label="Guarantor" width="120" />
         <el-table-column prop="purpose" label="Case Purpose" width="150" />
         <el-table-column prop="product_name" label="Product" />

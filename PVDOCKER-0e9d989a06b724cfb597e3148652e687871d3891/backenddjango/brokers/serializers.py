@@ -149,3 +149,50 @@ class BrokerDetailSerializer(serializers.ModelSerializer):
             'notes': {'required': False, 'allow_null': True, 'allow_blank': True},
             'is_active': {'required': False, 'allow_null': True},
         }
+
+
+# Lightweight serializers for dropdown usage
+class BrokerDropdownSerializer(serializers.ModelSerializer):
+    """Lightweight serializer for broker dropdown selection"""
+    display_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Broker
+        fields = ['id', 'name', 'company', 'display_name']
+    
+    def get_display_name(self, obj):
+        """Create a display name combining name and company"""
+        if obj.name and obj.company:
+            return f"{obj.name} - {obj.company}"
+        return obj.name or obj.company or f"Broker #{obj.id}"
+
+
+class BDMDropdownSerializer(serializers.ModelSerializer):
+    """Lightweight serializer for BDM dropdown selection"""
+    display_name = serializers.SerializerMethodField()
+    branch_name = serializers.CharField(source='branch.name', read_only=True)
+    
+    class Meta:
+        model = BDM
+        fields = ['id', 'name', 'email', 'display_name', 'branch_name']
+    
+    def get_display_name(self, obj):
+        """Create a display name with branch info"""
+        if obj.branch:
+            return f"{obj.name} - {obj.branch.name}"
+        return obj.name or f"BDM #{obj.id}"
+
+
+class BranchDropdownSerializer(serializers.ModelSerializer):
+    """Lightweight serializer for branch dropdown selection"""
+    display_name = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Branch
+        fields = ['id', 'name', 'address', 'display_name']
+    
+    def get_display_name(self, obj):
+        """Create a display name with address info"""
+        if obj.address:
+            return f"{obj.name} - {obj.address}"
+        return obj.name or f"Branch #{obj.id}"

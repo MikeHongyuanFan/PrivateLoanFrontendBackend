@@ -18,7 +18,7 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         
         if self.action == 'list':
             # Optimize the list view with prefetches for the enhanced fields
-            queryset = queryset.select_related('bd').prefetch_related(
+            queryset = queryset.select_related('bd', 'broker', 'branch').prefetch_related(
                 'borrowers',
                 'guarantors',
                 'security_properties'
@@ -590,15 +590,19 @@ class ApplicationViewSet(viewsets.ModelViewSet):
             # Add cascade metadata with safe type conversion
             try:
                 borrowers = response_data.get('borrowers', [])
+                company_borrowers = response_data.get('company_borrowers', [])
                 guarantors = response_data.get('guarantors', [])
                 security_properties = response_data.get('security_properties', [])
                 loan_requirements = response_data.get('loan_requirements', [])
                 documents = response_data.get('documents', [])
                 notes = response_data.get('notes', [])
                 
+                # Calculate total borrower count (individual + company)
+                total_borrower_count = (len(borrowers) if borrowers else 0) + (len(company_borrowers) if company_borrowers else 0)
+                
                 response_data['cascade_info'] = {
                     'retrieved_at': str(application.updated_at),
-                    'borrower_count': len(borrowers) if borrowers else 0,
+                    'borrower_count': total_borrower_count,
                     'guarantor_count': len(guarantors) if guarantors else 0,
                     'security_property_count': len(security_properties) if security_properties else 0,
                     'loan_requirement_count': len(loan_requirements) if loan_requirements else 0,

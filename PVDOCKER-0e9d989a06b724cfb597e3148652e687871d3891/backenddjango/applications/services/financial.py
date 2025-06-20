@@ -40,6 +40,26 @@ def safe_decimal(value, default=0):
         return Decimal(str(default))
 
 
+def make_json_serializable(data):
+    """
+    Convert a dictionary containing Decimal objects to JSON-serializable format
+    
+    Args:
+        data: Dictionary that may contain Decimal objects
+        
+    Returns:
+        Dictionary with Decimal objects converted to floats
+    """
+    if isinstance(data, dict):
+        return {key: make_json_serializable(value) for key, value in data.items()}
+    elif isinstance(data, list):
+        return [make_json_serializable(item) for item in data]
+    elif isinstance(data, Decimal):
+        return float(data)
+    else:
+        return data
+
+
 def generate_repayment_schedule(application_id, user):
     """
     Generate a repayment schedule for an application
@@ -230,10 +250,13 @@ def calculate_funding(application, calculation_input, user):
         'funds_available': float(funds_available),
     }
     
+    # Convert calculation_input to JSON-serializable format
+    json_serializable_input = make_json_serializable(calculation_input)
+    
     # Save calculation history
     funding_history = FundingCalculationHistory.objects.create(
         application=application,
-        calculation_input=calculation_input,
+        calculation_input=json_serializable_input,
         calculation_result=calculation_result,
         created_by=user
     )

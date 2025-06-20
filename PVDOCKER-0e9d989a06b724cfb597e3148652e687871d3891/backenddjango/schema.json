@@ -5148,6 +5148,35 @@
                 }
             }
         },
+        "/api/brokers/bdms/dropdown/": {
+            "get": {
+                "operationId": "brokers_bdms_dropdown_retrieve",
+                "description": "Get all BDMs in dropdown format for application creation",
+                "tags": [
+                    "brokers"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BDM"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/brokers/branches/": {
             "get": {
                 "operationId": "brokers_branches_list",
@@ -5500,6 +5529,64 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Branch"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/brokers/branches/dropdown/": {
+            "get": {
+                "operationId": "brokers_branches_dropdown_retrieve",
+                "description": "Get all branches in dropdown format for application creation",
+                "tags": [
+                    "brokers"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Branch"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/brokers/dropdown/": {
+            "get": {
+                "operationId": "brokers_dropdown_retrieve",
+                "description": "Get all brokers in dropdown format for application creation",
+                "tags": [
+                    "brokers"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BrokerDetail"
                                 }
                             }
                         },
@@ -9703,17 +9790,10 @@
                             }
                         ]
                     },
-                    "branch_id": {
+                    "broker": {
                         "type": "integer",
                         "nullable": true,
-                        "description": "Branch associated with this application",
-                        "readOnly": true
-                    },
-                    "bd_id": {
-                        "type": "integer",
-                        "nullable": true,
-                        "description": "Business Development Manager for this application",
-                        "readOnly": true
+                        "description": "Broker handling this application"
                     },
                     "valuer": {
                         "type": "integer",
@@ -9900,8 +9980,6 @@
                     }
                 },
                 "required": [
-                    "bd_id",
-                    "branch_id",
                     "id"
                 ]
             },
@@ -10009,6 +10087,21 @@
                                 "$ref": "#/components/schemas/NullEnum"
                             }
                         ]
+                    },
+                    "broker": {
+                        "type": "integer",
+                        "nullable": true,
+                        "description": "Broker handling this application"
+                    },
+                    "branch_id": {
+                        "type": "integer",
+                        "writeOnly": true,
+                        "nullable": true
+                    },
+                    "bd_id": {
+                        "type": "integer",
+                        "writeOnly": true,
+                        "nullable": true
                     },
                     "valuer": {
                         "type": "integer",
@@ -10797,6 +10890,16 @@
                         "description": "Get the BDM name",
                         "readOnly": true
                     },
+                    "broker_name": {
+                        "type": "string",
+                        "description": "Get the broker name",
+                        "readOnly": true
+                    },
+                    "branch_name": {
+                        "type": "string",
+                        "description": "Get the branch name",
+                        "readOnly": true
+                    },
                     "guarantor_name": {
                         "type": "string",
                         "description": "Get the guarantor name(s)",
@@ -10883,6 +10986,8 @@
                     "bdm_name",
                     "borrower_count",
                     "borrower_name",
+                    "branch_name",
+                    "broker_name",
                     "guarantor_name",
                     "id",
                     "product_name",
@@ -12875,6 +12980,12 @@
                         "items": {
                             "$ref": "#/components/schemas/CompanyAsset"
                         }
+                    },
+                    "liabilities": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Liability"
+                        }
                     }
                 },
                 "required": [
@@ -12966,6 +13077,12 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/CompanyAssetRequest"
+                        }
+                    },
+                    "liabilities": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LiabilityRequest"
                         }
                     }
                 }

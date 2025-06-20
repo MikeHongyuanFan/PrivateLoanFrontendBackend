@@ -3,7 +3,13 @@
         <div class="long_item">
             <h1>Company Assets</h1>
         </div>
-        <div v-for="(company, index) in company" :key="index" class="company">
+        <div v-if="companyList.length === 0" class="no-company">
+            <p>No company borrowers found. Please add a company borrower first to manage assets and liabilities.</p>
+            <div class="add-company">
+                <el-button type="primary" @click="$emit('addCompany')">Add Company Borrower</el-button>
+            </div>
+        </div>
+        <div v-for="(company, index) in companyList" :key="`company-asset-${index}-${company.company_name || 'unnamed'}`" class="company">
             <div class="long_item">
                 <h1>Assets</h1>
             </div>
@@ -134,11 +140,29 @@
 </template>
 
 <script setup>
+    import { computed, watch } from 'vue';
+
     const props = defineProps({
-        company: Array
+        company: {
+            type: Array,
+            default: () => []
+        }
     });
 
-    defineEmits(['addAsset', 'removeAsset', 'addLiability', 'removeLiability']);
+    const emit = defineEmits(['addAsset', 'removeAsset', 'addLiability', 'removeLiability', 'addCompany']);
+
+    // Computed property to ensure reactivity
+    const companyList = computed(() => props.company || []);
+
+    // Watch for changes in the company array
+    watch(() => props.company, (newCompany) => {
+        console.log("CompanyAssets: Company data changed:", newCompany);
+    }, { deep: true, immediate: true });
+
+    // Watch for changes in company array length
+    watch(() => props.company?.length, (newLength, oldLength) => {
+        console.log(`CompanyAssets: Company array length changed from ${oldLength} to ${newLength}`);
+    });
 
     // Helper functions to calculate totals
     const calculateTotalAssets = (company) => {
@@ -163,6 +187,23 @@
         display: flex;
         flex-direction: column;
         gap: 20px;
+    }
+    .no-company {
+        text-align: center;
+        padding: 40px 20px;
+        border: 2px dashed #e1e1e1;
+        border-radius: 8px;
+        background-color: #fafafa;
+    }
+    .no-company p {
+        color: #666;
+        font-size: 0.9rem;
+        margin-bottom: 20px;
+    }
+    .add-company {
+        display: flex;
+        justify-content: center;
+        margin-top: 20px;
     }
     .company {
         display: grid;

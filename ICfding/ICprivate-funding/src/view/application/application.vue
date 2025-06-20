@@ -26,6 +26,51 @@
                     </button>
                 </div>
             </div>
+            
+            <!-- Broker, BDM & Branch Assignment Section -->
+            <div class="assignment-section">
+                <div class="assignment-header">
+                    <h3>📋 Assignment Information</h3>
+                </div>
+                <div class="assignment-grid">
+                    <div class="assignment-item">
+                        <span class="assignment-label">Broker:</span>
+                        <span class="assignment-value">
+                            {{ application.broker?.name || 'Not Assigned' }}
+                            <span v-if="application.broker?.company" class="company">({{ application.broker.company }})</span>
+                        </span>
+                    </div>
+                    <div class="assignment-item">
+                        <span class="assignment-label">BDM:</span>
+                        <span class="assignment-value">{{ application.bd?.name || 'Not Assigned' }}</span>
+                    </div>
+                    <div class="assignment-item">
+                        <span class="assignment-label">Branch:</span>
+                        <span class="assignment-value">{{ application.branch?.name || 'Not Assigned' }}</span>
+                    </div>
+                    <div class="assignment-item" v-if="application.broker?.email">
+                        <span class="assignment-label">Broker Email:</span>
+                        <span class="assignment-value">
+                            <a :href="`mailto:${application.broker.email}`" class="email-link">
+                                {{ application.broker.email }}
+                            </a>
+                        </span>
+                    </div>
+                    <div class="assignment-item" v-if="application.broker?.phone">
+                        <span class="assignment-label">Broker Phone:</span>
+                        <span class="assignment-value">
+                            <a :href="`tel:${application.broker.phone}`" class="phone-link">
+                                {{ application.broker.phone }}
+                            </a>
+                        </span>
+                    </div>
+                    <div class="assignment-item" v-if="application.branch?.address">
+                        <span class="assignment-label">Branch Address:</span>
+                        <span class="assignment-value">{{ application.branch.address }}</span>
+                    </div>
+                </div>
+            </div>
+            
             <div class="stages">
                 <div class="title">
                     <h3>Stages</h3>
@@ -73,79 +118,6 @@
                     </div>
                 </div>
             </el-scrollbar>
-        </div>
-        
-        <!-- Enhanced data display sections with cascade information -->
-        <div v-if="cascadeMetadata.retrieval_method" class="cascade_info">
-            <div class="cascade_summary">
-                <h4>📊 Data Summary (Retrieved via {{ cascadeMetadata.retrieval_method }})</h4>
-                <div class="summary_grid">
-                    <div class="summary_item">
-                        <span class="label">Borrowers:</span>
-                        <span class="value">{{ totalBorrowers }}</span>
-                    </div>
-                    <div class="summary_item">
-                        <span class="label">Guarantors:</span>
-                        <span class="value">{{ totalGuarantors }}</span>
-                    </div>
-                    <div class="summary_item">
-                        <span class="label">Security Properties:</span>
-                        <span class="value">{{ totalSecurityProperties }}</span>
-                    </div>
-                    <div class="summary_item">
-                        <span class="label">Loan Requirements:</span>
-                        <span class="value">{{ totalLoanRequirements }}</span>
-                    </div>
-                    <div class="summary_item">
-                        <span class="label">Documents:</span>
-                        <span class="value">{{ totalDocuments }}</span>
-                    </div>
-                    <div class="summary_item">
-                        <span class="label">Notes:</span>
-                        <span class="value">{{ totalNotes }}</span>
-                    </div>
-                    <div class="summary_item">
-                        <span class="label">Total Loan Amount:</span>
-                        <span class="value">${{ totalLoanAmount.toLocaleString() }}</span>
-                    </div>
-                    <div class="summary_item">
-                        <span class="label">Total Security Value:</span>
-                        <span class="value">${{ totalSecurityValue.toLocaleString() }}</span>
-                    </div>
-                </div>
-                <small class="cascade_timestamp">Last retrieved: {{ new Date(cascadeMetadata.retrieved_at).toLocaleString() }}</small>
-            </div>
-        </div>
-        
-        <!-- Financial Summary -->
-        <div v-if="financialSummary.total_fees !== undefined" class="financial_summary">
-            <h4>💰 Financial Overview</h4>
-            <div class="financial_grid">
-                <div class="financial_item">
-                    <span class="label">Total Fees:</span>
-                    <span class="value">${{ financialSummary.total_fees?.toLocaleString() || 0 }}</span>
-                </div>
-                <div class="financial_item">
-                    <span class="label">Total Repayments:</span>
-                    <span class="value">${{ financialSummary.total_repayments?.toLocaleString() || 0 }}</span>
-                </div>
-                <div class="financial_item">
-                    <span class="label">Borrower Assets:</span>
-                    <span class="value">${{ financialSummary.total_borrower_assets?.toLocaleString() || 0 }}</span>
-                </div>
-                <div class="financial_item">
-                    <span class="label">Borrower Liabilities:</span>
-                    <span class="value">${{ financialSummary.total_borrower_liabilities?.toLocaleString() || 0 }}</span>
-                </div>
-                <div class="financial_item">
-                    <span class="label">Guarantor Assets:</span>
-                    <span class="value">${{ financialSummary.total_guarantor_assets?.toLocaleString() || 0 }}</span>
-                </div>
-                <div class="financial_item">
-                    <span class="label">Guarantor Liabilities:</span>
-                    <span class="value">${{ financialSummary.total_guarantor_liabilities?.toLocaleString() || 0 }}</span>
-                </div>
-            </div>
         </div>
         
         <!-- Enhanced component rendering with additional data access -->
@@ -289,6 +261,12 @@
     onMounted(() => {
         getApplicationWithCascade()
         getBd()
+    })
+
+    onActivated(() => {
+        // Refresh data when the route becomes active (e.g., navigating from list view after edit)
+        console.log("Application detail view activated, refreshing data...");
+        getApplicationWithCascade()
     })
 
     const updateInfoCounts = () => {
@@ -744,141 +722,105 @@
         background: #E8EBEE;
     }
     
-    /* New cascade info styles */
-    .cascade_info {
-        background: #F8F9FA;
+    /* Assignment section styles */
+    .assignment-section {
+        background: #FFF;
         border: 1px solid #E8EBEE;
         border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 10px;
-    }
-    .cascade_summary h4 {
-        color: #384144;
-        font-size: 1rem;
-        font-weight: 600;
-        margin: 0 0 12px 0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .summary_grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 10px;
-        margin-bottom: 10px;
-    }
-    .summary_item {
-        display: flex;
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 8px 12px;
-        background: #FFF;
-        border-radius: 4px;
-        border: 1px solid #E8EBEE;
-    }
-    .summary_item .label {
-        font-size: 0.7rem;
-        color: #666;
-        font-weight: 500;
-        margin-bottom: 2px;
-    }
-    .summary_item .value {
-        font-size: 0.85rem;
-        color: #384144;
-        font-weight: 600;
-    }
-    .cascade_timestamp {
-        color: #666;
-        font-size: 0.65rem;
-        font-style: italic;
-        display: block;
-        text-align: right;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     }
     
-    /* Financial summary styles */
-    .financial_summary {
-        background: #FFF;
-        border: 1px solid #E8EBEE;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 10px;
-    }
-    .financial_summary h4 {
+    .assignment-header h3 {
         color: #384144;
-        font-size: 1rem;
+        font-size: 1.1rem;
         font-weight: 600;
-        margin: 0 0 12px 0;
+        margin: 0 0 15px 0;
         display: flex;
         align-items: center;
         gap: 8px;
     }
-    .financial_grid {
+    
+    .assignment-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 12px;
+        gap: 15px;
     }
-    .financial_item {
+    
+    .assignment-item {
         display: flex;
         flex-direction: column;
         align-items: flex-start;
-        padding: 10px 14px;
+        padding: 12px 15px;
         background: #F8F9FA;
-        border-radius: 4px;
+        border-radius: 6px;
         border: 1px solid #E8EBEE;
-    }
-    .financial_item .label {
-        font-size: 0.7rem;
-        color: #666;
-        font-weight: 500;
-        margin-bottom: 3px;
-    }
-    .financial_item .value {
-        font-size: 0.9rem;
-        color: #2984DE;
-        font-weight: 700;
+        transition: all 0.2s ease;
     }
     
-    /* Responsive adjustments */
+    .assignment-item:hover {
+        background: #F0F4F8;
+        border-color: #2984DE;
+    }
+    
+    .assignment-label {
+        font-size: 0.75rem;
+        color: #666;
+        font-weight: 600;
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .assignment-value {
+        font-size: 0.9rem;
+        color: #384144;
+        font-weight: 500;
+        line-height: 1.4;
+    }
+    
+    .assignment-value .company {
+        font-size: 0.8rem;
+        color: #666;
+        font-weight: 400;
+        margin-left: 4px;
+    }
+    
+    .email-link, .phone-link {
+        color: #2984DE;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.2s ease;
+    }
+    
+    .email-link:hover, .phone-link:hover {
+        color: #1F63A9;
+        text-decoration: underline;
+    }
+    
+    /* Responsive adjustments for assignment section */
     @media (max-width: 1200px) {
-        .summary_grid {
-            grid-template-columns: repeat(3, 1fr);
-        }
-        .financial_grid {
+        .assignment-grid {
             grid-template-columns: repeat(2, 1fr);
-        }
-        .tabs_line {
-            gap: 15px;
-        }
-        .tab_item {
-            min-width: 100px;
         }
     }
+    
     @media (max-width: 768px) {
-        .summary_grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        .financial_grid {
+        .assignment-grid {
             grid-template-columns: 1fr;
         }
-        .tabs_line {
-            gap: 10px;
+        
+        .assignment-section {
+            padding: 15px;
         }
-        .tab_item {
-            min-width: 80px;
+        
+        .assignment-header h3 {
+            font-size: 1rem;
         }
-        .tab_info p {
-            font-size: 0.7rem;
+        
+        .assignment-item {
+            padding: 10px 12px;
         }
-    }
-    .slide-right-popup-enter-active, .slide-right-popup-leave-active {
-        transition: all 0.3s ease;
-    }
-    .slide-right-popup-enter-from, .slide-right-popup-leave-to {
-        opacity: 0;
-        transform: translateX(100%);
-    }
-    .slide-right-popup-enter-to, .slide-right-popup-leave-from {
-        opacity: 1;
-        transform: translateX(0);
     }
 </style>
