@@ -31,19 +31,19 @@ export function application(params) {
                 // Ensure guarantors array exists
                 res.guarantors = res.guarantors || [];
                 
-                // Ensure each guarantor has assets and liabilities
+                // Ensure each guarantor has assets and liabilities (from unified tables)
                 res.guarantors.forEach(guarantor => {
-                    guarantor.assets = guarantor.assets || [];
-                    guarantor.liabilities = guarantor.liabilities || [];
+                    guarantor.assets = guarantor.assets || [];      // From unified Asset table
+                    guarantor.liabilities = guarantor.liabilities || [];  // From unified Liability table
                 });
                 
                 // Ensure borrowers array exists
                 res.borrowers = res.borrowers || [];
                 
-                // Ensure borrowers have assets and liabilities
+                // Ensure borrowers have assets and liabilities (from unified tables)
                 res.borrowers.forEach(borrower => {
-                    borrower.assets = borrower.assets || [];
-                    borrower.liabilities = borrower.liabilities || [];
+                    borrower.assets = borrower.assets || [];        // From unified Asset table
+                    borrower.liabilities = borrower.liabilities || [];    // From unified Liability table
                 });
                 
                 // Ensure security_properties array exists
@@ -327,16 +327,16 @@ export function applicationWithCascade(id) {
                 res.ledger_entries = res.ledger_entries || [];
                 res.funding_calculation_history = res.funding_calculation_history || [];
                 
-                // Ensure borrowers have assets and liabilities
+                // Ensure borrowers have assets and liabilities (from unified tables)
                 res.borrowers.forEach(borrower => {
-                    borrower.assets = borrower.assets || [];
-                    borrower.liabilities = borrower.liabilities || [];
+                    borrower.assets = borrower.assets || [];        // From unified Asset table
+                    borrower.liabilities = borrower.liabilities || [];    // From unified Liability table
                 });
                 
-                // Ensure guarantors have assets and liabilities (should already be there from cascade)
+                // Ensure guarantors have assets and liabilities (from unified tables - should already be there from cascade)
                 res.guarantors.forEach(guarantor => {
-                    guarantor.assets = guarantor.assets || [];
-                    guarantor.liabilities = guarantor.liabilities || [];
+                    guarantor.assets = guarantor.assets || [];      // From unified Asset table
+                    guarantor.liabilities = guarantor.liabilities || [];  // From unified Liability table
                 });
                 
                 // Additional computed properties for easy access

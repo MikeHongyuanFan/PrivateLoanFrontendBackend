@@ -62,17 +62,17 @@
                 </div>
                 <div class="item">
                     <p>Bedrooms</p>
-                    <el-input-number v-model="bedroomsComputed[index]" :min="0" :max="20" placeholder="e.g. 3" />
+                    <el-input-number v-model="item.bedrooms" :min="0" :max="20" placeholder="e.g. 3" />
                     <span class="hint">Number of bedrooms</span>
                 </div>
                 <div class="item">
                     <p>Bathrooms</p>
-                    <el-input-number v-model="bathroomsComputed[index]" :min="0" :max="20" placeholder="e.g. 2" />
+                    <el-input-number v-model="item.bathrooms" :min="0" :max="20" placeholder="e.g. 2" />
                     <span class="hint">Number of bathrooms</span>
                 </div>
                 <div class="item">
                     <p>Car Spaces</p>
-                    <el-input-number v-model="carSpacesComputed[index]" :min="0" :max="20" placeholder="e.g. 1" />
+                    <el-input-number v-model="item.car_spaces" :min="0" :max="20" placeholder="e.g. 1" />
                     <span class="hint">Number of car spaces</span>
                 </div>
                 <div class="item">
@@ -147,7 +147,7 @@
 </template>
 
 <script setup>
-    import { ref, computed, onMounted, watch } from 'vue';
+    import { onMounted } from 'vue';
 
     const props = defineProps({
         security: Array
@@ -155,68 +155,14 @@
 
     defineEmits(['add', 'remove']);
 
-    // Create computed properties for numeric fields to handle type conversion
-    const bedroomsComputed = ref([]);
-    const bathroomsComputed = ref([]);
-    const carSpacesComputed = ref([]);
-
-    // Initialize default values and computed properties
+    // Initialize default values for boolean fields
     onMounted(() => {
-        // Initialize arrays for computed properties
-        bedroomsComputed.value = props.security.map(item => Number(item.bedrooms) || 0);
-        bathroomsComputed.value = props.security.map(item => Number(item.bathrooms) || 0);
-        carSpacesComputed.value = props.security.map(item => Number(item.car_spaces) || 0);
-        
-        // Initialize default values for required boolean fields
-        props.security.forEach((property, index) => {
-            if (property.is_single_story === null) property.is_single_story = false;
-            if (property.has_garage === null) property.has_garage = false;
-            if (property.has_carport === null) property.has_carport = false;
-            if (property.has_off_street_parking === null) property.has_off_street_parking = false;
+        props.security.forEach((property) => {
+            if (property.is_single_story === null || property.is_single_story === undefined) property.is_single_story = false;
+            if (property.has_garage === null || property.has_garage === undefined) property.has_garage = false;
+            if (property.has_carport === null || property.has_carport === undefined) property.has_carport = false;
+            if (property.has_off_street_parking === null || property.has_off_street_parking === undefined) property.has_off_street_parking = false;
         });
-    });
-
-    // Watch for changes in the computed properties and update the original data
-    watch(bedroomsComputed, (newVal) => {
-        props.security.forEach((item, index) => {
-            if (index < newVal.length) {
-                item.bedrooms = newVal[index];
-            }
-        });
-    });
-
-    watch(bathroomsComputed, (newVal) => {
-        props.security.forEach((item, index) => {
-            if (index < newVal.length) {
-                item.bathrooms = newVal[index];
-            }
-        });
-    });
-
-    watch(carSpacesComputed, (newVal) => {
-        props.security.forEach((item, index) => {
-            if (index < newVal.length) {
-                item.car_spaces = newVal[index];
-            }
-        });
-    });
-
-    // Watch for changes in the security array (e.g., when adding new items)
-    watch(() => props.security.length, (newLength, oldLength) => {
-        if (newLength > oldLength) {
-            // A new item was added, initialize its computed properties
-            for (let i = oldLength; i < newLength; i++) {
-                bedroomsComputed.value[i] = Number(props.security[i].bedrooms) || 0;
-                bathroomsComputed.value[i] = Number(props.security[i].bathrooms) || 0;
-                carSpacesComputed.value[i] = Number(props.security[i].car_spaces) || 0;
-                
-                // Initialize boolean fields
-                if (props.security[i].is_single_story === null) props.security[i].is_single_story = false;
-                if (props.security[i].has_garage === null) props.security[i].has_garage = false;
-                if (props.security[i].has_carport === null) props.security[i].has_carport = false;
-                if (props.security[i].has_off_street_parking === null) props.security[i].has_off_street_parking = false;
-            }
-        }
     });
 </script>
 

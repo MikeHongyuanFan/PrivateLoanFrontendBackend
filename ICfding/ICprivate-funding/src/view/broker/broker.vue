@@ -29,7 +29,28 @@
                     </div>
                     <div class="info">
                         <p style="color: #7A858E">Branch</p>
-                        <p class="text">{{ brokers.branch?.name || '-' }}</p>
+                        <p class="text">
+                            <router-link 
+                                v-if="brokers.branch?.id" 
+                                :to="`/branch/${brokers.branch.id}`" 
+                                class="branch-link"
+                            >
+                                {{ brokers.branch.name }}
+                            </router-link>
+                            <span v-else>{{ brokers.branch?.name || '-' }}</span>
+                        </p>
+                    </div>
+                    <div class="info" v-if="brokers.branch?.address">
+                        <p style="color: #7A858E">Branch Address</p>
+                        <p class="text">{{ brokers.branch.address }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Phone</p>
+                        <p class="text">{{ brokers.phone || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Address</p>
+                        <p class="text">{{ brokers.address || '-' }}</p>
                     </div>
                     <div class="info">
                         <p style="color: #7A858E">BD</p>
@@ -72,7 +93,57 @@
                 <template #label>
                     <div class="label">Applications</div>
                 </template>
-                Application
+                <div class="applications-section">
+                    <div v-if="loadingApplications" class="loading">Loading applications...</div>
+                    <div v-else-if="!applications || applications.length === 0" class="no-data">No applications found for this broker</div>
+                    <div v-else>
+                        <div class="applications-header">
+                            <h3>Applications ({{ applications.length }})</h3>
+                        </div>
+                        <el-table 
+                            :data="applications" 
+                            style="width: 100%" 
+                            class="applications-table"
+                            :key="`broker-applications-${brokerId}`"
+                            v-loading="loadingApplications"
+                        >
+                            <el-table-column prop="reference_number" label="Reference Number" width="150">
+                                <template #default="scope">
+                                    <router-link :to="`/application/${scope.row.id}`" class="app-link">
+                                        {{ scope.row.reference_number }}
+                                    </router-link>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="stage" label="Stage" width="120">
+                                <template #default="scope">
+                                    <el-tag :type="getStageTagType(scope.row.stage)" size="small">
+                                        {{ scope.row.stage_display || scope.row.stage }}
+                                    </el-tag>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="loan_amount" label="Loan Amount" width="120">
+                                <template #default="scope">
+                                    {{ formatCurrency(scope.row.loan_amount) }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="application_type" label="Type" width="120">
+                                <template #default="scope">
+                                    {{ scope.row.application_type || '-' }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="created_at" label="Created" width="120">
+                                <template #default="scope">
+                                    {{ formatDate(scope.row.created_at) }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="Primary Borrower" min-width="150">
+                                <template #default="scope">
+                                    {{ getPrimaryBorrowerName(scope.row.borrowers) }}
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                </div>
             </el-tab-pane>
             <el-tab-pane name="4">
                 <template #label>
@@ -115,19 +186,92 @@ const account = ref({
 })
 
 const brokers = ref({})
+const applications = ref([])
+const loadingApplications = ref(false)
 
-onMounted(() => {
-    getBroker()
+onMounted(async () => {
+    try {
+        await getBroker()
+    } catch (error) {
+        console.error('Error loading broker data:', error)
+    }
 })
 
 const getBroker = async () => {
-    const [err, res] = await api.broker(brokerId)
-    if (!err) {
-        console.log(res);
-        brokers.value = res
-    } else {
-        console.log(err)
+    try {
+        const [err, res] = await api.broker(brokerId)
+        if (!err) {
+            console.log(res);
+            brokers.value = res
+            await getApplications()
+        } else {
+            console.log(err)
+        }
+    } catch (error) {
+        console.error('Error in getBroker:', error)
     }
+}
+
+const getApplications = async () => {
+    try {
+        loadingApplications.value = true
+        const [err, res] = await api.brokerApplications(brokerId)
+        if (!err) {
+            console.log(res);
+            applications.value = Array.isArray(res) ? res : []
+        } else {
+            console.log(err)
+            applications.value = []
+        }
+    } catch (error) {
+        console.error('Error in getApplications:', error)
+        applications.value = []
+    } finally {
+        loadingApplications.value = false
+    }
+}
+
+const getStageTagType = (stage) => {
+    // Define tag types based on stage
+    const stageTypes = {
+        'inquiry': 'info',
+        'sent_to_lender': 'primary',
+        'funding_table_issued': 'primary',
+        'iloo_issued': 'warning',
+        'iloo_signed': 'warning',
+        'formal_approval': 'success',
+        'settled': 'success',
+        'declined': 'danger',
+        'withdrawn': 'danger'
+    }
+    return stageTypes[stage] || 'info'
+}
+
+const formatCurrency = (amount) => {
+    if (!amount || isNaN(amount)) return '-'
+    return new Intl.NumberFormat('en-AU', {
+        style: 'currency',
+        currency: 'AUD'
+    }).format(amount)
+}
+
+const formatDate = (dateString) => {
+    if (!dateString) return '-'
+    try {
+        return new Date(dateString).toLocaleDateString('en-AU')
+    } catch (error) {
+        return '-'
+    }
+}
+
+const getPrimaryBorrowerName = (borrowers) => {
+    if (!borrowers || !Array.isArray(borrowers) || borrowers.length === 0) {
+        return '-'
+    }
+    const primaryBorrower = borrowers.find(b => b.is_primary) || borrowers[0]
+    return primaryBorrower?.first_name && primaryBorrower?.last_name 
+        ? `${primaryBorrower.first_name} ${primaryBorrower.last_name}`
+        : primaryBorrower?.name || '-'
 }
 </script>
 
@@ -221,5 +365,56 @@ p {
     line-height: 100%;
     letter-spacing: 0px;
     color: #000000;
+}
+
+.applications-section {
+    padding: 20px;
+}
+
+.loading {
+    text-align: center;
+    color: #909399;
+    font-size: 0.875rem;
+    margin-bottom: 20px;
+}
+
+.no-data {
+    text-align: center;
+    color: #909399;
+    font-size: 0.875rem;
+    margin-bottom: 20px;
+}
+
+.applications-header {
+    margin-bottom: 20px;
+}
+
+.applications-header h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #000;
+    margin: 0;
+}
+
+.applications-table {
+    width: 100%;
+}
+
+.app-link {
+    color: #409EFF;
+    text-decoration: none;
+}
+
+.app-link:hover {
+    text-decoration: underline;
+}
+
+.branch-link {
+    color: #409EFF;
+    text-decoration: none;
+}
+
+.branch-link:hover {
+    text-decoration: underline;
 }
 </style>

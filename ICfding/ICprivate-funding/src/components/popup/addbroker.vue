@@ -119,7 +119,8 @@ const overview = ref({
     email: "",
     branch: "",
     // license: "",
-    user: userInfo.value?.user_id || "",
+    // Don't automatically assign current user - let backend handle this or make it explicitly optional
+    // user: userInfo.value?.user_id || "",
     // bdms: []
 })
 //todo something
@@ -162,9 +163,10 @@ async function getBroker() {
         overview.value.email = res.email
         overview.value.name = res.name
         overview.value.phone = res.phone
-        overview.value.branch = res.branch
-        //编辑时传入user会报错，先置为空
-        overview.value.user = ""
+        // Handle branch properly - if it's an object, get the ID; if it's already an ID, use as is
+        overview.value.branch = res.branch?.id || res.branch || ""
+        // Don't set user field since we removed it from overview object
+        // overview.value.user = ""
         // overview.value.bdms = res.bdms
         commission.value.commission_account_name = res.commission_account_name
         commission.value.commission_account_number = res.commission_account_number
@@ -180,6 +182,11 @@ const addBroker = async () => {
         ...overview.value,
         ...commission.value
     }
+    // Convert branch to branch_id for backend compatibility
+    if (data.branch) {
+        data.branch_id = data.branch
+        delete data.branch
+    }
     console.log(data)
     const [err, res] = await api.addBrokers(data)
     if (!err) {
@@ -194,6 +201,11 @@ const editBroker = async () => {
     const data = {
         ...overview.value,
         ...commission.value
+    }
+    // Convert branch to branch_id for backend compatibility
+    if (data.branch) {
+        data.branch_id = data.branch
+        delete data.branch
     }
     const [err, res] = await api.putBrokers(props.editId, data)
     if (!err) {

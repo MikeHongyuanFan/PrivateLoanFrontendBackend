@@ -16,15 +16,18 @@ class SecurityPropertySerializer(serializers.ModelSerializer):
     class Meta:
         model = SecurityProperty
         fields = [
-            'id', 'property_type', 'address_unit', 'address_street_no', 'address_street_name', 
-            'address_suburb', 'address_state', 'address_postcode', 'estimated_value',
-            'purchase_price', 'current_debt_position', 'current_mortgagee',
-            'first_mortgage', 'second_mortgage', 'bedrooms', 'bathrooms', 'car_spaces', 'building_size',
-            'land_size'
+            'id', 'property_type', 'occupancy',
+            'address_unit', 'address_street_no', 'address_street_name', 
+            'address_suburb', 'address_state', 'address_postcode', 
+            'estimated_value', 'purchase_price', 'current_debt_position', 
+            'current_mortgagee', 'first_mortgage', 'second_mortgage', 
+            'bedrooms', 'bathrooms', 'car_spaces', 'building_size', 'land_size',
+            'is_single_story', 'has_garage', 'has_carport', 'has_off_street_parking'
         ]
         extra_kwargs = {
             # Make most fields optional and allow null/blank values for minimal data creation
             'property_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'occupancy': {'required': False, 'allow_null': True, 'allow_blank': True},
             'address_unit': {'required': False, 'allow_null': True, 'allow_blank': True},
             'address_street_no': {'required': False, 'allow_null': True, 'allow_blank': True},
             'address_street_name': {'required': False, 'allow_null': True, 'allow_blank': True},
@@ -35,13 +38,17 @@ class SecurityPropertySerializer(serializers.ModelSerializer):
             'purchase_price': {'required': False, 'allow_null': True},
             'current_debt_position': {'required': False, 'allow_null': True},
             'current_mortgagee': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'first_mortgage': {'required': False, 'allow_null': True},
-            'second_mortgage': {'required': False, 'allow_null': True},
+            'first_mortgage': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'second_mortgage': {'required': False, 'allow_null': True, 'allow_blank': True},
             'bedrooms': {'required': False, 'allow_null': True},
             'bathrooms': {'required': False, 'allow_null': True},
             'car_spaces': {'required': False, 'allow_null': True},
             'building_size': {'required': False, 'allow_null': True},
             'land_size': {'required': False, 'allow_null': True},
+            'is_single_story': {'required': False, 'default': False},
+            'has_garage': {'required': False, 'default': False},
+            'has_carport': {'required': False, 'default': False},
+            'has_off_street_parking': {'required': False, 'default': False},
         }
         
     def to_internal_value(self, data):

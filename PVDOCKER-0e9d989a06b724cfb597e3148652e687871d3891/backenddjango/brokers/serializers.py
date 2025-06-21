@@ -127,6 +127,7 @@ class BrokerListSerializer(serializers.ModelSerializer):
 class BrokerDetailSerializer(serializers.ModelSerializer):
     """Serializer for detailed broker information with null/blank handling for minimal data creation"""
     branch = BranchSerializer(read_only=True)
+    branch_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     bdms = BDMSerializer(many=True, read_only=True)
     created_by = UserSerializer(read_only=True)
     
@@ -148,7 +149,44 @@ class BrokerDetailSerializer(serializers.ModelSerializer):
             'commission_structure': {'required': False, 'allow_null': True, 'allow_blank': True},
             'notes': {'required': False, 'allow_null': True, 'allow_blank': True},
             'is_active': {'required': False, 'allow_null': True},
+            'user': {'required': False, 'allow_null': True},
+            'branch_id': {'required': False, 'allow_null': True},
         }
+    
+    def create(self, validated_data):
+        branch_id = validated_data.pop('branch_id', None)
+        
+        # Handle branch association
+        branch = None
+        if branch_id:
+            try:
+                branch = Branch.objects.get(id=branch_id)
+            except Branch.DoesNotExist:
+                raise serializers.ValidationError({"branch_id": "Branch with this ID does not exist"})
+        
+        # Create broker instance
+        broker = Broker.objects.create(branch=branch, **validated_data)
+        return broker
+    
+    def update(self, instance, validated_data):
+        branch_id = validated_data.pop('branch_id', None)
+        
+        # Handle branch association
+        if branch_id is not None:  # Allow setting to None to remove branch
+            if branch_id:
+                try:
+                    branch = Branch.objects.get(id=branch_id)
+                    instance.branch = branch
+                except Branch.DoesNotExist:
+                    raise serializers.ValidationError({"branch_id": "Branch with this ID does not exist"})
+            else:
+                instance.branch = None
+        
+        # Update broker fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
 
 
 # Lightweight serializers for dropdown usage

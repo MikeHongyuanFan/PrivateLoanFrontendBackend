@@ -129,7 +129,7 @@
                                 <p :style="{color: isExitValid ? '#2984DE' : '#272727'}">Proposed Exit Strategy</p>
                             </div>
                         </template>
-                        <Exit :exit="application"></Exit>
+                        <Exit :detail="application"></Exit>
                     </el-collapse-item>
                 </el-collapse>
             </div>
@@ -146,7 +146,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Close, SuccessFilled, Loading } from '@element-plus/icons-vue';
 import { api } from '@/api';
-import { transformGuarantorAssets } from '@/utils/guarantorAssetTransformer';
+import { transformGuarantorAssets, reverseTransformGuarantorAssets } from '@/utils/guarantorAssetTransformer';
 
 // Import components
 import Company from '@/components/popup/addapplication/company.vue';
@@ -323,18 +323,46 @@ onMounted(async () => {
             res.funding_calculation_input = {};
         }
         
+        // Transform address data from backend format to frontend format
+        if (res.borrowers && res.borrowers.length > 0) {
+            res.borrowers.forEach(borrower => {
+                // Parse structured address data from address object if available
+                if (borrower.address) {
+                    borrower.address_street = borrower.address.street || '';
+                    borrower.address_city = borrower.address.city || '';
+                    borrower.address_state = borrower.address.state || '';
+                    borrower.address_postal_code = borrower.address.postal_code || '';
+                    borrower.address_country = borrower.address.country || '';
+                }
+            });
+        }
+        
         application.value = res;
         console.log("Application data loaded:", application.value);
         
-        // Transform guarantor assets if they exist
-        if (res.guarantors && res.guarantors.length > 0 && res.guarantors[0].assets) {
+        // Transform guarantor assets from backend format to frontend format for editing
+        if (res.guarantors && res.guarantors.length > 0) {
             try {
-                const transformedAssets = transformGuarantorAssets(res.guarantors[0].assets);
-                if (transformedAssets) {
-                    guarantorAsset.value = transformedAssets;
-                }
+                console.log("Loading existing guarantor assets for editing:", res.guarantors);
+                const frontendAssets = reverseTransformGuarantorAssets(res.guarantors);
+                guarantorAsset.value = frontendAssets;
+                console.log("Guarantor assets loaded into frontend format:", guarantorAsset.value);
             } catch (error) {
-                console.error("Error transforming guarantor assets:", error);
+                console.error("Error reverse transforming guarantor assets:", error);
+                // Initialize with empty form if transformation fails
+                guarantorAsset.value = {
+                    address1: "", address1Value: "", address1Owing: "", address1G1: false, address1G2: false,
+                    address2: "", address2Value: "", address2Owing: "", address2G1: false, address2G2: false,
+                    address3: "", address3Value: "", address3Owing: "", address3G1: false, address3G2: false,
+                    address4: "", address4Value: "", address4Owing: "", address4G1: false, address4G2: false,
+                    vehicleValue: "", vehicleOwing: "", vehicleG1: false, vehicleG2: false,
+                    savingValue: "", savingOwing: "", savingG1: false, savingG2: false,
+                    shareValue: "", shareOwing: "", shareG1: false, shareG2: false,
+                    cardValue: "", cardOwing: "", cardG1: false, cardG2: false,
+                    creditorValue: "", creditorOwing: "", creditorG1: false, creditorG2: false,
+                    otherValue: "", otherOwing: "", otherG1: false, otherG2: false,
+                    totalValue: "", totalOwing: ""
+                };
             }
         }
         
@@ -405,6 +433,29 @@ const handleSave = async () => {
         // Create a deep copy and transform data
         const applicationData = JSON.parse(JSON.stringify(application.value));
         
+        // Transform structured address data for borrowers
+        if (applicationData.borrowers && applicationData.borrowers.length > 0) {
+            applicationData.borrowers.forEach(borrower => {
+                // Create structured address object for API
+                if (borrower.address_street || borrower.address_city || borrower.address_state || borrower.address_postal_code || borrower.address_country) {
+                    borrower.address = {
+                        street: borrower.address_street || '',
+                        city: borrower.address_city || '',
+                        state: borrower.address_state || '',
+                        postal_code: borrower.address_postal_code || '',
+                        country: borrower.address_country || ''
+                    };
+                }
+                
+                // Clean up the individual address fields since we're sending them as nested object
+                delete borrower.address_street;
+                delete borrower.address_city;
+                delete borrower.address_state;
+                delete borrower.address_postal_code;
+                delete borrower.address_country;
+            });
+        }
+        
         // Add debug logging for company borrowers
         console.log("=== SAVE OPERATION DEBUG ===");
         console.log("Full applicationData:", applicationData);
@@ -468,9 +519,9 @@ const handleSave = async () => {
                 return {
                     ...property,
                     // Convert string numbers to integers for bedrooms, bathrooms, car_spaces
-                    bedrooms: property.bedrooms === "" || property.bedrooms === null || property.bedrooms === undefined ? null : parseInt(property.bedrooms) || null,
-                    bathrooms: property.bathrooms === "" || property.bathrooms === null || property.bathrooms === undefined ? null : parseInt(property.bathrooms) || null,
-                    car_spaces: property.car_spaces === "" || property.car_spaces === null || property.car_spaces === undefined ? null : parseInt(property.car_spaces) || null,
+                    bedrooms: property.bedrooms === "" || property.bedrooms === null || property.bedrooms === undefined ? null : parseInt(property.bedrooms),
+                    bathrooms: property.bathrooms === "" || property.bathrooms === null || property.bathrooms === undefined ? null : parseInt(property.bathrooms),
+                    car_spaces: property.car_spaces === "" || property.car_spaces === null || property.car_spaces === undefined ? null : parseInt(property.car_spaces),
                     
                     // Set boolean fields to null if empty string or undefined
                     is_single_story: property.is_single_story === "" || property.is_single_story === undefined ? null : property.is_single_story,
@@ -479,11 +530,11 @@ const handleSave = async () => {
                     has_off_street_parking: property.has_off_street_parking === "" || property.has_off_street_parking === undefined ? null : property.has_off_street_parking,
                     
                     // Convert string numbers to floats for decimal fields
-                    current_debt_position: property.current_debt_position === "" || property.current_debt_position === null ? null : parseFloat(property.current_debt_position) || null,
-                    estimated_value: property.estimated_value === "" || property.estimated_value === null ? null : parseFloat(property.estimated_value) || null,
-                    purchase_price: property.purchase_price === "" || property.purchase_price === null ? null : parseFloat(property.purchase_price) || null,
-                    building_size: property.building_size === "" || property.building_size === null ? null : parseFloat(property.building_size) || null,
-                    land_size: property.land_size === "" || property.land_size === null ? null : parseFloat(property.land_size) || null
+                    current_debt_position: property.current_debt_position === "" || property.current_debt_position === null ? null : parseFloat(property.current_debt_position),
+                    estimated_value: property.estimated_value === "" || property.estimated_value === null ? null : parseFloat(property.estimated_value),
+                    purchase_price: property.purchase_price === "" || property.purchase_price === null ? null : parseFloat(property.purchase_price),
+                    building_size: property.building_size === "" || property.building_size === null ? null : parseFloat(property.building_size),
+                    land_size: property.land_size === "" || property.land_size === null ? null : parseFloat(property.land_size)
                 };
             });
         }
@@ -603,17 +654,18 @@ const removeDirector = (idx) => {
     }
 };
 
-const addAsset = () => {
-    console.log("Adding asset...");
-    // Ensure company_borrowers array exists and has at least one element
-    if (!application.value.company_borrowers || application.value.company_borrowers.length === 0) {
-        application.value.company_borrowers = [createCompanyBorrower()];
+const addAsset = (companyIndex = 0) => {
+    console.log("Adding asset to company index:", companyIndex);
+    // Ensure company_borrowers array exists and has the requested element
+    if (!application.value.company_borrowers || application.value.company_borrowers.length <= companyIndex) {
+        console.error("Invalid company index or no company borrowers available");
+        return;
     }
     
-    if (!application.value.company_borrowers[0].assets) {
-        application.value.company_borrowers[0].assets = [];
+    if (!application.value.company_borrowers[companyIndex].assets) {
+        application.value.company_borrowers[companyIndex].assets = [];
     }
-    application.value.company_borrowers[0].assets.push({
+    application.value.company_borrowers[companyIndex].assets.push({
         asset_type: "Property",
         description: "",
         value: "",
@@ -624,33 +676,38 @@ const addAsset = () => {
     
     // Force reactivity update
     application.value = { ...application.value };
-    console.log("Assets after add:", application.value.company_borrowers[0].assets);
+    console.log("Assets after add:", application.value.company_borrowers[companyIndex].assets);
 };
 
-const removeAsset = (idx) => {
-    console.log("Removing asset at index:", idx);
+const removeAsset = (companyIndex = 0, assetIndex) => {
+    console.log("Removing asset from company index:", companyIndex, "asset index:", assetIndex);
     if (application.value.company_borrowers && 
-        application.value.company_borrowers[0] && 
-        application.value.company_borrowers[0].assets) {
-        application.value.company_borrowers[0].assets.splice(idx, 1);
+        application.value.company_borrowers[companyIndex] && 
+        application.value.company_borrowers[companyIndex].assets) {
+        if (assetIndex !== undefined) {
+            application.value.company_borrowers[companyIndex].assets.splice(assetIndex, 1);
+        } else {
+            application.value.company_borrowers[companyIndex].assets.pop();
+        }
         
         // Force reactivity update
         application.value = { ...application.value };
-        console.log("Assets after remove:", application.value.company_borrowers[0].assets);
+        console.log("Assets after remove:", application.value.company_borrowers[companyIndex].assets);
     }
 };
 
-const addLiability = () => {
-    console.log("Adding liability...");
-    // Ensure company_borrowers array exists and has at least one element
-    if (!application.value.company_borrowers || application.value.company_borrowers.length === 0) {
-        application.value.company_borrowers = [createCompanyBorrower()];
+const addLiability = (companyIndex = 0) => {
+    console.log("Adding liability to company index:", companyIndex);
+    // Ensure company_borrowers array exists and has the requested element
+    if (!application.value.company_borrowers || application.value.company_borrowers.length <= companyIndex) {
+        console.error("Invalid company index or no company borrowers available");
+        return;
     }
     
-    if (!application.value.company_borrowers[0].liabilities) {
-        application.value.company_borrowers[0].liabilities = [];
+    if (!application.value.company_borrowers[companyIndex].liabilities) {
+        application.value.company_borrowers[companyIndex].liabilities = [];
     }
-    application.value.company_borrowers[0].liabilities.push({
+    application.value.company_borrowers[companyIndex].liabilities.push({
         liability_type: "other",
         description: "",
         amount: "",
@@ -662,24 +719,29 @@ const addLiability = () => {
     
     // Force reactivity update
     application.value = { ...application.value };
-    console.log("Liabilities after add:", application.value.company_borrowers[0].liabilities);
+    console.log("Liabilities after add:", application.value.company_borrowers[companyIndex].liabilities);
 };
 
-const removeLiability = (idx) => {
-    console.log("Removing liability at index:", idx);
+const removeLiability = (companyIndex = 0, liabilityIndex) => {
+    console.log("Removing liability from company index:", companyIndex, "liability index:", liabilityIndex);
     if (application.value.company_borrowers && 
-        application.value.company_borrowers[0] && 
-        application.value.company_borrowers[0].liabilities) {
-        application.value.company_borrowers[0].liabilities.splice(idx, 1);
+        application.value.company_borrowers[companyIndex] && 
+        application.value.company_borrowers[companyIndex].liabilities) {
+        if (liabilityIndex !== undefined) {
+            application.value.company_borrowers[companyIndex].liabilities.splice(liabilityIndex, 1);
+        } else {
+            application.value.company_borrowers[companyIndex].liabilities.pop();
+        }
         
         // Force reactivity update
         application.value = { ...application.value };
-        console.log("Liabilities after remove:", application.value.company_borrowers[0].liabilities);
+        console.log("Liabilities after remove:", application.value.company_borrowers[companyIndex].liabilities);
     }
 };
 
 const addBorrower = () => {
     application.value.borrowers.push({
+        // Personal Information
         first_name: "",
         last_name: "",
         email: "",
@@ -689,7 +751,27 @@ const addBorrower = () => {
         marital_status: "",
         residency_status: "",
         referral_source: "",
-        tags: ""
+        tags: "",
+        
+        // Address Information
+        address_street: "",
+        address_city: "",
+        address_state: "",
+        address_postal_code: "",
+        address_country: "",
+        mailing_address: "",
+        
+        // Employment Information
+        employment_type: "",
+        employer_name: "",
+        job_title: "",
+        annual_income: null,
+        employment_duration: null,
+        employer_address: "",
+        
+        // Additional Financial Information
+        other_income: null,
+        monthly_expenses: null
     });
 };
 

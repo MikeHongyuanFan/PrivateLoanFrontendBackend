@@ -35,21 +35,108 @@
             </el-tab-pane>
             <el-tab-pane name="2">
                 <template #label>
-                    <div class="label">Broker</div>
+                    <div class="label">Brokers</div>
                 </template>
-                Broker
+                <div class="brokers-section">
+                    <div v-if="loadingBrokers" class="loading">Loading brokers...</div>
+                    <div v-else-if="!brokers || brokers.length === 0" class="no-data">No brokers found for this branch</div>
+                    <div v-else>
+                        <div class="brokers-header">
+                            <h3>Brokers ({{ brokers.length }})</h3>
+                        </div>
+                        <el-table 
+                            :data="brokers" 
+                            style="width: 100%" 
+                            class="brokers-table"
+                            :key="`branch-brokers-${branchId}`"
+                            v-loading="loadingBrokers"
+                        >
+                            <el-table-column prop="name" label="Broker Name" min-width="150">
+                                <template #default="scope">
+                                    <router-link :to="`/broker/${scope.row.id}`" class="broker-link">
+                                        {{ scope.row.name }}
+                                    </router-link>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="company" label="Company" min-width="150">
+                                <template #default="scope">
+                                    {{ scope.row.company || '-' }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="email" label="Email" min-width="180">
+                                <template #default="scope">
+                                    {{ scope.row.email || '-' }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="phone" label="Phone" width="120">
+                                <template #default="scope">
+                                    {{ scope.row.phone || '-' }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="created_at" label="Created" width="120">
+                                <template #default="scope">
+                                    {{ formatDate(scope.row.created_at) }}
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                </div>
             </el-tab-pane>
             <el-tab-pane name="3">
                 <template #label>
                     <div class="label">Applications</div>
                 </template>
-                Application
-            </el-tab-pane>
-            <el-tab-pane name="4">
-                <template #label>
-                    <div class="label">Borrower Repayment Account</div>
-                </template>
-                Borrower Repayment Account
+                <div class="applications-section">
+                    <div v-if="loadingApplications" class="loading">Loading applications...</div>
+                    <div v-else-if="!applications || applications.length === 0" class="no-data">No applications found for this branch</div>
+                    <div v-else>
+                        <div class="applications-header">
+                            <h3>Applications ({{ applications.length }})</h3>
+                        </div>
+                        <el-table 
+                            :data="applications" 
+                            style="width: 100%" 
+                            class="applications-table"
+                            :key="`branch-applications-${branchId}`"
+                            v-loading="loadingApplications"
+                        >
+                            <el-table-column prop="reference_number" label="Reference Number" width="150">
+                                <template #default="scope">
+                                    <router-link :to="`/application/${scope.row.id}`" class="app-link">
+                                        {{ scope.row.reference_number }}
+                                    </router-link>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="stage" label="Stage" width="120">
+                                <template #default="scope">
+                                    <el-tag :type="getStageTagType(scope.row.stage)" size="small">
+                                        {{ scope.row.stage_display || scope.row.stage }}
+                                    </el-tag>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="loan_amount" label="Loan Amount" width="120">
+                                <template #default="scope">
+                                    {{ formatCurrency(scope.row.loan_amount) }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="application_type" label="Type" width="120">
+                                <template #default="scope">
+                                    {{ scope.row.application_type || '-' }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="created_at" label="Created" width="120">
+                                <template #default="scope">
+                                    {{ formatDate(scope.row.created_at) }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column label="Broker" min-width="150">
+                                <template #default="scope">
+                                    {{ scope.row.broker?.name || '-' }}
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                </div>
             </el-tab-pane>
         </el-tabs>
     </div>
@@ -75,20 +162,102 @@ const overview = ref({
     email: "",
     manager: ""
 })
+const applications = ref([])
+const loadingApplications = ref(false)
+const brokers = ref([])
+const loadingBrokers = ref(false)
 
-onMounted(() => {
-    getBranch()
+onMounted(async () => {
+    try {
+        await getBranch()
+    } catch (error) {
+        console.error('Error loading branch data:', error)
+    }
 })
 
 const getBranch = async () => {
-    const [err, res] = await api.branch(branchId)
-    if (!err) {
-        console.log(res);
-        // borrowers.value = res.results
-        overview.value = res || {}
-    } else {
-        console.log(err)
+    try {
+        const [err, res] = await api.branch(branchId)
+        if (!err) {
+            console.log(res);
+            // borrowers.value = res.results
+            overview.value = res || {}
+            await getBrokers()
+            await getApplications()
+        } else {
+            console.log(err)
+        }
+    } catch (error) {
+        console.error('Error in getBranch:', error)
     }
+}
+
+const getBrokers = async () => {
+    try {
+        loadingBrokers.value = true
+        const [err, res] = await api.branchBrokers(branchId)
+        if (!err) {
+            console.log(res);
+            brokers.value = res || []
+        } else {
+            console.log(err)
+            brokers.value = []
+        }
+    } catch (error) {
+        console.error('Error in getBrokers:', error)
+        brokers.value = []
+    } finally {
+        loadingBrokers.value = false
+    }
+}
+
+const getApplications = async () => {
+    try {
+        loadingApplications.value = true
+        const [err, res] = await api.branchApplications(branchId)
+        if (!err) {
+            console.log(res);
+            // Ensure res is always an array
+            applications.value = Array.isArray(res) ? res : []
+        } else {
+            console.log(err)
+            applications.value = []
+        }
+    } catch (error) {
+        console.error('Error in getApplications:', error)
+        applications.value = []
+    } finally {
+        loadingApplications.value = false
+    }
+}
+
+const getStageTagType = (stage) => {
+    // Define tag types based on stage
+    const stageTypes = {
+        'inquiry': 'info',
+        'sent_to_lender': 'primary',
+        'funding_table_issued': 'primary',
+        'iloo_issued': 'warning',
+        'iloo_signed': 'warning',
+        'formal_approval': 'success',
+        'settled': 'success',
+        'declined': 'danger',
+        'withdrawn': 'danger'
+    }
+    return stageTypes[stage] || 'info'
+}
+
+const formatCurrency = (amount) => {
+    if (!amount) return '-'
+    return new Intl.NumberFormat('en-AU', {
+        style: 'currency',
+        currency: 'AUD'
+    }).format(amount)
+}
+
+const formatDate = (dateString) => {
+    if (!dateString) return '-'
+    return new Date(dateString).toLocaleDateString('en-AU')
 }
 </script>
 
@@ -182,5 +351,75 @@ p {
     line-height: 100%;
     letter-spacing: 0px;
     color: #000000;
+}
+
+.applications-section {
+    padding: 20px;
+}
+
+.loading {
+    text-align: center;
+    color: #909399;
+    font-size: 0.875rem;
+    margin-bottom: 20px;
+}
+
+.no-data {
+    text-align: center;
+    color: #909399;
+    font-size: 0.875rem;
+    margin-bottom: 20px;
+}
+
+.applications-header {
+    margin-bottom: 20px;
+}
+
+.applications-header h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #000;
+    margin: 0;
+}
+
+.applications-table {
+    width: 100%;
+}
+
+.app-link {
+    color: #409EFF;
+    text-decoration: none;
+}
+
+.app-link:hover {
+    text-decoration: underline;
+}
+
+.brokers-section {
+    padding: 20px;
+}
+
+.brokers-header {
+    margin-bottom: 20px;
+}
+
+.brokers-header h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #000;
+    margin: 0;
+}
+
+.brokers-table {
+    width: 100%;
+}
+
+.broker-link {
+    color: #409EFF;
+    text-decoration: none;
+}
+
+.broker-link:hover {
+    text-decoration: underline;
 }
 </style>
