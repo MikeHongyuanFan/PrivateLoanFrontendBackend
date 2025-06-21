@@ -9,13 +9,6 @@
                 <div v-for="(borrower, index) in summary" :key="index" class="borrower_section">
                     <div class="borrower_header">
                         <h3>{{ borrower.is_company ? borrower.company_name : `${borrower.first_name} ${borrower.last_name}` }}</h3>
-                        <div class="financial_totals">
-                            <span class="total_assets">Assets: ${{ borrower.total_assets?.toLocaleString() || '0' }}</span>
-                            <span class="total_liabilities">Liabilities: ${{ borrower.total_liabilities?.toLocaleString() || '0' }}</span>
-                            <span class="net_worth" :class="{ 'positive': borrower.net_worth >= 0, 'negative': borrower.net_worth < 0 }">
-                                Net Worth: ${{ borrower.net_worth?.toLocaleString() || '0' }}
-                            </span>
-                        </div>
                     </div>
                     
                     <!-- Assets Table -->
@@ -212,34 +205,6 @@ onMounted(() => {
     font-weight: 600;
     margin: 0;
 }
-.financial_totals {
-    display: flex;
-    flex-direction: row;
-    gap: 20px;
-    flex-wrap: wrap;
-}
-.total_assets, .total_liabilities, .net_worth {
-    font-size: 0.8rem;
-    font-weight: 600;
-    padding: 5px 10px;
-    border-radius: 4px;
-    background: #FFF;
-    border: 1px solid #E8EBEE;
-}
-.total_assets {
-    color: #14A105;
-}
-.total_liabilities {
-    color: #E74C3C;
-}
-.net_worth.positive {
-    color: #14A105;
-    border-color: #14A105;
-}
-.net_worth.negative {
-    color: #E74C3C;
-    border-color: #E74C3C;
-}
 
 /* Section Styles */
 .assets_section, .liabilities_section {
@@ -300,10 +265,6 @@ onMounted(() => {
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-    .financial_totals {
-        flex-direction: column;
-        gap: 10px;
-    }
     .borrower_header {
         align-items: flex-start;
     }

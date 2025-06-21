@@ -46,7 +46,7 @@
                                 <p :style="{color: isCompanyAssetValid ? '#2984DE' : '#272727'}">Company Assets & Liabilities</p>
                             </div>
                         </template>
-                        <CompanyAssets :companyasset="application.company_borrowers" @add="addAsset" @remove="removeAsset" @addLiability="addLiability" @removeLiability="removeLiability"></CompanyAssets>
+                        <CompanyAssets :company="application.company_borrowers" @addAsset="addAsset" @removeAsset="removeAsset" @addLiability="addLiability" @removeLiability="removeLiability" @addCompany="addCompany"></CompanyAssets>
                     </el-collapse-item>
                     <el-collapse-item name="3">
                         <template #title>
@@ -257,6 +257,7 @@
     }
     const createBorrower = () => {
         return {
+            // Personal Information
             first_name: "",
             last_name: "",
             email: "",
@@ -266,7 +267,27 @@
             marital_status: "",
             residency_status: "",
             referral_source: "",
-            tags: ""
+            tags: "",
+            
+            // Address Information
+            address_street: "",
+            address_city: "",
+            address_state: "",
+            address_postal_code: "",
+            address_country: "",
+            mailing_address: "",
+            
+            // Employment Information
+            employment_type: "",
+            employer_name: "",
+            job_title: "",
+            annual_income: null,
+            employment_duration: null,
+            employer_address: "",
+            
+            // Additional Financial Information
+            other_income: null,
+            monthly_expenses: null
         }
     }
     const createGuarantor = () => {
@@ -308,11 +329,11 @@
             address_state: "",
             address_postcode: "",
             property_type: "",
-            bedrooms: "",
-            bathrooms: "",
-            car_spaces: "",
-            building_size: "",
-            land_size: "",
+            bedrooms: null,
+            bathrooms: null,
+            car_spaces: null,
+            building_size: null,
+            land_size: null,
             has_garage: null,
             has_carport: null,
             is_single_story: null,
@@ -320,10 +341,10 @@
             current_mortgagee: "",
             first_mortgage: "",
             second_mortgage: "",
-            current_debt_position: "",
+            current_debt_position: null,
             occupancy: "",
-            estimated_value: "",
-            purchase_price: ""
+            estimated_value: null,
+            purchase_price: null
         }
     }
     const createRequirement = () => {
@@ -482,17 +503,25 @@
     const removeCompany = (idx) => {
         application.value.company_borrowers.splice(idx, 1)
     }
-    const addAsset = () => {
-        application.value.company_borrowers[0].assets.push(createCompanyAsset())
+    const addAsset = (companyIndex = 0) => {
+        if (application.value.company_borrowers[companyIndex]) {
+            application.value.company_borrowers[companyIndex].assets.push(createCompanyAsset())
+        }
     }
-    const removeAsset = () => {
-        application.value.company_borrowers[0].assets.pop()
+    const removeAsset = (companyIndex = 0) => {
+        if (application.value.company_borrowers[companyIndex] && application.value.company_borrowers[companyIndex].assets.length > 0) {
+            application.value.company_borrowers[companyIndex].assets.pop()
+        }
     }
-    const addLiability = () => {
-        application.value.company_borrowers[0].liabilities.push(createCompanyLiability())
+    const addLiability = (companyIndex = 0) => {
+        if (application.value.company_borrowers[companyIndex]) {
+            application.value.company_borrowers[companyIndex].liabilities.push(createCompanyLiability())
+        }
     }
-    const removeLiability = () => {
-        application.value.company_borrowers[0].liabilities.pop()
+    const removeLiability = (companyIndex = 0) => {
+        if (application.value.company_borrowers[companyIndex] && application.value.company_borrowers[companyIndex].liabilities.length > 0) {
+            application.value.company_borrowers[companyIndex].liabilities.pop()
+        }
     }
     const addBorrower = () => {
         application.value.borrowers.push(createBorrower())
@@ -906,6 +935,29 @@
             
             // Create a deep copy of the application to avoid proxy issues
             const applicationData = JSON.parse(JSON.stringify(application.value));
+            
+            // Transform structured address data for borrowers
+            if (applicationData.borrowers && applicationData.borrowers.length > 0) {
+                applicationData.borrowers.forEach(borrower => {
+                    // Create structured address object for API
+                    if (borrower.address_street || borrower.address_city || borrower.address_state || borrower.address_postal_code || borrower.address_country) {
+                        borrower.address = {
+                            street: borrower.address_street || '',
+                            city: borrower.address_city || '',
+                            state: borrower.address_state || '',
+                            postal_code: borrower.address_postal_code || '',
+                            country: borrower.address_country || ''
+                        };
+                    }
+                    
+                    // Clean up the individual address fields since we're sending them as nested object
+                    delete borrower.address_street;
+                    delete borrower.address_city;
+                    delete borrower.address_state;
+                    delete borrower.address_postal_code;
+                    delete borrower.address_country;
+                });
+            }
             
             // CRITICAL FIX: For guarantors in new applications, set borrower and application to null
             if (applicationData.guarantors && applicationData.guarantors.length > 0) {

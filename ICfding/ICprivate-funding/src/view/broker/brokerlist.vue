@@ -186,8 +186,16 @@ const handleCheckAllChange = (row) => {
     }
     isSelected.value = false
 }
-const handleView = (row) => {
-    router.push(`/broker/${row.id}`)
+const handleView = async (row) => {
+    try {
+        if (!row || !row.id) {
+            console.error('Invalid row data for navigation:', row)
+            return
+        }
+        await router.push(`/broker/${row.id}`)
+    } catch (error) {
+        console.error('Navigation error:', error)
+    }
 }
 const handleEdit = (row) => {
     const id = row.name

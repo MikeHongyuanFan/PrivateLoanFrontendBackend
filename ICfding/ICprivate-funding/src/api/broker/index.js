@@ -108,6 +108,36 @@ export function putBdms(id, data) {
   })
 }
 
+// Applications endpoints
+export function brokerApplications(brokerId) {
+  return sendRequest({
+    url: `/api/brokers/${brokerId}/applications/`,
+    method: 'get',
+  })
+}
+
+export function branchApplications(branchId) {
+  return sendRequest({
+    url: `/api/brokers/branches/${branchId}/applications/`,
+    method: 'get',
+  })
+}
+
+export function bdmApplications(bdmId) {
+  return sendRequest({
+    url: `/api/brokers/bdms/${bdmId}/applications/`,
+    method: 'get',
+  })
+}
+
+// Branch related endpoints
+export function branchBrokers(branchId) {
+  return sendRequest({
+    url: `/api/brokers/branches/${branchId}/brokers/`,
+    method: 'get',
+  })
+}
+
 export const brokerApi = {
   brokers,
   broker,
@@ -124,5 +154,9 @@ export const brokerApi = {
   addBdms,
   deleteBdms,
   putBdms,
+  brokerApplications,
+  branchApplications,
+  bdmApplications,
+  branchBrokers,
 }
 

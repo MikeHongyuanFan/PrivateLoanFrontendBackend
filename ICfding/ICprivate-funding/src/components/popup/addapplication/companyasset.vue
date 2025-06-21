@@ -10,10 +10,14 @@
             </div>
         </div>
         <div v-for="(company, index) in companyList" :key="`company-asset-${index}-${company.company_name || 'unnamed'}`" class="company">
+            <div class="company-header">
+                <h2>{{ company.company_name || `Company ${index + 1}` }}</h2>
+                <p v-if="company.company_abn">ABN: {{ company.company_abn }}</p>
+            </div>
             <div class="long_item">
                 <h1>Assets</h1>
             </div>
-            <div v-for="(asset, idx) in company.assets" :key="idx" class="asset">
+            <div v-for="(asset, idx) in ensureAssets(company)" :key="idx" class="asset">
                 <div class="item">
                     <p>Asset Type <span class="required">*</span></p>
                     <el-select v-model="asset.asset_type" placeholder="Select asset type">
@@ -54,16 +58,16 @@
                     <span class="hint">Complete address if asset is a property</span>
                 </div>
                 <div class="buttons">
-                    <el-button type="danger" @click="$emit('removeAsset')" :disabled="company.assets.length <= 1">Remove</el-button>
+                    <el-button type="danger" @click="$emit('removeAsset', index)" :disabled="ensureAssets(company).length <= 1">Remove</el-button>
                 </div>
             </div>
             <div class="add">
-                <el-button type="primary" @click="$emit('addAsset')">Add Asset</el-button>
+                <el-button type="primary" @click="$emit('addAsset', index)">Add Asset</el-button>
             </div>
             <div class="long_item">
                 <h1>Liabilities</h1>
             </div>
-            <div v-for="(liability, idx) in company.liabilities" :key="idx" class="liability">
+            <div v-for="(liability, idx) in ensureLiabilities(company)" :key="idx" class="liability">
                 <div class="item">
                     <p>Liability Type <span class="required">*</span></p>
                     <el-select v-model="liability.liability_type" placeholder="Select liability type">
@@ -111,11 +115,11 @@
                     <span class="hint">Borrower/Guarantor classification</span>
                 </div>
                 <div class="buttons">
-                    <el-button type="danger" @click="$emit('removeLiability')" :disabled="company.liabilities.length <= 1">Remove</el-button>
+                    <el-button type="danger" @click="$emit('removeLiability', index)" :disabled="ensureLiabilities(company).length <= 1">Remove</el-button>
                 </div>
             </div>
             <div class="add">
-                <el-button type="primary" @click="$emit('addLiability')">Add Liability</el-button>
+                <el-button type="primary" @click="$emit('addLiability', index)">Add Liability</el-button>
             </div>
             <div class="long_item">
                 <h1>Financial Summary</h1>
@@ -151,12 +155,20 @@
 
     const emit = defineEmits(['addAsset', 'removeAsset', 'addLiability', 'removeLiability', 'addCompany']);
 
-    // Computed property to ensure reactivity
-    const companyList = computed(() => props.company || []);
+    // Computed property to ensure reactivity and filter out empty companies
+    const companyList = computed(() => {
+        const companies = props.company || [];
+        console.log("CompanyAssets: Raw company data:", companies);
+        
+        // Simply return all companies - don't filter out empty ones as they may be in the process of being filled
+        console.log("CompanyAssets: Using companies:", companies);
+        return companies;
+    });
 
     // Watch for changes in the company array
     watch(() => props.company, (newCompany) => {
         console.log("CompanyAssets: Company data changed:", newCompany);
+        console.log("CompanyAssets: Company array length:", newCompany?.length || 0);
     }, { deep: true, immediate: true });
 
     // Watch for changes in company array length
@@ -179,6 +191,22 @@
             const amount = parseFloat(liability.amount) || 0;
             return total + amount;
         }, 0);
+    };
+
+    // New function to ensure assets are properly initialized
+    const ensureAssets = (company) => {
+        if (!company?.assets || !Array.isArray(company.assets)) {
+            return [];
+        }
+        return company.assets;
+    };
+
+    // New function to ensure liabilities are properly initialized
+    const ensureLiabilities = (company) => {
+        if (!company?.liabilities || !Array.isArray(company.liabilities)) {
+            return [];
+        }
+        return company.liabilities;
     };
 </script>
 
@@ -209,6 +237,25 @@
         display: grid;
         grid-template-columns: repeat(3, 1fr);
         gap: 15px;
+    }
+    .company-header {
+        grid-column: 1 / 4;
+        padding: 15px;
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        border-left: 4px solid #2984DE;
+    }
+    .company-header h2 {
+        margin: 0;
+        color: #2984DE;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+    .company-header p {
+        margin: 5px 0 0 0;
+        color: #666;
+        font-size: 0.8rem;
     }
     .item {
         display: flex;

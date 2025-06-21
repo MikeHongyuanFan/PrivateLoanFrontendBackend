@@ -2,22 +2,38 @@
     <div class="content">
         <div class="item">
             <p class="title">Finance Takeout Method</p>
-            <p>{{ exit.methods || '-' }}</p>
+            <p>{{ formatExitStrategy(detail.exit_strategy) || '-' }}</p>
         </div>
         <div class="item">
             <p class="title">Details (If Other)</p>
-            <p>{{ exit.detail || '-' }}</p>
+            <p>{{ detail.exit_strategy_details || '-' }}</p>
         </div>
     </div>
 </template>
 
 <script setup>
-    import { ref } from 'vue';
+    import { computed } from 'vue';
 
-    const exit = ref({
-        methods: "",
-        detail: ""
-    })
+    const props = defineProps({
+        detail: {
+            type: Object,
+            required: true
+        }
+    });
+
+    // Helper function to format exit strategy for display
+    const formatExitStrategy = (strategy) => {
+        if (!strategy) return null;
+        
+        const strategyMap = {
+            'sale': 'Sale of Property',
+            'refinance': 'Refinance',
+            'income': 'Income/Cash Flow',
+            'other': 'Other'
+        };
+        
+        return strategyMap[strategy] || strategy;
+    };
 </script>
 
 <style scoped>

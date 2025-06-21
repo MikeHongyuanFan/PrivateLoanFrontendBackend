@@ -3153,7 +3153,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/PaginatedCompanyAssetList"
+                                    "$ref": "#/components/schemas/PaginatedAssetList"
                                 }
                             }
                         },
@@ -3181,21 +3181,20 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/CompanyAssetRequest"
+                                "$ref": "#/components/schemas/AssetRequest"
                             }
                         },
                         "application/x-www-form-urlencoded": {
                             "schema": {
-                                "$ref": "#/components/schemas/CompanyAssetRequest"
+                                "$ref": "#/components/schemas/AssetRequest"
                             }
                         },
                         "multipart/form-data": {
                             "schema": {
-                                "$ref": "#/components/schemas/CompanyAssetRequest"
+                                "$ref": "#/components/schemas/AssetRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -3210,7 +3209,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/CompanyAsset"
+                                    "$ref": "#/components/schemas/Asset"
                                 }
                             }
                         },
@@ -3257,7 +3256,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/CompanyAsset"
+                                    "$ref": "#/components/schemas/Asset"
                                 }
                             }
                         },
@@ -3293,21 +3292,20 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/CompanyAssetRequest"
+                                "$ref": "#/components/schemas/AssetRequest"
                             }
                         },
                         "application/x-www-form-urlencoded": {
                             "schema": {
-                                "$ref": "#/components/schemas/CompanyAssetRequest"
+                                "$ref": "#/components/schemas/AssetRequest"
                             }
                         },
                         "multipart/form-data": {
                             "schema": {
-                                "$ref": "#/components/schemas/CompanyAssetRequest"
+                                "$ref": "#/components/schemas/AssetRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -3322,7 +3320,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/CompanyAsset"
+                                    "$ref": "#/components/schemas/Asset"
                                 }
                             }
                         },
@@ -3358,17 +3356,17 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/PatchedCompanyAssetRequest"
+                                "$ref": "#/components/schemas/PatchedAssetRequest"
                             }
                         },
                         "application/x-www-form-urlencoded": {
                             "schema": {
-                                "$ref": "#/components/schemas/PatchedCompanyAssetRequest"
+                                "$ref": "#/components/schemas/PatchedAssetRequest"
                             }
                         },
                         "multipart/form-data": {
                             "schema": {
-                                "$ref": "#/components/schemas/PatchedCompanyAssetRequest"
+                                "$ref": "#/components/schemas/PatchedAssetRequest"
                             }
                         }
                     }
@@ -3386,7 +3384,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/CompanyAsset"
+                                    "$ref": "#/components/schemas/Asset"
                                 }
                             }
                         },
@@ -3877,7 +3875,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/PaginatedGuarantorAssetList"
+                                    "$ref": "#/components/schemas/PaginatedAssetList"
                                 }
                             }
                         },
@@ -3905,21 +3903,20 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/GuarantorAssetRequest"
+                                "$ref": "#/components/schemas/AssetRequest"
                             }
                         },
                         "application/x-www-form-urlencoded": {
                             "schema": {
-                                "$ref": "#/components/schemas/GuarantorAssetRequest"
+                                "$ref": "#/components/schemas/AssetRequest"
                             }
                         },
                         "multipart/form-data": {
                             "schema": {
-                                "$ref": "#/components/schemas/GuarantorAssetRequest"
+                                "$ref": "#/components/schemas/AssetRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -3934,7 +3931,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/GuarantorAsset"
+                                    "$ref": "#/components/schemas/Asset"
                                 }
                             }
                         },
@@ -3981,7 +3978,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/GuarantorAsset"
+                                    "$ref": "#/components/schemas/Asset"
                                 }
                             }
                         },
@@ -4017,21 +4014,20 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/GuarantorAssetRequest"
+                                "$ref": "#/components/schemas/AssetRequest"
                             }
                         },
                         "application/x-www-form-urlencoded": {
                             "schema": {
-                                "$ref": "#/components/schemas/GuarantorAssetRequest"
+                                "$ref": "#/components/schemas/AssetRequest"
                             }
                         },
                         "multipart/form-data": {
                             "schema": {
-                                "$ref": "#/components/schemas/GuarantorAssetRequest"
+                                "$ref": "#/components/schemas/AssetRequest"
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "security": [
                     {
@@ -4046,7 +4042,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/GuarantorAsset"
+                                    "$ref": "#/components/schemas/Asset"
                                 }
                             }
                         },
@@ -4082,17 +4078,17 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/PatchedGuarantorAssetRequest"
+                                "$ref": "#/components/schemas/PatchedAssetRequest"
                             }
                         },
                         "application/x-www-form-urlencoded": {
                             "schema": {
-                                "$ref": "#/components/schemas/PatchedGuarantorAssetRequest"
+                                "$ref": "#/components/schemas/PatchedAssetRequest"
                             }
                         },
                         "multipart/form-data": {
                             "schema": {
-                                "$ref": "#/components/schemas/PatchedGuarantorAssetRequest"
+                                "$ref": "#/components/schemas/PatchedAssetRequest"
                             }
                         }
                     }
@@ -4110,7 +4106,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/GuarantorAsset"
+                                    "$ref": "#/components/schemas/Asset"
                                 }
                             }
                         },
@@ -5453,6 +5449,46 @@
                 "responses": {
                     "204": {
                         "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/brokers/branches/{id}/applications/": {
+            "get": {
+                "operationId": "brokers_branches_applications_retrieve",
+                "description": "Get all applications for a branch",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "A unique integer value identifying this branch.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "brokers"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Branch"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 }
             }
@@ -10777,84 +10813,6 @@
                     "total_repaid"
                 ]
             },
-            "ApplicationLiability": {
-                "type": "object",
-                "description": "Serializer for application-specific liability information",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "readOnly": true
-                    },
-                    "liability_type": {
-                        "$ref": "#/components/schemas/LiabilityTypeEnum"
-                    },
-                    "description": {
-                        "type": "string"
-                    },
-                    "amount": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
-                    },
-                    "monthly_payment": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "bg_type": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/BgType856Enum"
-                            }
-                        ],
-                        "description": "Indicates if this liability belongs to B/G1 or B/G2\n\n* `bg1` - B/G1\n* `bg2` - B/G2"
-                    }
-                },
-                "required": [
-                    "amount",
-                    "description",
-                    "id",
-                    "liability_type"
-                ]
-            },
-            "ApplicationLiabilityRequest": {
-                "type": "object",
-                "description": "Serializer for application-specific liability information",
-                "properties": {
-                    "liability_type": {
-                        "$ref": "#/components/schemas/LiabilityTypeEnum"
-                    },
-                    "description": {
-                        "type": "string",
-                        "minLength": 1
-                    },
-                    "amount": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$"
-                    },
-                    "monthly_payment": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "bg_type": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/BgType856Enum"
-                            }
-                        ],
-                        "description": "Indicates if this liability belongs to B/G1 or B/G2\n\n* `bg1` - B/G1\n* `bg2` - B/G2"
-                    }
-                },
-                "required": [
-                    "amount",
-                    "description",
-                    "liability_type"
-                ]
-            },
             "ApplicationList": {
                 "type": "object",
                 "description": "Serializer for listing applications with summary information",
@@ -11188,7 +11146,7 @@
             },
             "Asset": {
                 "type": "object",
-                "description": "Serializer for borrower assets with null/blank handling for minimal data creation",
+                "description": "Unified serializer for all assets (borrower, guarantor, company) using the same Asset table",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -11254,7 +11212,7 @@
             },
             "AssetRequest": {
                 "type": "object",
-                "description": "Serializer for borrower assets with null/blank handling for minimal data creation",
+                "description": "Unified serializer for all assets (borrower, guarantor, company) using the same Asset table",
                 "properties": {
                     "asset_type": {
                         "nullable": true,
@@ -11411,14 +11369,6 @@
                     }
                 }
             },
-            "BgType856Enum": {
-                "enum": [
-                    "bg1",
-                    "bg2"
-                ],
-                "type": "string",
-                "description": "* `bg1` - B/G1\n* `bg2` - B/G2"
-            },
             "BgTypeEnum": {
                 "enum": [
                     "BG1",
@@ -11533,6 +11483,63 @@
                             "$ref": "#/components/schemas/Liability"
                         },
                         "readOnly": true
+                    },
+                    "employment_type": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/EmploymentTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    },
+                    "employer_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 255
+                    },
+                    "job_title": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 100
+                    },
+                    "annual_income": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "employment_duration": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
+                        "nullable": true,
+                        "description": "Duration in months"
+                    },
+                    "employer_address": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "other_income": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "monthly_expenses": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "mailing_address": {
+                        "type": "string",
+                        "nullable": true
                     }
                 },
                 "required": [
@@ -12564,6 +12571,63 @@
                         "type": "string",
                         "nullable": true,
                         "maxLength": 255
+                    },
+                    "employment_type": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/EmploymentTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    },
+                    "employer_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 255
+                    },
+                    "job_title": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 100
+                    },
+                    "annual_income": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "employment_duration": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
+                        "nullable": true,
+                        "description": "Duration in months"
+                    },
+                    "employer_address": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "other_income": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "monthly_expenses": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "mailing_address": {
+                        "type": "string",
+                        "nullable": true
                     }
                 }
             },
@@ -12730,6 +12794,11 @@
                 "type": "object",
                 "description": "Serializer for detailed broker information with null/blank handling for minimal data creation",
                 "properties": {
+                    "branch_id": {
+                        "type": "integer",
+                        "writeOnly": true,
+                        "nullable": true
+                    },
                     "name": {
                         "type": "string",
                         "nullable": true,
@@ -12813,81 +12882,6 @@
                 },
                 "required": [
                     "id"
-                ]
-            },
-            "CompanyAsset": {
-                "type": "object",
-                "description": "Serializer for company assets",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "readOnly": true
-                    },
-                    "asset_type": {
-                        "$ref": "#/components/schemas/AssetTypeEnum"
-                    },
-                    "description": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "value": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "amount_owing": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "to_be_refinanced": {
-                        "type": "boolean"
-                    },
-                    "address": {
-                        "type": "string",
-                        "nullable": true
-                    }
-                },
-                "required": [
-                    "asset_type",
-                    "id"
-                ]
-            },
-            "CompanyAssetRequest": {
-                "type": "object",
-                "description": "Serializer for company assets",
-                "properties": {
-                    "asset_type": {
-                        "$ref": "#/components/schemas/AssetTypeEnum"
-                    },
-                    "description": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "value": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "amount_owing": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "to_be_refinanced": {
-                        "type": "boolean"
-                    },
-                    "address": {
-                        "type": "string",
-                        "nullable": true
-                    }
-                },
-                "required": [
-                    "asset_type"
                 ]
             },
             "CompanyBorrower": {
@@ -12978,7 +12972,7 @@
                     "assets": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/CompanyAsset"
+                            "$ref": "#/components/schemas/Asset"
                         }
                     },
                     "liabilities": {
@@ -13076,7 +13070,7 @@
                     "assets": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/CompanyAssetRequest"
+                            "$ref": "#/components/schemas/AssetRequest"
                         }
                     },
                     "liabilities": {
@@ -13828,6 +13822,20 @@
                             }
                         ]
                     },
+                    "title": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/TitleEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    },
                     "first_name": {
                         "type": "string",
                         "nullable": true,
@@ -13854,8 +13862,93 @@
                         "format": "date",
                         "nullable": true
                     },
+                    "drivers_licence_no": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 50
+                    },
+                    "home_phone": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 20
+                    },
+                    "address_unit": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 20
+                    },
+                    "address_street_no": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 20
+                    },
+                    "address_street_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 100
+                    },
+                    "address_suburb": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 100
+                    },
+                    "address_state": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 50
+                    },
+                    "address_postcode": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 10
+                    },
                     "address": {
                         "$ref": "#/components/schemas/Address"
+                    },
+                    "occupation": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 100
+                    },
+                    "employer_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 255
+                    },
+                    "employment_type": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/GuarantorEmploymentTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    },
+                    "annual_income": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "company_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 255
+                    },
+                    "company_abn": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 20
+                    },
+                    "company_acn": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 20
                     },
                     "employment_info": {
                         "$ref": "#/components/schemas/EmploymentInfo"
@@ -13866,121 +13959,18 @@
                     "assets": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/GuarantorAsset"
-                        },
-                        "readOnly": true
+                            "$ref": "#/components/schemas/Asset"
+                        }
                     },
                     "liabilities": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/ApplicationLiability"
-                        },
-                        "readOnly": true
+                            "$ref": "#/components/schemas/Liability"
+                        }
                     }
                 },
                 "required": [
-                    "assets",
-                    "id",
-                    "liabilities"
-                ]
-            },
-            "GuarantorAsset": {
-                "type": "object",
-                "description": "Serializer for guarantor assets",
-                "properties": {
-                    "id": {
-                        "type": "integer",
-                        "readOnly": true
-                    },
-                    "asset_type": {
-                        "$ref": "#/components/schemas/AssetTypeEnum"
-                    },
-                    "description": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "value": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "amount_owing": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "address": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "bg_type": {
-                        "nullable": true,
-                        "description": "Indicates if this asset belongs to BG1 or BG2 (only for guarantor assets)\n\n* `BG1` - BG1\n* `BG2` - BG2",
-                        "oneOf": [
-                            {
-                                "$ref": "#/components/schemas/BgTypeEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/BlankEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/NullEnum"
-                            }
-                        ]
-                    }
-                },
-                "required": [
-                    "asset_type",
                     "id"
-                ]
-            },
-            "GuarantorAssetRequest": {
-                "type": "object",
-                "description": "Serializer for guarantor assets",
-                "properties": {
-                    "asset_type": {
-                        "$ref": "#/components/schemas/AssetTypeEnum"
-                    },
-                    "description": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "value": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "amount_owing": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "address": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "bg_type": {
-                        "nullable": true,
-                        "description": "Indicates if this asset belongs to BG1 or BG2 (only for guarantor assets)\n\n* `BG1` - BG1\n* `BG2` - BG2",
-                        "oneOf": [
-                            {
-                                "$ref": "#/components/schemas/BgTypeEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/BlankEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/NullEnum"
-                            }
-                        ]
-                    }
-                },
-                "required": [
-                    "asset_type"
                 ]
             },
             "GuarantorEmploymentTypeEnum": {
@@ -14011,6 +14001,20 @@
                             }
                         ]
                     },
+                    "title": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/TitleEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    },
                     "first_name": {
                         "type": "string",
                         "nullable": true,
@@ -14037,14 +14041,111 @@
                         "format": "date",
                         "nullable": true
                     },
+                    "drivers_licence_no": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 50
+                    },
+                    "home_phone": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 20
+                    },
+                    "address_unit": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 20
+                    },
+                    "address_street_no": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 20
+                    },
+                    "address_street_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 100
+                    },
+                    "address_suburb": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 100
+                    },
+                    "address_state": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 50
+                    },
+                    "address_postcode": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 10
+                    },
                     "address": {
                         "$ref": "#/components/schemas/AddressRequest"
+                    },
+                    "occupation": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 100
+                    },
+                    "employer_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 255
+                    },
+                    "employment_type": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/GuarantorEmploymentTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    },
+                    "annual_income": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "company_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 255
+                    },
+                    "company_abn": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 20
+                    },
+                    "company_acn": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 20
                     },
                     "employment_info": {
                         "$ref": "#/components/schemas/EmploymentInfoRequest"
                     },
                     "financial_info": {
                         "$ref": "#/components/schemas/FinancialInfoRequest"
+                    },
+                    "assets": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AssetRequest"
+                        }
+                    },
+                    "liabilities": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LiabilityRequest"
+                        }
                     }
                 }
             },
@@ -14157,7 +14258,7 @@
             },
             "Liability": {
                 "type": "object",
-                "description": "Serializer for borrower liabilities with null/blank handling for minimal data creation",
+                "description": "Unified serializer for all liabilities (borrower, guarantor, company) using the same Liability table",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -14207,7 +14308,7 @@
                         "description": "Indicates if this liability belongs to B/G1 or B/G2\n\n* `bg1` - B/G1\n* `bg2` - B/G2",
                         "oneOf": [
                             {
-                                "$ref": "#/components/schemas/BgType856Enum"
+                                "$ref": "#/components/schemas/LiabilityBgTypeEnum"
                             },
                             {
                                 "$ref": "#/components/schemas/BlankEnum"
@@ -14222,9 +14323,17 @@
                     "id"
                 ]
             },
+            "LiabilityBgTypeEnum": {
+                "enum": [
+                    "bg1",
+                    "bg2"
+                ],
+                "type": "string",
+                "description": "* `bg1` - B/G1\n* `bg2` - B/G2"
+            },
             "LiabilityRequest": {
                 "type": "object",
-                "description": "Serializer for borrower liabilities with null/blank handling for minimal data creation",
+                "description": "Unified serializer for all liabilities (borrower, guarantor, company) using the same Liability table",
                 "properties": {
                     "liability_type": {
                         "nullable": true,
@@ -14270,7 +14379,7 @@
                         "description": "Indicates if this liability belongs to B/G1 or B/G2\n\n* `bg1` - B/G1\n* `bg2` - B/G2",
                         "oneOf": [
                             {
-                                "$ref": "#/components/schemas/BgType856Enum"
+                                "$ref": "#/components/schemas/LiabilityBgTypeEnum"
                             },
                             {
                                 "$ref": "#/components/schemas/BlankEnum"
@@ -14899,6 +15008,14 @@
                     null
                 ]
             },
+            "OccupancyEnum": {
+                "enum": [
+                    "owner_occupied",
+                    "investment"
+                ],
+                "type": "string",
+                "description": "* `owner_occupied` - Owner Occupied\n* `investment` - Investment Property"
+            },
             "OutputFormatEnum": {
                 "enum": [
                     "pdf",
@@ -14930,6 +15047,33 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/ApplicationList"
+                        }
+                    }
+                }
+            },
+            "PaginatedAssetList": {
+                "type": "object",
+                "properties": {
+                    "count": {
+                        "type": "integer",
+                        "example": 123
+                    },
+                    "next": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?page=4"
+                    },
+                    "previous": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "example": "http://api.example.org/accounts/?page=2"
+                    },
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Asset"
                         }
                     }
                 }
@@ -15069,33 +15213,6 @@
                     }
                 }
             },
-            "PaginatedCompanyAssetList": {
-                "type": "object",
-                "properties": {
-                    "count": {
-                        "type": "integer",
-                        "example": 123
-                    },
-                    "next": {
-                        "type": "string",
-                        "nullable": true,
-                        "format": "uri",
-                        "example": "http://api.example.org/accounts/?page=4"
-                    },
-                    "previous": {
-                        "type": "string",
-                        "nullable": true,
-                        "format": "uri",
-                        "example": "http://api.example.org/accounts/?page=2"
-                    },
-                    "results": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/CompanyAsset"
-                        }
-                    }
-                }
-            },
             "PaginatedDocumentList": {
                 "type": "object",
                 "properties": {
@@ -15146,33 +15263,6 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Fee"
-                        }
-                    }
-                }
-            },
-            "PaginatedGuarantorAssetList": {
-                "type": "object",
-                "properties": {
-                    "count": {
-                        "type": "integer",
-                        "example": 123
-                    },
-                    "next": {
-                        "type": "string",
-                        "nullable": true,
-                        "format": "uri",
-                        "example": "http://api.example.org/accounts/?page=4"
-                    },
-                    "previous": {
-                        "type": "string",
-                        "nullable": true,
-                        "format": "uri",
-                        "example": "http://api.example.org/accounts/?page=2"
-                    },
-                    "results": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/GuarantorAsset"
                         }
                     }
                 }
@@ -15513,6 +15603,65 @@
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/ApplicationTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    }
+                }
+            },
+            "PatchedAssetRequest": {
+                "type": "object",
+                "description": "Unified serializer for all assets (borrower, guarantor, company) using the same Asset table",
+                "properties": {
+                    "asset_type": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/AssetTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "value": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "amount_owing": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "to_be_refinanced": {
+                        "type": "boolean",
+                        "nullable": true
+                    },
+                    "address": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "bg_type": {
+                        "nullable": true,
+                        "description": "Indicates if this asset belongs to BG1 or BG2 (only for guarantor assets)\n\n* `BG1` - BG1\n* `BG2` - BG2",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/BgTypeEnum"
                             },
                             {
                                 "$ref": "#/components/schemas/BlankEnum"
@@ -16013,6 +16162,11 @@
                 "type": "object",
                 "description": "Serializer for detailed broker information with null/blank handling for minimal data creation",
                 "properties": {
+                    "branch_id": {
+                        "type": "integer",
+                        "writeOnly": true,
+                        "nullable": true
+                    },
                     "name": {
                         "type": "string",
                         "nullable": true,
@@ -16060,38 +16214,6 @@
                     },
                     "user": {
                         "type": "integer",
-                        "nullable": true
-                    }
-                }
-            },
-            "PatchedCompanyAssetRequest": {
-                "type": "object",
-                "description": "Serializer for company assets",
-                "properties": {
-                    "asset_type": {
-                        "$ref": "#/components/schemas/AssetTypeEnum"
-                    },
-                    "description": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "value": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "amount_owing": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "to_be_refinanced": {
-                        "type": "boolean"
-                    },
-                    "address": {
-                        "type": "string",
                         "nullable": true
                     }
                 }
@@ -16188,50 +16310,6 @@
                     "application": {
                         "type": "integer",
                         "nullable": true
-                    }
-                }
-            },
-            "PatchedGuarantorAssetRequest": {
-                "type": "object",
-                "description": "Serializer for guarantor assets",
-                "properties": {
-                    "asset_type": {
-                        "$ref": "#/components/schemas/AssetTypeEnum"
-                    },
-                    "description": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "value": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "amount_owing": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true
-                    },
-                    "address": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "bg_type": {
-                        "nullable": true,
-                        "description": "Indicates if this asset belongs to BG1 or BG2 (only for guarantor assets)\n\n* `BG1` - BG1\n* `BG2` - BG2",
-                        "oneOf": [
-                            {
-                                "$ref": "#/components/schemas/BgTypeEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/BlankEnum"
-                            },
-                            {
-                                "$ref": "#/components/schemas/NullEnum"
-                            }
-                        ]
                     }
                 }
             },
@@ -17212,131 +17290,12 @@
                             }
                         ]
                     },
-                    "address_unit": {
-                        "type": "string",
+                    "occupancy": {
                         "nullable": true,
-                        "description": "Unit/apartment number",
-                        "maxLength": 20
-                    },
-                    "address_street_no": {
-                        "type": "string",
-                        "nullable": true,
-                        "description": "Street number",
-                        "maxLength": 20
-                    },
-                    "address_street_name": {
-                        "type": "string",
-                        "nullable": true,
-                        "description": "Street name",
-                        "maxLength": 100
-                    },
-                    "address_suburb": {
-                        "type": "string",
-                        "nullable": true,
-                        "description": "Suburb/city",
-                        "maxLength": 100
-                    },
-                    "address_state": {
-                        "type": "string",
-                        "nullable": true,
-                        "description": "State/territory",
-                        "maxLength": 50
-                    },
-                    "address_postcode": {
-                        "type": "string",
-                        "nullable": true,
-                        "description": "Postal code",
-                        "maxLength": 10
-                    },
-                    "estimated_value": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true,
-                        "description": "Estimated property value"
-                    },
-                    "purchase_price": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true,
-                        "description": "Property purchase price"
-                    },
-                    "current_debt_position": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
-                        "nullable": true,
-                        "description": "Current outstanding debt amount"
-                    },
-                    "current_mortgagee": {
-                        "type": "string",
-                        "nullable": true,
-                        "description": "Current mortgage holder",
-                        "maxLength": 255
-                    },
-                    "first_mortgage": {
-                        "type": "string",
-                        "nullable": true,
-                        "description": "First mortgage details",
-                        "maxLength": 255
-                    },
-                    "second_mortgage": {
-                        "type": "string",
-                        "nullable": true,
-                        "description": "Second mortgage details",
-                        "maxLength": 255
-                    },
-                    "bedrooms": {
-                        "type": "integer",
-                        "maximum": 2147483647,
-                        "minimum": 0,
-                        "nullable": true,
-                        "description": "Number of bedrooms"
-                    },
-                    "bathrooms": {
-                        "type": "integer",
-                        "maximum": 2147483647,
-                        "minimum": 0,
-                        "nullable": true,
-                        "description": "Number of bathrooms"
-                    },
-                    "car_spaces": {
-                        "type": "integer",
-                        "maximum": 2147483647,
-                        "minimum": 0,
-                        "nullable": true,
-                        "description": "Number of car spaces"
-                    },
-                    "building_size": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
-                        "nullable": true,
-                        "description": "Building size in square meters"
-                    },
-                    "land_size": {
-                        "type": "string",
-                        "format": "decimal",
-                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
-                        "nullable": true,
-                        "description": "Land size in square meters"
-                    }
-                },
-                "required": [
-                    "id"
-                ]
-            },
-            "SecurityPropertyRequest": {
-                "type": "object",
-                "description": "Serializer for security properties with null/blank handling for minimal data creation",
-                "properties": {
-                    "property_type": {
-                        "nullable": true,
-                        "description": "Type of property\n\n* `residential` - Residential\n* `commercial` - Commercial\n* `industrial` - Industrial\n* `retail` - Retail\n* `land` - Land\n* `rural` - Rural\n* `other` - Other",
+                        "description": "How the property is occupied\n\n* `owner_occupied` - Owner Occupied\n* `investment` - Investment Property",
                         "oneOf": [
                             {
-                                "$ref": "#/components/schemas/PropertyTypeEnum"
+                                "$ref": "#/components/schemas/OccupancyEnum"
                             },
                             {
                                 "$ref": "#/components/schemas/BlankEnum"
@@ -17455,6 +17414,195 @@
                         "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
                         "nullable": true,
                         "description": "Land size in square meters"
+                    },
+                    "is_single_story": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Whether the property is single story"
+                    },
+                    "has_garage": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Whether the property has a garage"
+                    },
+                    "has_carport": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Whether the property has a carport"
+                    },
+                    "has_off_street_parking": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Whether the property has off-street parking"
+                    }
+                },
+                "required": [
+                    "id"
+                ]
+            },
+            "SecurityPropertyRequest": {
+                "type": "object",
+                "description": "Serializer for security properties with null/blank handling for minimal data creation",
+                "properties": {
+                    "property_type": {
+                        "nullable": true,
+                        "description": "Type of property\n\n* `residential` - Residential\n* `commercial` - Commercial\n* `industrial` - Industrial\n* `retail` - Retail\n* `land` - Land\n* `rural` - Rural\n* `other` - Other",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/PropertyTypeEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    },
+                    "occupancy": {
+                        "nullable": true,
+                        "description": "How the property is occupied\n\n* `owner_occupied` - Owner Occupied\n* `investment` - Investment Property",
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/OccupancyEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/BlankEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    },
+                    "address_unit": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Unit/apartment number",
+                        "maxLength": 20
+                    },
+                    "address_street_no": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Street number",
+                        "maxLength": 20
+                    },
+                    "address_street_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Street name",
+                        "maxLength": 100
+                    },
+                    "address_suburb": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Suburb/city",
+                        "maxLength": 100
+                    },
+                    "address_state": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "State/territory",
+                        "maxLength": 50
+                    },
+                    "address_postcode": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Postal code",
+                        "maxLength": 10
+                    },
+                    "estimated_value": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
+                        "description": "Estimated property value"
+                    },
+                    "purchase_price": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
+                        "description": "Property purchase price"
+                    },
+                    "current_debt_position": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
+                        "description": "Current outstanding debt amount"
+                    },
+                    "current_mortgagee": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Current mortgage holder",
+                        "maxLength": 255
+                    },
+                    "first_mortgage": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "First mortgage details",
+                        "maxLength": 255
+                    },
+                    "second_mortgage": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Second mortgage details",
+                        "maxLength": 255
+                    },
+                    "bedrooms": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
+                        "nullable": true,
+                        "description": "Number of bedrooms"
+                    },
+                    "bathrooms": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
+                        "nullable": true,
+                        "description": "Number of bathrooms"
+                    },
+                    "car_spaces": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
+                        "nullable": true,
+                        "description": "Number of car spaces"
+                    },
+                    "building_size": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
+                        "description": "Building size in square meters"
+                    },
+                    "land_size": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
+                        "description": "Land size in square meters"
+                    },
+                    "is_single_story": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Whether the property is single story"
+                    },
+                    "has_garage": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Whether the property has a garage"
+                    },
+                    "has_carport": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Whether the property has a carport"
+                    },
+                    "has_off_street_parking": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Whether the property has off-street parking"
                     }
                 }
             },

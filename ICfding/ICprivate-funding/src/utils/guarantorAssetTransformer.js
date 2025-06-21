@@ -1,6 +1,14 @@
 /**
- * Utility functions to transform guarantor assets from the frontend format to the backend format
- * Refactored to more directly match the API schema
+ * Utility functions to transform guarantor assets and liabilities from the frontend format to the backend format
+ * 
+ * UNIFIED DATA STRUCTURE:
+ * - All assets (borrower, guarantor, company) are stored in the same Asset table
+ * - All liabilities (borrower, guarantor, company) are stored in the same Liability table  
+ * - The distinction is made through foreign key relationships (borrower_id vs guarantor_id)
+ * - Context-aware validation is handled by the unified serializers
+ * 
+ * This transformer works with the unified backend structure and converts the frontend
+ * form format to the proper unified Asset/Liability format for API submission.
  */
 
 /**
@@ -163,4 +171,128 @@ function processAsset(
     });
     console.log(`Added asset to guarantor 1 with BG2 (only one guarantor available)`);
   }
+}
+
+/**
+ * Transforms guarantor assets from the backend format back to the frontend format for editing
+ * @param {Array} guarantors - The guarantors array from backend with assets
+ * @returns {Object} - Frontend format guarantor asset object
+ */
+export function reverseTransformGuarantorAssets(guarantors) {
+  console.log("reverseTransformGuarantorAssets called with:", guarantors);
+  
+  if (!guarantors || !Array.isArray(guarantors) || guarantors.length === 0) {
+    console.log("No guarantors to reverse transform");
+    return createEmptyGuarantorAssetForm();
+  }
+
+  // Initialize empty frontend format
+  const frontendAssets = createEmptyGuarantorAssetForm();
+  
+  // Process each guarantor's assets
+  guarantors.forEach((guarantor, guarantorIndex) => {
+    if (!guarantor.assets || !Array.isArray(guarantor.assets)) {
+      return;
+    }
+    
+    guarantor.assets.forEach(asset => {
+      const bgType = asset.bg_type || 'BG1';
+      const isG1 = bgType === 'BG1';
+      const isG2 = bgType === 'BG2';
+      
+      // Map backend asset types to frontend format
+      switch (asset.asset_type) {
+        case 'Property':
+          // Find next available address slot
+          for (let i = 1; i <= 4; i++) {
+            if (!frontendAssets[`address${i}`]) {
+              frontendAssets[`address${i}`] = asset.description || asset.address || '';
+              frontendAssets[`address${i}Value`] = asset.value || '';
+              frontendAssets[`address${i}Owing`] = asset.amount_owing || '';
+              frontendAssets[`address${i}G1`] = isG1;
+              frontendAssets[`address${i}G2`] = isG2;
+              break;
+            }
+          }
+          break;
+          
+        case 'Vehicle':
+          if (!frontendAssets.vehicleValue) {
+            frontendAssets.vehicleValue = asset.value || '';
+            frontendAssets.vehicleOwing = asset.amount_owing || '';
+            frontendAssets.vehicleG1 = isG1;
+            frontendAssets.vehicleG2 = isG2;
+          }
+          break;
+          
+        case 'Savings':
+          if (!frontendAssets.savingValue) {
+            frontendAssets.savingValue = asset.value || '';
+            frontendAssets.savingOwing = asset.amount_owing || '';
+            frontendAssets.savingG1 = isG1;
+            frontendAssets.savingG2 = isG2;
+          }
+          break;
+          
+        case 'Investment Shares':
+          if (!frontendAssets.shareValue) {
+            frontendAssets.shareValue = asset.value || '';
+            frontendAssets.shareOwing = asset.amount_owing || '';
+            frontendAssets.shareG1 = isG1;
+            frontendAssets.shareG2 = isG2;
+          }
+          break;
+          
+        case 'Credit Card':
+          if (!frontendAssets.cardValue) {
+            frontendAssets.cardValue = asset.value || '';
+            frontendAssets.cardOwing = asset.amount_owing || '';
+            frontendAssets.cardG1 = isG1;
+            frontendAssets.cardG2 = isG2;
+          }
+          break;
+          
+        case 'Other Creditor':
+          if (!frontendAssets.creditorValue) {
+            frontendAssets.creditorValue = asset.value || '';
+            frontendAssets.creditorOwing = asset.amount_owing || '';
+            frontendAssets.creditorG1 = isG1;
+            frontendAssets.creditorG2 = isG2;
+          }
+          break;
+          
+        case 'Other':
+          if (!frontendAssets.otherValue) {
+            frontendAssets.otherValue = asset.value || '';
+            frontendAssets.otherOwing = asset.amount_owing || '';
+            frontendAssets.otherG1 = isG1;
+            frontendAssets.otherG2 = isG2;
+          }
+          break;
+      }
+    });
+  });
+  
+  console.log("Reverse transformed guarantor assets:", frontendAssets);
+  return frontendAssets;
+}
+
+/**
+ * Creates an empty guarantor asset form object
+ * @returns {Object} - Empty frontend format guarantor asset object
+ */
+function createEmptyGuarantorAssetForm() {
+  return {
+    address1: "", address1Value: "", address1Owing: "", address1G1: false, address1G2: false,
+    address2: "", address2Value: "", address2Owing: "", address2G1: false, address2G2: false,
+    address3: "", address3Value: "", address3Owing: "", address3G1: false, address3G2: false,
+    address4: "", address4Value: "", address4Owing: "", address4G1: false, address4G2: false,
+    vehicleValue: "", vehicleOwing: "", vehicleG1: false, vehicleG2: false,
+    savingValue: "", savingOwing: "", savingG1: false, savingG2: false,
+    shareValue: "", shareOwing: "", shareG1: false, shareG2: false,
+    cardValue: "", cardOwing: "", cardG1: false, cardG2: false,
+    creditorValue: "", creditorOwing: "", creditorG1: false, creditorG2: false,
+    otherValue: "", otherOwing: "", otherG1: false, otherG2: false,
+    totalValue: "", totalOwing: ""
+  };
 }

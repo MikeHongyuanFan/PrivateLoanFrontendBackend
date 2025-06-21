@@ -59,6 +59,17 @@ class BranchViewSet(viewsets.ModelViewSet):
         serializer = BDMSerializer(bdms, many=True)
         return Response(serializer.data)
     
+    @action(detail=True, methods=['get'])
+    def applications(self, request, pk=None):
+        """
+        Get all applications for a branch
+        """
+        branch = self.get_object()
+        from applications.serializers import ApplicationListSerializer
+        applications = branch.branch_applications.all().order_by('-created_at')
+        serializer = ApplicationListSerializer(applications, many=True)
+        return Response(serializer.data)
+    
     @action(detail=False, methods=['get'])
     def dropdown(self, request):
         """
@@ -132,7 +143,7 @@ class BrokerViewSet(viewsets.ModelViewSet):
         broker = self.get_object()
         
         # Get applications for this broker
-        applications = broker.applications.all()
+        applications = broker.broker_applications.all()
         
         # Calculate statistics
         total_applications = applications.count()
@@ -218,7 +229,7 @@ class BDMViewSet(viewsets.ModelViewSet):
         """
         bdm = self.get_object()
         from applications.serializers import ApplicationListSerializer
-        applications = bdm.applications.all().order_by('-created_at')
+        applications = bdm.bdm_applications.all().order_by('-created_at')
         serializer = ApplicationListSerializer(applications, many=True)
         return Response(serializer.data)
 
