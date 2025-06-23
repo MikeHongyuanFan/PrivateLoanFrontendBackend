@@ -5831,7 +5831,7 @@
         "/api/documents/documents/": {
             "get": {
                 "operationId": "documents_documents_list",
-                "description": "API endpoint for managing documents",
+                "description": "API endpoint for managing documents with enhanced search capabilities",
                 "parameters": [
                     {
                         "in": "query",
@@ -5842,9 +5842,23 @@
                     },
                     {
                         "in": "query",
+                        "name": "application_search",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
                         "name": "borrower",
                         "schema": {
                             "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "borrower_search",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     {
@@ -5938,7 +5952,7 @@
             },
             "post": {
                 "operationId": "documents_documents_create",
-                "description": "API endpoint for managing documents",
+                "description": "API endpoint for managing documents with enhanced search capabilities",
                 "tags": [
                     "documents"
                 ],
@@ -5981,7 +5995,7 @@
         "/api/documents/documents/{id}/": {
             "get": {
                 "operationId": "documents_documents_retrieve",
-                "description": "API endpoint for managing documents",
+                "description": "API endpoint for managing documents with enhanced search capabilities",
                 "parameters": [
                     {
                         "in": "path",
@@ -6019,7 +6033,7 @@
             },
             "put": {
                 "operationId": "documents_documents_update",
-                "description": "API endpoint for managing documents",
+                "description": "API endpoint for managing documents with enhanced search capabilities",
                 "parameters": [
                     {
                         "in": "path",
@@ -6071,7 +6085,7 @@
             },
             "patch": {
                 "operationId": "documents_documents_partial_update",
-                "description": "API endpoint for managing documents",
+                "description": "API endpoint for managing documents with enhanced search capabilities",
                 "parameters": [
                     {
                         "in": "path",
@@ -6123,7 +6137,7 @@
             },
             "delete": {
                 "operationId": "documents_documents_destroy",
-                "description": "API endpoint for managing documents",
+                "description": "API endpoint for managing documents with enhanced search capabilities",
                 "parameters": [
                     {
                         "in": "path",
@@ -13282,7 +13296,7 @@
             },
             "Document": {
                 "type": "object",
-                "description": "Serializer for documents with null/blank handling for minimal data creation",
+                "description": "Serializer for documents with enhanced application and borrower details",
                 "properties": {
                     "id": {
                         "type": "integer",
@@ -13298,6 +13312,28 @@
                     },
                     "file_url": {
                         "type": "string",
+                        "readOnly": true
+                    },
+                    "application_reference": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "application_stage": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "borrower_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "borrower_email": {
+                        "type": "string",
+                        "format": "email",
+                        "readOnly": true
+                    },
+                    "borrower_address": {
+                        "type": "object",
+                        "additionalProperties": {},
                         "readOnly": true
                     },
                     "title": {
@@ -13378,6 +13414,11 @@
                     }
                 },
                 "required": [
+                    "application_reference",
+                    "application_stage",
+                    "borrower_address",
+                    "borrower_email",
+                    "borrower_name",
                     "created_at",
                     "created_by",
                     "created_by_name",
@@ -13393,7 +13434,7 @@
             },
             "DocumentRequest": {
                 "type": "object",
-                "description": "Serializer for documents with null/blank handling for minimal data creation",
+                "description": "Serializer for documents with enhanced application and borrower details",
                 "properties": {
                     "title": {
                         "type": "string",
@@ -16343,7 +16384,7 @@
             },
             "PatchedDocumentRequest": {
                 "type": "object",
-                "description": "Serializer for documents with null/blank handling for minimal data creation",
+                "description": "Serializer for documents with enhanced application and borrower details",
                 "properties": {
                     "title": {
                         "type": "string",

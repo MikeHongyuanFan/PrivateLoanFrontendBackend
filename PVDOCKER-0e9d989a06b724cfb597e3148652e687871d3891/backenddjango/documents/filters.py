@@ -8,6 +8,8 @@ class DocumentFilter(django_filters.FilterSet):
     Custom filter for documents with advanced filtering options
     """
     search = django_filters.CharFilter(method='search_filter')
+    application_search = django_filters.CharFilter(method='application_search_filter')
+    borrower_search = django_filters.CharFilter(method='borrower_search_filter')
     created_after = django_filters.DateFilter(field_name="created_at", lookup_expr='gte')
     created_before = django_filters.DateFilter(field_name="created_at", lookup_expr='lte')
     
@@ -15,6 +17,7 @@ class DocumentFilter(django_filters.FilterSet):
         model = Document
         fields = [
             'document_type', 'application', 'borrower', 'search',
+            'application_search', 'borrower_search',
             'created_after', 'created_before'
         ]
     
@@ -26,6 +29,29 @@ class DocumentFilter(django_filters.FilterSet):
             Q(title__icontains=value) |
             Q(description__icontains=value) |
             Q(file_name__icontains=value)
+        )
+    
+    def application_search_filter(self, queryset, name, value):
+        """
+        Search by application reference number or ID
+        """
+        return queryset.filter(
+            Q(application__reference_number__icontains=value) |
+            Q(application__id__iexact=value)
+        )
+    
+    def borrower_search_filter(self, queryset, name, value):
+        """
+        Search by borrower name or address
+        """
+        return queryset.filter(
+            Q(borrower__first_name__icontains=value) |
+            Q(borrower__last_name__icontains=value) |
+            Q(borrower__email__icontains=value) |
+            Q(borrower__address__street__icontains=value) |
+            Q(borrower__address__city__icontains=value) |
+            Q(borrower__address__state__icontains=value) |
+            Q(borrower__address__postal_code__icontains=value)
         )
 
 

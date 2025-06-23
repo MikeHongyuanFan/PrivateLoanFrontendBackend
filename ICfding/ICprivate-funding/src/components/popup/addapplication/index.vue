@@ -364,7 +364,7 @@
         application_type_other: "",
         product_id: "",
         estimated_settlement_date: "",
-        stage: "inquiry",
+        stage: "received",
         broker: null,
         bd_id: null,
         branch_id: null,

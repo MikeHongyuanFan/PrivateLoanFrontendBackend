@@ -12,6 +12,14 @@
         </div>
         <el-scrollbar v-else>
             <div class="popup_content">
+                <!-- Add stage display -->
+                <div class="stage-section">
+                    <h2>Current Stage</h2>
+                    <el-tag :type="getStageTagType(application.stage)" size="large">
+                        {{ getStageDisplay(application.stage) }}
+                    </el-tag>
+                </div>
+                
                 <el-collapse v-model="activeNames" accordion style="--el-collapse-border-color: none;">
                     <el-collapse-item name="1">
                         <template #title>
@@ -432,6 +440,22 @@ const handleSave = async () => {
         
         // Create a deep copy and transform data
         const applicationData = JSON.parse(JSON.stringify(application.value));
+        
+        // Validate stage value
+        const validStages = [
+            'received', 'sent_to_lender', 'funding_table_issued', 
+            'indicative_letter_issued', 'indicative_letter_signed', 
+            'commitment_fee_received', 'application_submitted',
+            'valuation_ordered', 'valuation_received', 'more_info_required',
+            'formal_approval', 'loan_docs_instructed', 'loan_docs_issued',
+            'loan_docs_signed', 'settlement_conditions', 'settled',
+            'closed', 'discharged'
+        ];
+        
+        // If stage is not valid, set it to 'received'
+        if (!validStages.includes(applicationData.stage)) {
+            applicationData.stage = 'received';
+        }
         
         // Transform structured address data for borrowers
         if (applicationData.borrowers && applicationData.borrowers.length > 0) {
@@ -856,6 +880,55 @@ const addRequirement = () => {
 const removeRequirement = (idx) => {
     application.value.loan_requirements.splice(idx, 1);
 };
+
+// Add stage display helpers
+const getStageDisplay = (stage) => {
+    const stageMap = {
+        'received': 'Received',
+        'sent_to_lender': 'Sent to Lender/Investor',
+        'funding_table_issued': 'Funding Table Issued',
+        'indicative_letter_issued': 'Indicative Letter Issued',
+        'indicative_letter_signed': 'Indicative Letter Signed',
+        'commitment_fee_received': 'Commitment Fee Received',
+        'application_submitted': 'Application Submitted',
+        'valuation_ordered': 'Valuation Ordered',
+        'valuation_received': 'Valuation Received',
+        'more_info_required': 'More Information Required',
+        'formal_approval': 'Formal Approval',
+        'loan_docs_instructed': 'Loan Documents Instructed',
+        'loan_docs_issued': 'Loan Documents Issued',
+        'loan_docs_signed': 'Loan Documents Signed',
+        'settlement_conditions': 'Settlement Conditions',
+        'settled': 'Settled',
+        'closed': 'Closed',
+        'discharged': 'Discharged'
+    };
+    return stageMap[stage] || stage;
+};
+
+const getStageTagType = (stage) => {
+    const stageTypes = {
+        'received': 'info',
+        'sent_to_lender': 'warning',
+        'funding_table_issued': 'warning',
+        'indicative_letter_issued': 'warning',
+        'indicative_letter_signed': 'warning',
+        'commitment_fee_received': 'success',
+        'application_submitted': 'warning',
+        'valuation_ordered': 'warning',
+        'valuation_received': 'success',
+        'more_info_required': 'danger',
+        'formal_approval': 'success',
+        'loan_docs_instructed': 'warning',
+        'loan_docs_issued': 'warning',
+        'loan_docs_signed': 'success',
+        'settlement_conditions': 'warning',
+        'settled': 'success',
+        'closed': 'info',
+        'discharged': 'info'
+    };
+    return stageTypes[stage] || 'info';
+};
 </script>
 
 <style scoped>
@@ -934,5 +1007,18 @@ h1 {
 .loading-container .el-icon {
     font-size: 24px;
     color: #2984DE;
+}
+
+.stage-section {
+    margin-bottom: 20px;
+    padding: 16px;
+    background-color: #f5f7fa;
+    border-radius: 8px;
+}
+
+.stage-section h2 {
+    margin: 0 0 12px 0;
+    font-size: 16px;
+    color: #606266;
 }
 </style>

@@ -71,6 +71,24 @@ export const documentsApi = {
     });
   },
 
+  // Get list of applications
+  getApplications: async (params) => {
+    return sendRequest({
+      url: '/api/applications/applications/',
+      method: 'get',
+      params
+    });
+  },
+
+  // Get list of borrowers
+  getBorrowers: async (params) => {
+    return sendRequest({
+      url: '/api/borrowers/borrowers/',
+      method: 'get',
+      params
+    });
+  },
+
   // Repayments
   repayments: () => sendRequest({
     url: '/api/documents/repayments/',

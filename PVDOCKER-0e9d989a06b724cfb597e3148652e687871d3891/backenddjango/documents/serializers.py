@@ -4,30 +4,37 @@ from .models import Document, Note, Fee, Repayment, Ledger, NoteComment
 
 class DocumentSerializer(serializers.ModelSerializer):
     """
-    Serializer for documents with null/blank handling for minimal data creation
+    Serializer for documents with enhanced application and borrower details
     """
     document_type_display = serializers.CharField(source='get_document_type_display', read_only=True)
     created_by_name = serializers.StringRelatedField(source='created_by')
     file_url = serializers.SerializerMethodField()
     
+    # Application details
+    application_reference = serializers.CharField(source='application.reference_number', read_only=True)
+    application_stage = serializers.CharField(source='application.stage', read_only=True)
+    
+    # Borrower details
+    borrower_name = serializers.SerializerMethodField()
+    borrower_email = serializers.EmailField(source='borrower.email', read_only=True)
+    borrower_address = serializers.SerializerMethodField()
+    
     class Meta:
         model = Document
         fields = '__all__'
-        read_only_fields = ['file_name', 'file_size', 'file_type', 'version', 'created_by', 'created_at', 'updated_at']
+        read_only_fields = [
+            'file_name', 'file_size', 'file_type', 'version', 
+            'created_by', 'created_at', 'updated_at',
+            'application_reference', 'application_stage',
+            'borrower_name', 'borrower_email', 'borrower_address'
+        ]
         extra_kwargs = {
-            # Make most fields optional and allow null/blank values for minimal data creation
             'title': {'required': False, 'allow_null': True, 'allow_blank': True},
             'description': {'required': False, 'allow_null': True, 'allow_blank': True},
             'document_type': {'required': False, 'allow_null': True, 'allow_blank': True},
             'file': {'required': False, 'allow_null': True},
             'application': {'required': False, 'allow_null': True},
             'borrower': {'required': False, 'allow_null': True},
-            'guarantor': {'required': False, 'allow_null': True},
-            'uploaded_by': {'required': False, 'allow_null': True},
-            'tags': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'notes': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'is_signed': {'required': False, 'allow_null': True},
-            'signed_date': {'required': False, 'allow_null': True},
         }
     
     def get_file_url(self, obj) -> str:
@@ -35,6 +42,25 @@ class DocumentSerializer(serializers.ModelSerializer):
             request = self.context.get('request')
             if request:
                 return request.build_absolute_uri(obj.file.url)
+        return None
+    
+    def get_borrower_name(self, obj) -> str:
+        if obj.borrower:
+            if obj.borrower.is_company:
+                return obj.borrower.company_name
+            return f"{obj.borrower.first_name} {obj.borrower.last_name}"
+        return None
+    
+    def get_borrower_address(self, obj) -> dict:
+        if obj.borrower and hasattr(obj.borrower, 'address'):
+            address = obj.borrower.address
+            return {
+                'street': address.street,
+                'city': address.city,
+                'state': address.state,
+                'postal_code': address.postal_code,
+                'country': address.country
+            }
         return None
 
 

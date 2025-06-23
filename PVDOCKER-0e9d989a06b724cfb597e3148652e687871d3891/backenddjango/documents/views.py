@@ -20,17 +20,25 @@ from .filters import DocumentFilter, NoteFilter, FeeFilter, RepaymentFilter, Not
 from users.permissions import IsAdmin, IsAdminOrBroker, IsAdminOrBD, IsAdminOrBrokerOrBD, CanAccessNote
 from django.http import FileResponse
 import os
+from django.db.models import Q
 
 
 class DocumentViewSet(viewsets.ModelViewSet):
     """
-    API endpoint for managing documents
+    API endpoint for managing documents with enhanced search capabilities
     """
     queryset = Document.objects.all().order_by('-created_at')
     serializer_class = DocumentSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_class = DocumentFilter
-    search_fields = ['title', 'description', 'file_name']
+    search_fields = [
+        'title', 'description', 'file_name',
+        'application__reference_number',
+        'borrower__first_name', 'borrower__last_name',
+        'borrower__email',
+        'borrower__address__street', 'borrower__address__city',
+        'borrower__address__state', 'borrower__address__postal_code'
+    ]
     ordering_fields = ['created_at', 'updated_at', 'title']
     parser_classes = [MultiPartParser, FormParser]
     
@@ -47,33 +55,51 @@ class DocumentViewSet(viewsets.ModelViewSet):
         return [permission() for permission in permission_classes]
     
     def get_queryset(self):
+        # Get base queryset with optimized joins
+        queryset = super().get_queryset().select_related(
+            'application',
+            'borrower',
+            'created_by'
+        ).prefetch_related(
+            'application__borrowers',
+            'borrower__address'
+        )
+        
+        # Apply role-based filtering
         user = self.request.user
-        queryset = super().get_queryset()
+        if not hasattr(user, 'role') or user.role not in ['super_user', 'accounts', 'admin']:
+            if user.role == 'broker':
+                queryset = queryset.filter(application__broker__user=user)
+            elif user.role == 'bd':
+                if hasattr(user, 'bdm_profile'):
+                    queryset = queryset.filter(application__bd=user.bdm_profile)
+                else:
+                    return queryset.none()
+            elif user.role == 'client':
+                if hasattr(user, 'borrower_profile'):
+                    queryset = queryset.filter(
+                        Q(application__borrowers=user.borrower_profile) |
+                        Q(borrower=user.borrower_profile)
+                    )
+                else:
+                    return queryset.none()
+            else:
+                return queryset.none()
         
-        # Super user and accounts can see all documents
-        if hasattr(user, 'role') and user.role in ['super_user', 'accounts']:
-            return queryset
+        # Get search parameters
+        search_query = self.request.query_params.get('search', '')
+        app_search = self.request.query_params.get('application_search', '')
+        borrower_search = self.request.query_params.get('borrower_search', '')
         
-        # Filter documents based on user role
-        if user.role == 'admin':
-            return queryset
-        elif user.role == 'broker':
-            return queryset.filter(application__broker__user=user)
-        elif user.role == 'bd':
-            # Check if user has a BDM profile
-            if hasattr(user, 'bdm_profile'):
-                return queryset.filter(application__bd=user.bdm_profile)
-            return queryset.none()
-        elif user.role == 'client':
-            # Clients can only see documents associated with their borrower profile
-            if hasattr(user, 'borrower_profile'):
-                return queryset.filter(
-                    application__borrowers=user.borrower_profile
-                ) | queryset.filter(
-                    borrower=user.borrower_profile
-                )
+        # Apply search filters if provided
+        if search_query:
+            queryset = self.filterset_class.search_filter(None, queryset, None, search_query)
+        if app_search:
+            queryset = self.filterset_class.application_search_filter(None, queryset, None, app_search)
+        if borrower_search:
+            queryset = self.filterset_class.borrower_search_filter(None, queryset, None, borrower_search)
         
-        return queryset.none()
+        return queryset.distinct()
     
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)

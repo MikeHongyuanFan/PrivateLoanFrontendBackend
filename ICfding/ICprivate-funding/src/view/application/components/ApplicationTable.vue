@@ -80,7 +80,16 @@
 <template>
     <el-table :data="paginatedData" class="table" :header-cell-style="{ background: '#f8f8f8', color: '#272727' }">
         <el-table-column type="selection" width="50" align="center" fixed />
-        <el-table-column prop="reference_number" label="Reference Number" sortable width="200" />
+        <el-table-column prop="reference_number" label="Reference Number" width="150">
+            <template #default="scope">
+                <router-link 
+                    :to="`/application/${scope.row.id}`" 
+                    class="reference-link"
+                >
+                    {{ scope.row.reference_number }}
+                </router-link>
+            </template>
+        </el-table-column>
         <el-table-column prop="borrower_name" label="Borrower" width="150" />
         <el-table-column prop="stage" label="Status" width="150">
             <template #default="scope">
@@ -228,5 +237,15 @@
 
 .history-icon:hover {
     color: #2984DE;
+}
+
+.reference-link {
+    color: #2984DE;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.reference-link:hover {
+    text-decoration: underline;
 }
 </style>

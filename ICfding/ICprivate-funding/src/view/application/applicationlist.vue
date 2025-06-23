@@ -50,6 +50,7 @@
                     :data="filteredApplications"
                     @getData="getApplications"
                     @edit="handleEdit"
+                    @click="handleApplicationClick"
                 ></ApplicationTable>
                 <div class="flex">
                     <!-- <div class="select">
@@ -93,6 +94,7 @@ import DeleteButton from '@/components/buttons/delete.vue';
 
 import { Pagination } from '@/components'
 import { ApplicationTable } from './components'
+import { ElMessage } from 'element-plus';
 
 const route = useRoute()
 const popup = ref(false)
@@ -145,6 +147,8 @@ const paginationInfo = ref({
 })
 const selectAll = ref(false)
 const isSelected = ref(false)
+
+const router = useRouter();
 
 onActivated(() => {
     getApplications()
@@ -234,6 +238,10 @@ const handleApplicationSaved = (savedData) => {
     // if (appIndex !== -1) {
     //     applications.value[appIndex] = { ...applications.value[appIndex], ...savedData.data };
     // }
+};
+
+const handleApplicationClick = (id) => {
+    router.push(`/application/${id}`);
 };
 </script>
 

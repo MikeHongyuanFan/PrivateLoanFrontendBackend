@@ -9,6 +9,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "src"),
     },
   },
+//local deployment settings(uncomment when deploying to local)
   server: {
     proxy: {
       "/api": {

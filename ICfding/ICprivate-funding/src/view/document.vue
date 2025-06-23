@@ -3,8 +3,24 @@
         <div class="filters">
             <div class="left">
                 <div class="filter">
-                    <h1>Search By Description</h1>
-                    <el-input v-model="searchedApplication" style="width: 200px" placeholder="Search By Description" />
+                    <h1>Search Documents</h1>
+                    <el-input v-model="searchQuery" style="width: 200px" placeholder="Search documents..." />
+                </div>
+                <div class="filter">
+                    <h1>Application Search</h1>
+                    <el-input 
+                        v-model="applicationSearch" 
+                        style="width: 200px" 
+                        placeholder="Search by App ID/Reference" 
+                    />
+                </div>
+                <div class="filter">
+                    <h1>Borrower Search</h1>
+                    <el-input 
+                        v-model="borrowerSearch" 
+                        style="width: 200px" 
+                        placeholder="Search by name/address" 
+                    />
                 </div>
                 <div class="filter">
                     <h1>Document Type</h1>
@@ -20,50 +36,35 @@
             </div>
             <el-button type="primary" @click="uploadDialogVisible = true">Upload Document</el-button>
         </div>
+
         <div class="container">
             <el-table
                 ref="docListTable"
-                v-loading="loading"
                 :data="paginatedData"
                 style="width: 100%"
-                :default-sort="{ prop: 'id', order: 'ascending' }"
-                :cell-style="{ padding: '10px 0' }"
                 @selection-change="handleSelectionChange"
+                v-loading="loading"
             >
-                <el-table-column type="selection" align="center" width="50" />
-                <el-table-column prop="title" label="Title" sortable width="150" />
-                <el-table-column prop="document_type_display" label="Type" width="150" />
-                <el-table-column prop="application" label="Application" width="130" />
-                <el-table-column prop="created_by_name" label="Uploaded By" min-width="150" />                
-                <el-table-column prop="created_at" label="Uploaded At" width="200">
-                    <template #default="{ row }">
-                        {{ new Date(row.created_at).toLocaleString() }}
-                    </template>
-                </el-table-column>
-                <el-table-column prop="version" label="Version" width="90" />
-                <el-table-column label="Action" align="center" width="200">
-                    <template #default="{ row }">
+                <el-table-column type="selection" width="55" />
+                <el-table-column prop="title" label="Title" />
+                <el-table-column prop="description" label="Description" />
+                <el-table-column prop="document_type" label="Type" />
+                <el-table-column prop="created_at" label="Created At" />
+                <el-table-column label="Actions" width="200">
+                    <template #default="scope">
                         <div class="actions">
-                            <el-tooltip content="View" placement="top">
-                                <div class="view" @click="handleView(row)">
-                                    <el-icon :size="20" color="#2984DE"><View /></el-icon>
-                                </div>
-                            </el-tooltip>
-                            <el-tooltip content="Download" placement="top">
-                                <div class="download" @click="handleDownload(row)">
-                                    <el-icon :size="20" color="#7A858E"><Download /></el-icon>
-                                </div>
-                            </el-tooltip>
-                            <el-tooltip content="New Version" placement="top">
-                                <div class="upload" @click="handleUpload(row)">
-                                    <el-icon :size="20" color="#1AAD0A"><Upload /></el-icon>
-                                </div>
-                            </el-tooltip>
-                            <el-tooltip content="Edit" placement="top">
-                                <div class="edit" @click="openEditDialog(row)">
-                                    <el-icon :size="20" color="#E6A23C"><Edit /></el-icon>
-                                </div>
-                            </el-tooltip>
+                            <div class="view" @click="handleView(scope.row)">
+                                <el-icon><View /></el-icon>
+                            </div>
+                            <div class="download" @click="handleDownload(scope.row)">
+                                <el-icon><Download /></el-icon>
+                            </div>
+                            <div class="upload" @click="handleUpload(scope.row)">
+                                <el-icon><Upload /></el-icon>
+                            </div>
+                            <div class="edit" @click="openEditDialog(scope.row)">
+                                <el-icon><Edit /></el-icon>
+                            </div>
                         </div>
                     </template>
                 </el-table-column>
@@ -139,11 +140,35 @@
                         </template>
                     </el-upload>
                 </el-form-item>
-                <el-form-item label="Application ID" prop="application">
-                    <el-input v-model="documentForm.application" type="number" />
+                <el-form-item label="Application" prop="application">
+                    <el-select 
+                        v-model="documentForm.application" 
+                        placeholder="Select application"
+                        filterable
+                        clearable
+                    >
+                        <el-option
+                            v-for="app in applications"
+                            :key="app.id"
+                            :label="'App #' + app.id + (app.reference ? ' - ' + app.reference : '')"
+                            :value="app.id"
+                        />
+                    </el-select>
                 </el-form-item>
-                <el-form-item label="Borrower ID" prop="borrower">
-                    <el-input v-model="documentForm.borrower" type="number" />
+                <el-form-item label="Borrower" prop="borrower">
+                    <el-select 
+                        v-model="documentForm.borrower" 
+                        placeholder="Select borrower"
+                        filterable
+                        clearable
+                    >
+                        <el-option
+                            v-for="borrower in borrowers"
+                            :key="borrower.id"
+                            :label="borrower.first_name + ' ' + borrower.last_name"
+                            :value="borrower.id"
+                        />
+                    </el-select>
                 </el-form-item>
             </el-form>
             <template #footer>
@@ -182,11 +207,35 @@
                         />
                     </el-select>
                 </el-form-item>
-                <el-form-item label="Application ID" prop="application">
-                    <el-input v-model="documentForm.application" type="number" />
+                <el-form-item label="Application" prop="application">
+                    <el-select 
+                        v-model="documentForm.application" 
+                        placeholder="Select application"
+                        filterable
+                        clearable
+                    >
+                        <el-option
+                            v-for="app in applications"
+                            :key="app.id"
+                            :label="'App #' + app.id + (app.reference ? ' - ' + app.reference : '')"
+                            :value="app.id"
+                        />
+                    </el-select>
                 </el-form-item>
-                <el-form-item label="Borrower ID" prop="borrower">
-                    <el-input v-model="documentForm.borrower" type="number" />
+                <el-form-item label="Borrower" prop="borrower">
+                    <el-select 
+                        v-model="documentForm.borrower" 
+                        placeholder="Select borrower"
+                        filterable
+                        clearable
+                    >
+                        <el-option
+                            v-for="borrower in borrowers"
+                            :key="borrower.id"
+                            :label="borrower.first_name + ' ' + borrower.last_name"
+                            :value="borrower.id"
+                        />
+                    </el-select>
                 </el-form-item>
             </el-form>
             <template #footer>
@@ -203,8 +252,8 @@
     import { ref, computed, onMounted, watch } from 'vue';
     import { useRouter } from 'vue-router';
     import { ElMessage, ElMessageBox } from 'element-plus';
-    import { View, Download, Upload, Edit } from '@element-plus/icons-vue';
-    import { api } from '@/api';
+    import { View, Download, Upload, Edit, InfoFilled } from '@element-plus/icons-vue';
+    import { documentsApi } from '@/api/documents';
 
     const router = useRouter()
 
@@ -222,13 +271,17 @@
         { value: 'other', label: 'Other' }
     ])
     
-    const searchedApplication = ref("")
+    const searchQuery = ref("")
+    const applicationSearch = ref("")
+    const borrowerSearch = ref("")
     const selectedDoc = ref("")
     const loading = ref(false)
     const uploadDialogVisible = ref(false)
     const editDialogVisible = ref(false)
     const currentDocument = ref(null)
     const docs = ref([])
+    const applications = ref([])
+    const borrowers = ref([])
     
     // Form data for document upload/edit
     const documentForm = ref({
@@ -266,15 +319,23 @@
             const params = {};
             
             // Only add parameters if they have values
-            if (searchedApplication.value) {
-                params.search = searchedApplication.value;
+            if (searchQuery.value) {
+                params.search = searchQuery.value;
+            }
+            
+            if (applicationSearch.value) {
+                params.application_search = applicationSearch.value;
+            }
+            
+            if (borrowerSearch.value) {
+                params.borrower_search = borrowerSearch.value;
             }
             
             if (selectedDoc.value) {
                 params.document_type = selectedDoc.value;
             }
             
-            const [error, data] = await api.getDocuments(params);
+            const [error, data] = await documentsApi.getDocuments(params);
             
             if (error) {
                 ElMessage.error('Failed to fetch documents');
@@ -295,11 +356,60 @@
             loading.value = false
         }
     }
+
+    // Load applications and borrowers
+    const loadApplications = async () => {
+        try {
+            const [error, data] = await documentsApi.getApplications();
+            if (error) {
+                ElMessage.error('Failed to fetch applications');
+                console.error('Error fetching applications:', error);
+                return;
+            }
+            if (data && data.results) {
+                applications.value = data.results;
+            }
+        } catch (error) {
+            handleError(error);
+        }
+    }
+
+    const loadBorrowers = async () => {
+        try {
+            const [error, data] = await documentsApi.getBorrowers();
+            if (error) {
+                ElMessage.error('Failed to fetch borrowers');
+                console.error('Error fetching borrowers:', error);
+                return;
+            }
+            if (data && data.results) {
+                borrowers.value = data.results;
+            }
+        } catch (error) {
+            handleError(error);
+        }
+    }
+
+    // Load data when dialog opens
+    watch(uploadDialogVisible, (newVal) => {
+        if (newVal) {
+            loadApplications();
+            loadBorrowers();
+        }
+    });
+
+    watch(editDialogVisible, (newVal) => {
+        if (newVal) {
+            loadApplications();
+            loadBorrowers();
+        }
+    });
     
     // Watch for filter changes
-    watch([searchedApplication, selectedDoc], () => {
+    watch([searchQuery, applicationSearch, borrowerSearch, selectedDoc], () => {
         loadDocuments()
     })
+
     const pageSize = 10
     const currentPage = ref(1)
     const uploadFormRef = ref(null);
@@ -314,11 +424,13 @@
         const start = (currentPage.value - 1) * pageSize;
         return docs.value.slice(start, start + pageSize);
     });
+
     const handleSelectionChange = (row) => {
         selectedItem.value = row;
         selectAll.value = row.length === docs.value.length;
         isSelected.value = row.length > 0 && row.length < docs.value.length;
     };
+
     const handleCheckAllChange = (row) => {
         if (row) {
             docListTable.value.toggleAllSelection();
@@ -341,7 +453,7 @@
     const handleDownload = async (row) => {
         try {
             loading.value = true
-            const [error, data] = await api.downloadDocument(row.id);
+            const [error, data] = await documentsApi.downloadDocument(row.id);
             
             if (error) {
                 ElMessage.error('Failed to download document');
@@ -383,7 +495,7 @@
                     if (row.borrower) formData.append('borrower', row.borrower);
 
                     try {
-                        const [error] = await api.createDocumentVersion(row.id, formData);
+                        const [error] = await documentsApi.createDocumentVersion(row.id, formData);
                         
                         if (error) {
                             ElMessage.error('Failed to upload new version');
@@ -426,7 +538,7 @@
 
             loading.value = true
             const deletePromises = selectedItem.value.map(item => 
-                api.deleteDocument(item.id)
+                documentsApi.deleteDocument(item.id)
             )
             await Promise.all(deletePromises)
             
@@ -468,7 +580,7 @@
                 }
             });
 
-            const [error] = await api.createDocument(formData);
+            const [error] = await documentsApi.createDocument(formData);
             
             if (error) {
                 ElMessage.error('Failed to create document');
@@ -514,7 +626,7 @@
                 formData.append('file', documentForm.value.file);
             }
 
-            const [error] = await api.updateDocument(currentDocument.value.id, formData);
+            const [error] = await documentsApi.updateDocument(currentDocument.value.id, formData);
             
             if (error) {
                 ElMessage.error('Failed to update document');
@@ -644,114 +756,14 @@
         align-items: center;
     }
     .select {
-        padding-left: 18px;
-        display: flex;
-        flex-direction: row;
-        gap: 25px;
-    }
-    .table_buttons {
         display: flex;
         flex-direction: row;
         align-items: center;
         gap: 10px;
     }
-    :deep(.el-table .el-table__cell) {
-        padding: 0;
-    }
-    :deep(.el-table tbody .cell) {
-        height: auto;
-        padding: 0 5px;
-        color: #272727;
-        font-feature-settings: 'liga' off, 'clig' off;
-        font-size: 0.75rem;
-        font-style: normal;
-        font-weight: 400;
-        line-height: 140%;
-    }
-    :deep(.el-table th.el-table__cell) {
-        background: #F8F8F8;
-    }
-    :deep(.el-table thead .cell) {
-        padding: 10px 5px;
-        color: #272727;
-        font-feature-settings: 'liga' off, 'clig' off;
-        font-size: 0.75rem;
-        font-style: normal;
-        font-weight: 600;
-        line-height: 140%;
-    }
-    :deep(.el-checkbox) {
-        --el-checkbox-input-border: 1.5px solid #B2B3BD;
-        --el-checkbox-checked-input-border-color: #2984DE;
-        --el-checkbox-checked-bg-color: #2984DE;
-        --el-checkbox-input-border-color-hover: #2984DE;
-    }
-    :deep(.el-pagination) {
-        --el-pagination-button-bg-color: #FFF;
-        --el-pagination-button-disabled-bg-color: #FFF;
-    }
-    :deep(.el-pager li) {
-        background: #FFF;
-        color: rgba(0, 0, 0, 0.20);
-        border-radius: 4px;
-        border: 1.5px solid rgba(64, 64, 64, 0.16);
-        font-weight: 500;
-    }
-    :deep(.el-pager li):hover {
-        border: 1.5px solid #2984DE;
-    }
-    :deep(.el-pagination button) {
-        height: 32px;
-        padding: 0 15px;
-        gap: 5px;
-        border-radius: 4px;
-        color: #1F1F1F;
-        border: 1.5px solid rgba(64, 64, 64, 0.16);
-        font-size: 0.9rem;
-        font-style: normal;
-        font-weight: 500;
-        line-height: 140%;
-    }
-    :deep(.el-pagination button):hover {
-        border: 1.5px solid #2984DE;
-    }
-    :deep(.el-pagination .btn-prev::after) {
-        content: "Previous";
-    }
-    :deep(.el-pagination .btn-next::before) {
-        content: "Next";
-    }
-    :deep(.el-pagination.is-background .btn-prev:disabled) {
-        background: #FFF;
-    }
-    :deep(.el-pagination.is-background .btn-next:disabled) {
-        background: #FFF;
-    }
-    :deep(.el-pagination.is-background .el-pager li.is-active) {
-        background: rgba(114, 114, 114, 0.08);
-        color: #625E5E;
-        font-weight: 500;
-    }
-    :deep(.el-dialog) {
-        border-radius: 8px;
-    }
-    :deep(.el-dialog__header) {
-        margin: 0;
-        padding: 20px;
-        border-bottom: 1px solid #EBEEF5;
-    }
-    :deep(.el-dialog__body) {
-        padding: 20px;
-    }
-    :deep(.el-dialog__footer) {
-        padding: 20px;
-        border-top: 1px solid #EBEEF5;
-    }
-    :deep(.el-upload) {
-        width: 100%;
-    }
-    :deep(.el-upload-dragger) {
-        width: 100%;
-        height: 120px;
+    .table_buttons {
+        display: flex;
+        flex-direction: row;
+        gap: 10px;
     }
 </style>
