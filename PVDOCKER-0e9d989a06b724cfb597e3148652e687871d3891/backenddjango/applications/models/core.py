@@ -46,25 +46,24 @@ class Application(BaseApplicationModel):
     # ============================================================================
     
     STAGE_CHOICES = [
-        ('inquiry', 'Inquiry'),
-        ('sent_to_lender', 'Sent to Lender'),
+        ('received', 'Received'),
+        ('sent_to_lender', 'Sent to Lender/Investor'),
         ('funding_table_issued', 'Funding Table Issued'),
-        ('iloo_issued', 'ILOO Issued'),
-        ('iloo_signed', 'ILOO Signed'),
-        ('commitment_fee_paid', 'Commitment Fee Paid'),
-        ('app_submitted', 'App Submitted'),
+        ('indicative_letter_issued', 'Indicative Letter Issued'),
+        ('indicative_letter_signed', 'Indicative Letter Signed'),
+        ('commitment_fee_received', 'Commitment Fee Received'),
+        ('application_submitted', 'Application Submitted'),
         ('valuation_ordered', 'Valuation Ordered'),
         ('valuation_received', 'Valuation Received'),
-        ('more_info_required', 'More Info Required'),
+        ('more_info_required', 'More Information Required'),
         ('formal_approval', 'Formal Approval'),
-        ('loan_docs_instructed', 'Loan Docs Instructed'),
-        ('loan_docs_issued', 'Loan Docs Issued'),
-        ('loan_docs_signed', 'Loan Docs Signed'),
+        ('loan_docs_instructed', 'Loan Documents Instructed'),
+        ('loan_docs_issued', 'Loan Documents Issued'),
+        ('loan_docs_signed', 'Loan Documents Signed'),
         ('settlement_conditions', 'Settlement Conditions'),
         ('settled', 'Settled'),
         ('closed', 'Closed'),
-        ('declined', 'Declined'),
-        ('withdrawn', 'Withdrawn'),
+        ('discharged', 'Discharged'),
     ]
     
     APPLICATION_TYPE_CHOICES = [
@@ -116,12 +115,12 @@ class Application(BaseApplicationModel):
     stage = models.CharField(
         max_length=25,
         choices=STAGE_CHOICES,
-        default='inquiry',
+        default='received',
         help_text="Current stage of the application"
     )
-    stage_last_updated = models.DateTimeField(
-        default=timezone.now,
-        help_text="When the stage was last updated"
+    stage_history = models.JSONField(
+        default=list,
+        help_text="History of stage changes with timestamps and users"
     )
     application_type = models.CharField(
         max_length=30,
@@ -510,7 +509,11 @@ class Application(BaseApplicationModel):
             try:
                 old_instance = Application.objects.get(pk=self.pk)
                 if old_instance.stage != self.stage:
-                    self.stage_last_updated = timezone.now()
+                    self.stage_history.append({
+                        'stage': old_instance.stage,
+                        'timestamp': timezone.now(),
+                        'user': self.assigned_bd.username if self.assigned_bd else 'System'
+                    })
             except Application.DoesNotExist:
                 pass
         

@@ -674,7 +674,7 @@
         "/api/applications/{id}/stage/": {
             "put": {
                 "operationId": "applications_stage_update",
-                "description": "ViewSet for viewing and editing Application instances.",
+                "description": "Update application stage with history tracking\n\nUpdates the stage of an application and maintains a history of changes.\nAlso creates notifications for relevant users.",
                 "parameters": [
                     {
                         "in": "path",
@@ -1602,7 +1602,7 @@
         "/api/applications/applications/{id}/update_stage/": {
             "put": {
                 "operationId": "applications_applications_update_stage_update",
-                "description": "ViewSet for viewing and editing Application instances.",
+                "description": "Update application stage with history tracking\n\nUpdates the stage of an application and maintains a history of changes.\nAlso creates notifications for relevant users.",
                 "parameters": [
                     {
                         "in": "path",
@@ -4681,6 +4681,65 @@
                 }
             }
         },
+        "/api/brokers/{id}/lock_commission_account/": {
+            "post": {
+                "operationId": "brokers_lock_commission_account_create",
+                "description": "Lock the commission account for a broker\nOnly super user and accounts can lock commission accounts",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "A unique integer value identifying this broker.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "brokers"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BrokerDetailRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BrokerDetailRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BrokerDetailRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BrokerDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/brokers/{id}/stats/": {
             "get": {
                 "operationId": "brokers_stats_retrieve",
@@ -4699,6 +4758,65 @@
                 "tags": [
                     "brokers"
                 ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BrokerDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/brokers/{id}/unlock_commission_account/": {
+            "post": {
+                "operationId": "brokers_unlock_commission_account_create",
+                "description": "Unlock the commission account for a broker\nOnly super user and accounts can unlock commission accounts",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "A unique integer value identifying this broker.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "brokers"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BrokerDetailRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BrokerDetailRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/BrokerDetailRequest"
+                            }
+                        }
+                    }
+                },
                 "security": [
                     {
                         "jwtAuth": []
@@ -5048,6 +5166,46 @@
                 }
             }
         },
+        "/api/brokers/bdms/{id}/brokers/": {
+            "get": {
+                "operationId": "brokers_bdms_brokers_retrieve",
+                "description": "Get all brokers assigned to a BDM",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "A unique integer value identifying this BDM.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "brokers"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/BDM"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/brokers/bdms/claim_application/": {
             "post": {
                 "operationId": "brokers_bdms_claim_application_create",
@@ -5279,7 +5437,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this branch.",
+                        "description": "A unique integer value identifying this Branch/Subsidiary.",
                         "required": true
                     }
                 ],
@@ -5317,7 +5475,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this branch.",
+                        "description": "A unique integer value identifying this Branch/Subsidiary.",
                         "required": true
                     }
                 ],
@@ -5374,7 +5532,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this branch.",
+                        "description": "A unique integer value identifying this Branch/Subsidiary.",
                         "required": true
                     }
                 ],
@@ -5431,7 +5589,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this branch.",
+                        "description": "A unique integer value identifying this Branch/Subsidiary.",
                         "required": true
                     }
                 ],
@@ -5464,7 +5622,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this branch.",
+                        "description": "A unique integer value identifying this Branch/Subsidiary.",
                         "required": true
                     }
                 ],
@@ -5504,7 +5662,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this branch.",
+                        "description": "A unique integer value identifying this Branch/Subsidiary.",
                         "required": true
                     }
                 ],
@@ -5544,7 +5702,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "A unique integer value identifying this branch.",
+                        "description": "A unique integer value identifying this Branch/Subsidiary.",
                         "required": true
                     }
                 ],
@@ -8687,7 +8845,7 @@
         "/api/users/download-email-logs/": {
             "get": {
                 "operationId": "users_download_email_logs_retrieve",
-                "description": "View for downloading email logs as a DOCX file.\nOnly available to admin users.",
+                "description": "View for downloading email logs as a DOCX file.\nOnly available to super user, accounts, and admin users.",
                 "tags": [
                     "users"
                 ],
@@ -9813,7 +9971,7 @@
                     },
                     "stage": {
                         "nullable": true,
-                        "description": "Current stage of the application\n\n* `inquiry` - Inquiry\n* `sent_to_lender` - Sent to Lender\n* `funding_table_issued` - Funding Table Issued\n* `iloo_issued` - ILOO Issued\n* `iloo_signed` - ILOO Signed\n* `commitment_fee_paid` - Commitment Fee Paid\n* `app_submitted` - App Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Info Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Docs Instructed\n* `loan_docs_issued` - Loan Docs Issued\n* `loan_docs_signed` - Loan Docs Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `declined` - Declined\n* `withdrawn` - Withdrawn",
+                        "description": "Current stage of the application\n\n* `received` - Received\n* `sent_to_lender` - Sent to Lender/Investor\n* `funding_table_issued` - Funding Table Issued\n* `indicative_letter_issued` - Indicative Letter Issued\n* `indicative_letter_signed` - Indicative Letter Signed\n* `commitment_fee_received` - Commitment Fee Received\n* `application_submitted` - Application Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Information Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Documents Instructed\n* `loan_docs_issued` - Loan Documents Issued\n* `loan_docs_signed` - Loan Documents Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `discharged` - Discharged",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/StageEnum"
@@ -10111,7 +10269,7 @@
                     },
                     "stage": {
                         "nullable": true,
-                        "description": "Current stage of the application\n\n* `inquiry` - Inquiry\n* `sent_to_lender` - Sent to Lender\n* `funding_table_issued` - Funding Table Issued\n* `iloo_issued` - ILOO Issued\n* `iloo_signed` - ILOO Signed\n* `commitment_fee_paid` - Commitment Fee Paid\n* `app_submitted` - App Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Info Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Docs Instructed\n* `loan_docs_issued` - Loan Docs Issued\n* `loan_docs_signed` - Loan Docs Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `declined` - Declined\n* `withdrawn` - Withdrawn",
+                        "description": "Current stage of the application\n\n* `received` - Received\n* `sent_to_lender` - Sent to Lender/Investor\n* `funding_table_issued` - Funding Table Issued\n* `indicative_letter_issued` - Indicative Letter Issued\n* `indicative_letter_signed` - Indicative Letter Signed\n* `commitment_fee_received` - Commitment Fee Received\n* `application_submitted` - Application Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Information Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Documents Instructed\n* `loan_docs_issued` - Loan Documents Issued\n* `loan_docs_signed` - Loan Documents Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `discharged` - Discharged",
                         "oneOf": [
                             {
                                 "$ref": "#/components/schemas/StageEnum"
@@ -10416,7 +10574,7 @@
                                 "$ref": "#/components/schemas/StageEnum"
                             }
                         ],
-                        "description": "Current stage of the application\n\n* `inquiry` - Inquiry\n* `sent_to_lender` - Sent to Lender\n* `funding_table_issued` - Funding Table Issued\n* `iloo_issued` - ILOO Issued\n* `iloo_signed` - ILOO Signed\n* `commitment_fee_paid` - Commitment Fee Paid\n* `app_submitted` - App Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Info Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Docs Instructed\n* `loan_docs_issued` - Loan Docs Issued\n* `loan_docs_signed` - Loan Docs Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `declined` - Declined\n* `withdrawn` - Withdrawn"
+                        "description": "Current stage of the application\n\n* `received` - Received\n* `sent_to_lender` - Sent to Lender/Investor\n* `funding_table_issued` - Funding Table Issued\n* `indicative_letter_issued` - Indicative Letter Issued\n* `indicative_letter_signed` - Indicative Letter Signed\n* `commitment_fee_received` - Commitment Fee Received\n* `application_submitted` - Application Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Information Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Documents Instructed\n* `loan_docs_issued` - Loan Documents Issued\n* `loan_docs_signed` - Loan Documents Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `discharged` - Discharged"
                     },
                     "stage_display": {
                         "type": "string",
@@ -10837,9 +10995,17 @@
                                 "$ref": "#/components/schemas/StageEnum"
                             }
                         ],
-                        "description": "Current stage of the application\n\n* `inquiry` - Inquiry\n* `sent_to_lender` - Sent to Lender\n* `funding_table_issued` - Funding Table Issued\n* `iloo_issued` - ILOO Issued\n* `iloo_signed` - ILOO Signed\n* `commitment_fee_paid` - Commitment Fee Paid\n* `app_submitted` - App Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Info Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Docs Instructed\n* `loan_docs_issued` - Loan Docs Issued\n* `loan_docs_signed` - Loan Docs Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `declined` - Declined\n* `withdrawn` - Withdrawn"
+                        "description": "Current stage of the application\n\n* `received` - Received\n* `sent_to_lender` - Sent to Lender/Investor\n* `funding_table_issued` - Funding Table Issued\n* `indicative_letter_issued` - Indicative Letter Issued\n* `indicative_letter_signed` - Indicative Letter Signed\n* `commitment_fee_received` - Commitment Fee Received\n* `application_submitted` - Application Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Information Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Documents Instructed\n* `loan_docs_issued` - Loan Documents Issued\n* `loan_docs_signed` - Loan Documents Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `discharged` - Discharged"
                     },
                     "stage_display": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "last_stage_change": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "stage_history_summary": {
                         "type": "string",
                         "readOnly": true
                     },
@@ -10948,11 +11114,13 @@
                     "broker_name",
                     "guarantor_name",
                     "id",
+                    "last_stage_change",
                     "product_name",
                     "purpose",
                     "security_address",
                     "solvency_issues",
                     "stage_display",
+                    "stage_history_summary",
                     "updated_at"
                 ]
             },
@@ -10972,7 +11140,7 @@
                                 "$ref": "#/components/schemas/StageEnum"
                             }
                         ],
-                        "description": "Current stage of the application\n\n* `inquiry` - Inquiry\n* `sent_to_lender` - Sent to Lender\n* `funding_table_issued` - Funding Table Issued\n* `iloo_issued` - ILOO Issued\n* `iloo_signed` - ILOO Signed\n* `commitment_fee_paid` - Commitment Fee Paid\n* `app_submitted` - App Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Info Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Docs Instructed\n* `loan_docs_issued` - Loan Docs Issued\n* `loan_docs_signed` - Loan Docs Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `declined` - Declined\n* `withdrawn` - Withdrawn"
+                        "description": "Current stage of the application\n\n* `received` - Received\n* `sent_to_lender` - Sent to Lender/Investor\n* `funding_table_issued` - Funding Table Issued\n* `indicative_letter_issued` - Indicative Letter Issued\n* `indicative_letter_signed` - Indicative Letter Signed\n* `commitment_fee_received` - Commitment Fee Received\n* `application_submitted` - Application Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Information Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Documents Instructed\n* `loan_docs_issued` - Loan Documents Issued\n* `loan_docs_signed` - Loan Documents Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `discharged` - Discharged"
                     },
                     "loan_amount": {
                         "type": "string",
@@ -11343,27 +11511,6 @@
                     },
                     "branch_id": {
                         "type": "integer",
-                        "writeOnly": true,
-                        "nullable": true
-                    },
-                    "branch_name": {
-                        "type": "string",
-                        "writeOnly": true,
-                        "nullable": true
-                    },
-                    "address": {
-                        "type": "string",
-                        "writeOnly": true,
-                        "nullable": true
-                    },
-                    "branch_phone": {
-                        "type": "string",
-                        "writeOnly": true,
-                        "nullable": true
-                    },
-                    "branch_email": {
-                        "type": "string",
-                        "format": "email",
                         "writeOnly": true,
                         "nullable": true
                     }
@@ -12643,21 +12790,6 @@
                         "type": "string",
                         "nullable": true,
                         "maxLength": 100
-                    },
-                    "address": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "phone": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
-                    "email": {
-                        "type": "string",
-                        "format": "email",
-                        "nullable": true,
-                        "maxLength": 254
                     }
                 },
                 "required": [
@@ -12672,21 +12804,6 @@
                         "type": "string",
                         "nullable": true,
                         "maxLength": 100
-                    },
-                    "address": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "phone": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
-                    "email": {
-                        "type": "string",
-                        "format": "email",
-                        "nullable": true,
-                        "maxLength": 254
                     }
                 }
             },
@@ -12714,6 +12831,14 @@
                         "readOnly": true
                     },
                     "created_by": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/User"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "commission_account_locked_by": {
                         "allOf": [
                             {
                                 "$ref": "#/components/schemas/User"
@@ -12766,6 +12891,16 @@
                         "nullable": true,
                         "maxLength": 10
                     },
+                    "commission_account_locked": {
+                        "type": "boolean",
+                        "description": "If True, only super user and accounts can modify commission details"
+                    },
+                    "commission_account_locked_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
                     "created_at": {
                         "type": "string",
                         "format": "date-time",
@@ -12784,6 +12919,8 @@
                 "required": [
                     "bdms",
                     "branch",
+                    "commission_account_locked_at",
+                    "commission_account_locked_by",
                     "created_at",
                     "created_by",
                     "id",
@@ -12798,6 +12935,13 @@
                         "type": "integer",
                         "writeOnly": true,
                         "nullable": true
+                    },
+                    "bdm_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "writeOnly": true
                     },
                     "name": {
                         "type": "string",
@@ -12843,6 +12987,10 @@
                         "type": "string",
                         "nullable": true,
                         "maxLength": 10
+                    },
+                    "commission_account_locked": {
+                        "type": "boolean",
+                        "description": "If True, only super user and accounts can modify commission details"
                     },
                     "user": {
                         "type": "integer",
@@ -15563,7 +15711,7 @@
                                 "$ref": "#/components/schemas/StageEnum"
                             }
                         ],
-                        "description": "Current stage of the application\n\n* `inquiry` - Inquiry\n* `sent_to_lender` - Sent to Lender\n* `funding_table_issued` - Funding Table Issued\n* `iloo_issued` - ILOO Issued\n* `iloo_signed` - ILOO Signed\n* `commitment_fee_paid` - Commitment Fee Paid\n* `app_submitted` - App Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Info Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Docs Instructed\n* `loan_docs_issued` - Loan Docs Issued\n* `loan_docs_signed` - Loan Docs Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `declined` - Declined\n* `withdrawn` - Withdrawn"
+                        "description": "Current stage of the application\n\n* `received` - Received\n* `sent_to_lender` - Sent to Lender/Investor\n* `funding_table_issued` - Funding Table Issued\n* `indicative_letter_issued` - Indicative Letter Issued\n* `indicative_letter_signed` - Indicative Letter Signed\n* `commitment_fee_received` - Commitment Fee Received\n* `application_submitted` - Application Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Information Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Documents Instructed\n* `loan_docs_issued` - Loan Documents Issued\n* `loan_docs_signed` - Loan Documents Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `discharged` - Discharged"
                     },
                     "loan_amount": {
                         "type": "string",
@@ -15695,27 +15843,6 @@
                     },
                     "branch_id": {
                         "type": "integer",
-                        "writeOnly": true,
-                        "nullable": true
-                    },
-                    "branch_name": {
-                        "type": "string",
-                        "writeOnly": true,
-                        "nullable": true
-                    },
-                    "address": {
-                        "type": "string",
-                        "writeOnly": true,
-                        "nullable": true
-                    },
-                    "branch_phone": {
-                        "type": "string",
-                        "writeOnly": true,
-                        "nullable": true
-                    },
-                    "branch_email": {
-                        "type": "string",
-                        "format": "email",
                         "writeOnly": true,
                         "nullable": true
                     }
@@ -16140,21 +16267,6 @@
                         "type": "string",
                         "nullable": true,
                         "maxLength": 100
-                    },
-                    "address": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "phone": {
-                        "type": "string",
-                        "nullable": true,
-                        "maxLength": 20
-                    },
-                    "email": {
-                        "type": "string",
-                        "format": "email",
-                        "nullable": true,
-                        "maxLength": 254
                     }
                 }
             },
@@ -16166,6 +16278,13 @@
                         "type": "integer",
                         "writeOnly": true,
                         "nullable": true
+                    },
+                    "bdm_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "integer"
+                        },
+                        "writeOnly": true
                     },
                     "name": {
                         "type": "string",
@@ -16211,6 +16330,10 @@
                         "type": "string",
                         "nullable": true,
                         "maxLength": 10
+                    },
+                    "commission_account_locked": {
+                        "type": "boolean",
+                        "description": "If True, only super user and accounts can modify commission details"
                     },
                     "user": {
                         "type": "integer",
@@ -17259,13 +17382,18 @@
             },
             "RoleEnum": {
                 "enum": [
+                    "accounts",
                     "admin",
+                    "business_development_manager",
+                    "business_development_associate",
+                    "credit_manager",
+                    "super_user",
                     "broker",
                     "bd",
                     "client"
                 ],
                 "type": "string",
-                "description": "* `admin` - Admin\n* `broker` - Broker\n* `bd` - Business Development\n* `client` - Client"
+                "description": "* `accounts` - Accounts\n* `admin` - Admin\n* `business_development_manager` - Business Development Manager\n* `business_development_associate` - Business Development Associate\n* `credit_manager` - Credit Manager\n* `super_user` - Super User\n* `broker` - Broker\n* `bd` - Business Development\n* `client` - Client"
             },
             "SecurityProperty": {
                 "type": "object",
@@ -17608,13 +17736,13 @@
             },
             "StageEnum": {
                 "enum": [
-                    "inquiry",
+                    "received",
                     "sent_to_lender",
                     "funding_table_issued",
-                    "iloo_issued",
-                    "iloo_signed",
-                    "commitment_fee_paid",
-                    "app_submitted",
+                    "indicative_letter_issued",
+                    "indicative_letter_signed",
+                    "commitment_fee_received",
+                    "application_submitted",
                     "valuation_ordered",
                     "valuation_received",
                     "more_info_required",
@@ -17625,11 +17753,10 @@
                     "settlement_conditions",
                     "settled",
                     "closed",
-                    "declined",
-                    "withdrawn"
+                    "discharged"
                 ],
                 "type": "string",
-                "description": "* `inquiry` - Inquiry\n* `sent_to_lender` - Sent to Lender\n* `funding_table_issued` - Funding Table Issued\n* `iloo_issued` - ILOO Issued\n* `iloo_signed` - ILOO Signed\n* `commitment_fee_paid` - Commitment Fee Paid\n* `app_submitted` - App Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Info Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Docs Instructed\n* `loan_docs_issued` - Loan Docs Issued\n* `loan_docs_signed` - Loan Docs Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `declined` - Declined\n* `withdrawn` - Withdrawn"
+                "description": "* `received` - Received\n* `sent_to_lender` - Sent to Lender/Investor\n* `funding_table_issued` - Funding Table Issued\n* `indicative_letter_issued` - Indicative Letter Issued\n* `indicative_letter_signed` - Indicative Letter Signed\n* `commitment_fee_received` - Commitment Fee Received\n* `application_submitted` - Application Submitted\n* `valuation_ordered` - Valuation Ordered\n* `valuation_received` - Valuation Received\n* `more_info_required` - More Information Required\n* `formal_approval` - Formal Approval\n* `loan_docs_instructed` - Loan Documents Instructed\n* `loan_docs_issued` - Loan Documents Issued\n* `loan_docs_signed` - Loan Documents Signed\n* `settlement_conditions` - Settlement Conditions\n* `settled` - Settled\n* `closed` - Closed\n* `discharged` - Discharged"
             },
             "TitleEnum": {
                 "enum": [

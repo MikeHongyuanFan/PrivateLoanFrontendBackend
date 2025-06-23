@@ -54,7 +54,20 @@
                     </div>
                     <div class="info">
                         <p style="color: #7A858E">BD</p>
-                        <p class="text">{{ brokers.bdms }}</p>
+                        <div class="text">
+                            <template v-if="brokers.bdms && brokers.bdms.length > 0">
+                                <router-link 
+                                    v-for="(bdm, index) in brokers.bdms" 
+                                    :key="bdm.id"
+                                    :to="`/bdm/${bdm.id}`" 
+                                    class="bdm-link"
+                                >
+                                    {{ bdm.display_name || bdm.name }}
+                                    <span v-if="index < brokers.bdms.length - 1">, </span>
+                                </router-link>
+                            </template>
+                            <span v-else>-</span>
+                        </div>
                     </div>
                 </div>
             </el-tab-pane>
@@ -65,19 +78,19 @@
                 <div class="tab">
                     <div class="info">
                         <p style="color: #7A858E">Bank Name</p>
-                        <p class="text">{{ brokers.commission_bank_name }}</p>
+                        <p class="text">{{ brokers.commission_bank_name || '-' }}</p>
                     </div>
                     <div class="info">
                         <p style="color: #7A858E">Bank Account Name</p>
-                        <p class="text">{{ brokers.commission_account_name }}</p>
+                        <p class="text">{{ brokers.commission_account_name || '-' }}</p>
                     </div>
                     <div class="info">
                         <p style="color: #7A858E">BSB</p>
-                        <p class="text">{{ brokers.commission_bsb }}</p>
+                        <p class="text">{{ brokers.commission_bsb || '-' }}</p>
                     </div>
                     <div class="info">
                         <p style="color: #7A858E">Account No.</p>
-                        <p class="text">{{ brokers.commission_account_number }}</p>
+                        <p class="text">{{ brokers.commission_account_number || '-' }}</p>
                     </div>
                     <div class="info">
                         <p style="color: #7A858E">Contact Name for Commission</p>
@@ -86,6 +99,16 @@
                     <div class="info">
                         <p style="color: #7A858E">Email for Commission</p>
                         <p class="text">{{ brokers.email }}</p>
+                    </div>
+                    <div v-if="brokers.commission_account_locked" class="info commission-lock-info">
+                        <p style="color: #7A858E">Commission Account Status</p>
+                        <div class="text">
+                            <el-tag type="warning" size="small">Locked</el-tag>
+                            <p style="color: #909399; font-size: 0.7rem; margin-top: 5px;">
+                                Locked by: {{ brokers.commission_account_locked_by?.email || 'Unknown' }}<br>
+                                Locked at: {{ formatDate(brokers.commission_account_locked_at) }}
+                            </p>
+                        </div>
                     </div>
                 </div>
             </el-tab-pane>
@@ -416,5 +439,21 @@ p {
 
 .branch-link:hover {
     text-decoration: underline;
+}
+
+.bdm-link {
+    color: #409EFF;
+    text-decoration: none;
+}
+
+.bdm-link:hover {
+    text-decoration: underline;
+}
+
+.commission-lock-info {
+    padding: 10px;
+    background-color: #FFF;
+    border-radius: 4px;
+    border: 1px solid #E4E7ED;
 }
 </style>

@@ -3,7 +3,7 @@
         <div class="title">
             <h1>{{ overview.name }}</h1>
             <!-- <h2>{{ overview.date }}</h2> -->
-            <p style="color: #2984DE">Branch ID: {{ branchId }}</p>
+            <p style="color: #2984DE">Branch/Subsidiary ID: {{ branchId }}</p>
         </div>
         <el-tabs v-model="activeName" class="tabs">
             <el-tab-pane name="1">
@@ -12,24 +12,12 @@
                 </template>
                 <div class="tab">
                     <div class="info">
-                        <p style="color: #7A858E">Branch Name</p>
+                        <p style="color: #7A858E">Branch/Subsidiary Name</p>
                         <p class="text">{{ overview.name }}</p>
                     </div>
                     <div class="info">
-                        <p style="color: #7A858E">Branch Address</p>
-                        <p class="text">{{ overview.address }}</p>
-                    </div>
-                    <div class="info">
-                        <p style="color: #7A858E">Phone Number</p>
-                        <p class="text">{{ overview.phone }}</p>
-                    </div>
-                    <div class="info">
-                        <p style="color: #7A858E">Email Address</p>
-                        <p class="text">{{ overview.email }}</p>
-                    </div>
-                    <div class="info">
-                        <p style="color: #7A858E">Manager</p>
-                        <p class="text">{{ overview.manager }}</p>
+                        <p style="color: #7A858E">Created At</p>
+                        <p class="text">{{ formatDate(overview.created_at) }}</p>
                     </div>
                 </div>
             </el-tab-pane>
@@ -157,15 +145,19 @@ const activeName = ref('1')
 const branchId = route.params.branchId
 const overview = ref({
     name: "",
-    address: "",
-    phone: "",
-    email: "",
-    manager: ""
+    created_at: ""
 })
 const applications = ref([])
 const loadingApplications = ref(false)
 const brokers = ref([])
 const loadingBrokers = ref(false)
+
+// Helper function to format dates
+const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+}
 
 onMounted(async () => {
     try {
@@ -253,11 +245,6 @@ const formatCurrency = (amount) => {
         style: 'currency',
         currency: 'AUD'
     }).format(amount)
-}
-
-const formatDate = (dateString) => {
-    if (!dateString) return '-'
-    return new Date(dateString).toLocaleDateString('en-AU')
 }
 </script>
 

@@ -8,6 +8,7 @@ including create, detail, list, and various update serializers.
 from rest_framework import serializers
 from django.db import transaction
 from decimal import Decimal
+from django.utils import timezone
 
 from ..models import Application, SecurityProperty, LoanRequirement
 from borrowers.models import Borrower, Guarantor
@@ -45,9 +46,55 @@ class ApplicationSignatureSerializer(serializers.Serializer):
 class ApplicationStageUpdateSerializer(serializers.Serializer):
     """
     Serializer for updating application stage
+    
+    Handles stage transitions and maintains a history of stage changes.
     """
     stage = serializers.ChoiceField(choices=Application.STAGE_CHOICES)
     notes = serializers.CharField(required=False, allow_blank=True)
+    
+    def validate_stage(self, value):
+        """Validate stage transitions."""
+        if self.instance and value == self.instance.stage:
+            raise serializers.ValidationError("Application is already in this stage.")
+        
+        # Add any specific stage transition validation rules here
+        # For example, prevent going back to 'received' from later stages
+        if self.instance and self.instance.stage != 'received' and value == 'received':
+            raise serializers.ValidationError("Cannot move back to 'received' stage once application has progressed.")
+        
+        return value
+    
+    def update(self, instance, validated_data):
+        """Update application stage and maintain history."""
+        old_stage = instance.stage
+        new_stage = validated_data['stage']
+        notes = validated_data.get('notes', '')
+        
+        # Update stage history
+        if not instance.stage_history:
+            instance.stage_history = []
+        
+        instance.stage_history.append({
+            'from_stage': old_stage,
+            'to_stage': new_stage,
+            'timestamp': timezone.now().isoformat(),
+            'user': self.context['request'].user.username,
+            'notes': notes
+        })
+        
+        # Update stage
+        instance.stage = new_stage
+        instance.save()
+        
+        # Create note about stage change
+        Note.objects.create(
+            application=instance,
+            title=f"Stage Updated: {instance.get_stage_display()}",
+            content=f"Stage changed from '{dict(Application.STAGE_CHOICES)[old_stage]}' to '{dict(Application.STAGE_CHOICES)[new_stage]}'\n\nNotes: {notes}",
+            created_by=self.context['request'].user
+        )
+        
+        return instance
 
 
 class ApplicationBorrowerSerializer(serializers.Serializer):
@@ -580,6 +627,8 @@ class ApplicationListSerializer(serializers.ModelSerializer):
     Serializer for listing applications with summary information
     """
     stage_display = serializers.CharField(source='get_stage_display', read_only=True)
+    last_stage_change = serializers.SerializerMethodField()
+    stage_history_summary = serializers.SerializerMethodField()
     borrower_count = serializers.SerializerMethodField()
     borrower_name = serializers.SerializerMethodField()
     guarantor_name = serializers.SerializerMethodField()
@@ -596,10 +645,34 @@ class ApplicationListSerializer(serializers.ModelSerializer):
         model = Application
         fields = [
             'id', 'reference_number', 'borrower_name', 'stage', 'stage_display',
+            'last_stage_change', 'stage_history_summary',
             'bdm_name', 'broker_name', 'branch_name', 'guarantor_name', 'purpose', 'product_name', 'security_address',
             'loan_amount', 'loan_term', 'capitalised_interest_term', 'estimated_settlement_date', 'updated_at', 'created_at',
             'application_type', 'borrower_count', 'solvency_issues'
         ]
+    
+    def get_last_stage_change(self, obj):
+        """Get information about the last stage change."""
+        if not obj.stage_history:
+            return None
+        last_change = obj.stage_history[-1]
+        return {
+            'from_stage': dict(Application.STAGE_CHOICES).get(last_change['from_stage'], 'Unknown'),
+            'to_stage': dict(Application.STAGE_CHOICES).get(last_change['to_stage'], 'Unknown'),
+            'timestamp': last_change['timestamp'],
+            'user': last_change['user'],
+            'notes': last_change.get('notes', '')
+        }
+    
+    def get_stage_history_summary(self, obj):
+        """Get a summary of stage changes."""
+        if not obj.stage_history:
+            return []
+        return [{
+            'stage': dict(Application.STAGE_CHOICES).get(change['to_stage'], 'Unknown'),
+            'timestamp': change['timestamp'],
+            'user': change['user']
+        } for change in obj.stage_history[-5:]]  # Return last 5 changes
     
     def get_borrower_count(self, obj) -> int:
         return obj.borrowers.count()

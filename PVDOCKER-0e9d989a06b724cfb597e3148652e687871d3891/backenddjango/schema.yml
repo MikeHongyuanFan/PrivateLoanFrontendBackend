@@ -447,7 +447,11 @@ paths:
   /api/applications/{id}/stage/:
     put:
       operationId: applications_stage_update
-      description: ViewSet for viewing and editing Application instances.
+      description: |-
+        Update application stage with history tracking
+
+        Updates the stage of an application and maintains a history of changes.
+        Also creates notifications for relevant users.
       parameters:
       - in: path
         name: id
@@ -1028,7 +1032,11 @@ paths:
   /api/applications/applications/{id}/update_stage/:
     put:
       operationId: applications_applications_update_stage_update
-      description: ViewSet for viewing and editing Application instances.
+      description: |-
+        Update application stage with history tracking
+
+        Updates the stage of an application and maintains a history of changes.
+        Also creates notifications for relevant users.
       parameters:
       - in: path
         name: id
@@ -2827,6 +2835,42 @@ paths:
               schema:
                 $ref: '#/components/schemas/BrokerDetail'
           description: ''
+  /api/brokers/{id}/lock_commission_account/:
+    post:
+      operationId: brokers_lock_commission_account_create
+      description: |-
+        Lock the commission account for a broker
+        Only super user and accounts can lock commission accounts
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this broker.
+        required: true
+      tags:
+      - brokers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrokerDetailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BrokerDetailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BrokerDetailRequest'
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrokerDetail'
+          description: ''
   /api/brokers/{id}/stats/:
     get:
       operationId: brokers_stats_retrieve
@@ -2840,6 +2884,42 @@ paths:
         required: true
       tags:
       - brokers
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrokerDetail'
+          description: ''
+  /api/brokers/{id}/unlock_commission_account/:
+    post:
+      operationId: brokers_unlock_commission_account_create
+      description: |-
+        Unlock the commission account for a broker
+        Only super user and accounts can unlock commission accounts
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this broker.
+        required: true
+      tags:
+      - brokers
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BrokerDetailRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/BrokerDetailRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/BrokerDetailRequest'
       security:
       - jwtAuth: []
       - Bearer: []
@@ -3039,6 +3119,29 @@ paths:
               schema:
                 $ref: '#/components/schemas/BDM'
           description: ''
+  /api/brokers/bdms/{id}/brokers/:
+    get:
+      operationId: brokers_bdms_brokers_retrieve
+      description: Get all brokers assigned to a BDM
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this BDM.
+        required: true
+      tags:
+      - brokers
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BDM'
+          description: ''
   /api/brokers/bdms/claim_application/:
     post:
       operationId: brokers_bdms_claim_application_create
@@ -3173,7 +3276,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this branch.
+        description: A unique integer value identifying this Branch/Subsidiary.
         required: true
       tags:
       - brokers
@@ -3195,7 +3298,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this branch.
+        description: A unique integer value identifying this Branch/Subsidiary.
         required: true
       tags:
       - brokers
@@ -3228,7 +3331,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this branch.
+        description: A unique integer value identifying this Branch/Subsidiary.
         required: true
       tags:
       - brokers
@@ -3261,7 +3364,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this branch.
+        description: A unique integer value identifying this Branch/Subsidiary.
         required: true
       tags:
       - brokers
@@ -3280,7 +3383,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this branch.
+        description: A unique integer value identifying this Branch/Subsidiary.
         required: true
       tags:
       - brokers
@@ -3303,7 +3406,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this branch.
+        description: A unique integer value identifying this Branch/Subsidiary.
         required: true
       tags:
       - brokers
@@ -3326,7 +3429,7 @@ paths:
         name: id
         schema:
           type: integer
-        description: A unique integer value identifying this branch.
+        description: A unique integer value identifying this Branch/Subsidiary.
         required: true
       tags:
       - brokers
@@ -5181,7 +5284,7 @@ paths:
       operationId: users_download_email_logs_retrieve
       description: |-
         View for downloading email logs as a DOCX file.
-        Only available to admin users.
+        Only available to super user, accounts, and admin users.
       tags:
       - users
       security:
@@ -5896,25 +5999,24 @@ components:
           description: |-
             Current stage of the application
 
-            * `inquiry` - Inquiry
-            * `sent_to_lender` - Sent to Lender
+            * `received` - Received
+            * `sent_to_lender` - Sent to Lender/Investor
             * `funding_table_issued` - Funding Table Issued
-            * `iloo_issued` - ILOO Issued
-            * `iloo_signed` - ILOO Signed
-            * `commitment_fee_paid` - Commitment Fee Paid
-            * `app_submitted` - App Submitted
+            * `indicative_letter_issued` - Indicative Letter Issued
+            * `indicative_letter_signed` - Indicative Letter Signed
+            * `commitment_fee_received` - Commitment Fee Received
+            * `application_submitted` - Application Submitted
             * `valuation_ordered` - Valuation Ordered
             * `valuation_received` - Valuation Received
-            * `more_info_required` - More Info Required
+            * `more_info_required` - More Information Required
             * `formal_approval` - Formal Approval
-            * `loan_docs_instructed` - Loan Docs Instructed
-            * `loan_docs_issued` - Loan Docs Issued
-            * `loan_docs_signed` - Loan Docs Signed
+            * `loan_docs_instructed` - Loan Documents Instructed
+            * `loan_docs_issued` - Loan Documents Issued
+            * `loan_docs_signed` - Loan Documents Signed
             * `settlement_conditions` - Settlement Conditions
             * `settled` - Settled
             * `closed` - Closed
-            * `declined` - Declined
-            * `withdrawn` - Withdrawn
+            * `discharged` - Discharged
           oneOf:
           - $ref: '#/components/schemas/StageEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -6169,25 +6271,24 @@ components:
           description: |-
             Current stage of the application
 
-            * `inquiry` - Inquiry
-            * `sent_to_lender` - Sent to Lender
+            * `received` - Received
+            * `sent_to_lender` - Sent to Lender/Investor
             * `funding_table_issued` - Funding Table Issued
-            * `iloo_issued` - ILOO Issued
-            * `iloo_signed` - ILOO Signed
-            * `commitment_fee_paid` - Commitment Fee Paid
-            * `app_submitted` - App Submitted
+            * `indicative_letter_issued` - Indicative Letter Issued
+            * `indicative_letter_signed` - Indicative Letter Signed
+            * `commitment_fee_received` - Commitment Fee Received
+            * `application_submitted` - Application Submitted
             * `valuation_ordered` - Valuation Ordered
             * `valuation_received` - Valuation Received
-            * `more_info_required` - More Info Required
+            * `more_info_required` - More Information Required
             * `formal_approval` - Formal Approval
-            * `loan_docs_instructed` - Loan Docs Instructed
-            * `loan_docs_issued` - Loan Docs Issued
-            * `loan_docs_signed` - Loan Docs Signed
+            * `loan_docs_instructed` - Loan Documents Instructed
+            * `loan_docs_issued` - Loan Documents Issued
+            * `loan_docs_signed` - Loan Documents Signed
             * `settlement_conditions` - Settlement Conditions
             * `settled` - Settled
             * `closed` - Closed
-            * `declined` - Declined
-            * `withdrawn` - Withdrawn
+            * `discharged` - Discharged
           oneOf:
           - $ref: '#/components/schemas/StageEnum'
           - $ref: '#/components/schemas/BlankEnum'
@@ -6447,25 +6548,24 @@ components:
           description: |-
             Current stage of the application
 
-            * `inquiry` - Inquiry
-            * `sent_to_lender` - Sent to Lender
+            * `received` - Received
+            * `sent_to_lender` - Sent to Lender/Investor
             * `funding_table_issued` - Funding Table Issued
-            * `iloo_issued` - ILOO Issued
-            * `iloo_signed` - ILOO Signed
-            * `commitment_fee_paid` - Commitment Fee Paid
-            * `app_submitted` - App Submitted
+            * `indicative_letter_issued` - Indicative Letter Issued
+            * `indicative_letter_signed` - Indicative Letter Signed
+            * `commitment_fee_received` - Commitment Fee Received
+            * `application_submitted` - Application Submitted
             * `valuation_ordered` - Valuation Ordered
             * `valuation_received` - Valuation Received
-            * `more_info_required` - More Info Required
+            * `more_info_required` - More Information Required
             * `formal_approval` - Formal Approval
-            * `loan_docs_instructed` - Loan Docs Instructed
-            * `loan_docs_issued` - Loan Docs Issued
-            * `loan_docs_signed` - Loan Docs Signed
+            * `loan_docs_instructed` - Loan Documents Instructed
+            * `loan_docs_issued` - Loan Documents Issued
+            * `loan_docs_signed` - Loan Documents Signed
             * `settlement_conditions` - Settlement Conditions
             * `settled` - Settled
             * `closed` - Closed
-            * `declined` - Declined
-            * `withdrawn` - Withdrawn
+            * `discharged` - Discharged
         stage_display:
           type: string
           readOnly: true
@@ -6807,26 +6907,31 @@ components:
           description: |-
             Current stage of the application
 
-            * `inquiry` - Inquiry
-            * `sent_to_lender` - Sent to Lender
+            * `received` - Received
+            * `sent_to_lender` - Sent to Lender/Investor
             * `funding_table_issued` - Funding Table Issued
-            * `iloo_issued` - ILOO Issued
-            * `iloo_signed` - ILOO Signed
-            * `commitment_fee_paid` - Commitment Fee Paid
-            * `app_submitted` - App Submitted
+            * `indicative_letter_issued` - Indicative Letter Issued
+            * `indicative_letter_signed` - Indicative Letter Signed
+            * `commitment_fee_received` - Commitment Fee Received
+            * `application_submitted` - Application Submitted
             * `valuation_ordered` - Valuation Ordered
             * `valuation_received` - Valuation Received
-            * `more_info_required` - More Info Required
+            * `more_info_required` - More Information Required
             * `formal_approval` - Formal Approval
-            * `loan_docs_instructed` - Loan Docs Instructed
-            * `loan_docs_issued` - Loan Docs Issued
-            * `loan_docs_signed` - Loan Docs Signed
+            * `loan_docs_instructed` - Loan Documents Instructed
+            * `loan_docs_issued` - Loan Documents Issued
+            * `loan_docs_signed` - Loan Documents Signed
             * `settlement_conditions` - Settlement Conditions
             * `settled` - Settled
             * `closed` - Closed
-            * `declined` - Declined
-            * `withdrawn` - Withdrawn
+            * `discharged` - Discharged
         stage_display:
+          type: string
+          readOnly: true
+        last_stage_change:
+          type: string
+          readOnly: true
+        stage_history_summary:
           type: string
           readOnly: true
         bdm_name:
@@ -6919,11 +7024,13 @@ components:
       - broker_name
       - guarantor_name
       - id
+      - last_stage_change
       - product_name
       - purpose
       - security_address
       - solvency_issues
       - stage_display
+      - stage_history_summary
       - updated_at
     ApplicationListRequest:
       type: object
@@ -6940,25 +7047,24 @@ components:
           description: |-
             Current stage of the application
 
-            * `inquiry` - Inquiry
-            * `sent_to_lender` - Sent to Lender
+            * `received` - Received
+            * `sent_to_lender` - Sent to Lender/Investor
             * `funding_table_issued` - Funding Table Issued
-            * `iloo_issued` - ILOO Issued
-            * `iloo_signed` - ILOO Signed
-            * `commitment_fee_paid` - Commitment Fee Paid
-            * `app_submitted` - App Submitted
+            * `indicative_letter_issued` - Indicative Letter Issued
+            * `indicative_letter_signed` - Indicative Letter Signed
+            * `commitment_fee_received` - Commitment Fee Received
+            * `application_submitted` - Application Submitted
             * `valuation_ordered` - Valuation Ordered
             * `valuation_received` - Valuation Received
-            * `more_info_required` - More Info Required
+            * `more_info_required` - More Information Required
             * `formal_approval` - Formal Approval
-            * `loan_docs_instructed` - Loan Docs Instructed
-            * `loan_docs_issued` - Loan Docs Issued
-            * `loan_docs_signed` - Loan Docs Signed
+            * `loan_docs_instructed` - Loan Documents Instructed
+            * `loan_docs_issued` - Loan Documents Issued
+            * `loan_docs_signed` - Loan Documents Signed
             * `settlement_conditions` - Settlement Conditions
             * `settled` - Settled
             * `closed` - Closed
-            * `declined` - Declined
-            * `withdrawn` - Withdrawn
+            * `discharged` - Discharged
         loan_amount:
           type: string
           format: decimal
@@ -7255,23 +7361,6 @@ components:
           maxLength: 20
         branch_id:
           type: integer
-          writeOnly: true
-          nullable: true
-        branch_name:
-          type: string
-          writeOnly: true
-          nullable: true
-        address:
-          type: string
-          writeOnly: true
-          nullable: true
-        branch_phone:
-          type: string
-          writeOnly: true
-          nullable: true
-        branch_email:
-          type: string
-          format: email
           writeOnly: true
           nullable: true
     BgTypeEnum:
@@ -8187,18 +8276,6 @@ components:
           type: string
           nullable: true
           maxLength: 100
-        address:
-          type: string
-          nullable: true
-        phone:
-          type: string
-          nullable: true
-          maxLength: 20
-        email:
-          type: string
-          format: email
-          nullable: true
-          maxLength: 254
       required:
       - id
     BranchRequest:
@@ -8210,18 +8287,6 @@ components:
           type: string
           nullable: true
           maxLength: 100
-        address:
-          type: string
-          nullable: true
-        phone:
-          type: string
-          nullable: true
-          maxLength: 20
-        email:
-          type: string
-          format: email
-          nullable: true
-          maxLength: 254
     BrokerDetail:
       type: object
       description: Serializer for detailed broker information with null/blank handling
@@ -8240,6 +8305,10 @@ components:
             $ref: '#/components/schemas/BDM'
           readOnly: true
         created_by:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          readOnly: true
+        commission_account_locked_by:
           allOf:
           - $ref: '#/components/schemas/User'
           readOnly: true
@@ -8279,6 +8348,15 @@ components:
           type: string
           nullable: true
           maxLength: 10
+        commission_account_locked:
+          type: boolean
+          description: If True, only super user and accounts can modify commission
+            details
+        commission_account_locked_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
         created_at:
           type: string
           format: date-time
@@ -8293,6 +8371,8 @@ components:
       required:
       - bdms
       - branch
+      - commission_account_locked_at
+      - commission_account_locked_by
       - created_at
       - created_by
       - id
@@ -8306,6 +8386,11 @@ components:
           type: integer
           writeOnly: true
           nullable: true
+        bdm_ids:
+          type: array
+          items:
+            type: integer
+          writeOnly: true
         name:
           type: string
           nullable: true
@@ -8342,6 +8427,10 @@ components:
           type: string
           nullable: true
           maxLength: 10
+        commission_account_locked:
+          type: boolean
+          description: If True, only super user and accounts can modify commission
+            details
         user:
           type: integer
           nullable: true
@@ -10451,25 +10540,24 @@ components:
           description: |-
             Current stage of the application
 
-            * `inquiry` - Inquiry
-            * `sent_to_lender` - Sent to Lender
+            * `received` - Received
+            * `sent_to_lender` - Sent to Lender/Investor
             * `funding_table_issued` - Funding Table Issued
-            * `iloo_issued` - ILOO Issued
-            * `iloo_signed` - ILOO Signed
-            * `commitment_fee_paid` - Commitment Fee Paid
-            * `app_submitted` - App Submitted
+            * `indicative_letter_issued` - Indicative Letter Issued
+            * `indicative_letter_signed` - Indicative Letter Signed
+            * `commitment_fee_received` - Commitment Fee Received
+            * `application_submitted` - Application Submitted
             * `valuation_ordered` - Valuation Ordered
             * `valuation_received` - Valuation Received
-            * `more_info_required` - More Info Required
+            * `more_info_required` - More Information Required
             * `formal_approval` - Formal Approval
-            * `loan_docs_instructed` - Loan Docs Instructed
-            * `loan_docs_issued` - Loan Docs Issued
-            * `loan_docs_signed` - Loan Docs Signed
+            * `loan_docs_instructed` - Loan Documents Instructed
+            * `loan_docs_issued` - Loan Documents Issued
+            * `loan_docs_signed` - Loan Documents Signed
             * `settlement_conditions` - Settlement Conditions
             * `settled` - Settled
             * `closed` - Closed
-            * `declined` - Declined
-            * `withdrawn` - Withdrawn
+            * `discharged` - Discharged
         loan_amount:
           type: string
           format: decimal
@@ -10574,23 +10662,6 @@ components:
           maxLength: 20
         branch_id:
           type: integer
-          writeOnly: true
-          nullable: true
-        branch_name:
-          type: string
-          writeOnly: true
-          nullable: true
-        address:
-          type: string
-          writeOnly: true
-          nullable: true
-        branch_phone:
-          type: string
-          writeOnly: true
-          nullable: true
-        branch_email:
-          type: string
-          format: email
           writeOnly: true
           nullable: true
     PatchedBorrowerDetailRequest:
@@ -10894,18 +10965,6 @@ components:
           type: string
           nullable: true
           maxLength: 100
-        address:
-          type: string
-          nullable: true
-        phone:
-          type: string
-          nullable: true
-          maxLength: 20
-        email:
-          type: string
-          format: email
-          nullable: true
-          maxLength: 254
     PatchedBrokerDetailRequest:
       type: object
       description: Serializer for detailed broker information with null/blank handling
@@ -10915,6 +10974,11 @@ components:
           type: integer
           writeOnly: true
           nullable: true
+        bdm_ids:
+          type: array
+          items:
+            type: integer
+          writeOnly: true
         name:
           type: string
           nullable: true
@@ -10951,6 +11015,10 @@ components:
           type: string
           nullable: true
           maxLength: 10
+        commission_account_locked:
+          type: boolean
+          description: If True, only super user and accounts can modify commission
+            details
         user:
           type: integer
           nullable: true
@@ -11773,13 +11841,23 @@ components:
         * `foreign_investor` - Foreign Investor
     RoleEnum:
       enum:
+      - accounts
       - admin
+      - business_development_manager
+      - business_development_associate
+      - credit_manager
+      - super_user
       - broker
       - bd
       - client
       type: string
       description: |-
+        * `accounts` - Accounts
         * `admin` - Admin
+        * `business_development_manager` - Business Development Manager
+        * `business_development_associate` - Business Development Associate
+        * `credit_manager` - Credit Manager
+        * `super_user` - Super User
         * `broker` - Broker
         * `bd` - Business Development
         * `client` - Client
@@ -12072,13 +12150,13 @@ components:
           description: Whether the property has off-street parking
     StageEnum:
       enum:
-      - inquiry
+      - received
       - sent_to_lender
       - funding_table_issued
-      - iloo_issued
-      - iloo_signed
-      - commitment_fee_paid
-      - app_submitted
+      - indicative_letter_issued
+      - indicative_letter_signed
+      - commitment_fee_received
+      - application_submitted
       - valuation_ordered
       - valuation_received
       - more_info_required
@@ -12089,29 +12167,27 @@ components:
       - settlement_conditions
       - settled
       - closed
-      - declined
-      - withdrawn
+      - discharged
       type: string
       description: |-
-        * `inquiry` - Inquiry
-        * `sent_to_lender` - Sent to Lender
+        * `received` - Received
+        * `sent_to_lender` - Sent to Lender/Investor
         * `funding_table_issued` - Funding Table Issued
-        * `iloo_issued` - ILOO Issued
-        * `iloo_signed` - ILOO Signed
-        * `commitment_fee_paid` - Commitment Fee Paid
-        * `app_submitted` - App Submitted
+        * `indicative_letter_issued` - Indicative Letter Issued
+        * `indicative_letter_signed` - Indicative Letter Signed
+        * `commitment_fee_received` - Commitment Fee Received
+        * `application_submitted` - Application Submitted
         * `valuation_ordered` - Valuation Ordered
         * `valuation_received` - Valuation Received
-        * `more_info_required` - More Info Required
+        * `more_info_required` - More Information Required
         * `formal_approval` - Formal Approval
-        * `loan_docs_instructed` - Loan Docs Instructed
-        * `loan_docs_issued` - Loan Docs Issued
-        * `loan_docs_signed` - Loan Docs Signed
+        * `loan_docs_instructed` - Loan Documents Instructed
+        * `loan_docs_issued` - Loan Documents Issued
+        * `loan_docs_signed` - Loan Documents Signed
         * `settlement_conditions` - Settlement Conditions
         * `settled` - Settled
         * `closed` - Closed
-        * `declined` - Declined
-        * `withdrawn` - Withdrawn
+        * `discharged` - Discharged
     TitleEnum:
       enum:
       - mr

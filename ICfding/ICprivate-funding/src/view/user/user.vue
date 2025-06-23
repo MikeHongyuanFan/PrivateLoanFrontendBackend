@@ -122,7 +122,13 @@
         </el-row>
         <el-form-item label="Role" prop="role" v-if="isAdmin">
           <el-select v-model="editForm.role" placeholder="Select Role" class="w-100">
+            <el-option label="Accounts" value="accounts" />
             <el-option label="Administrator" value="admin" />
+            <el-option label="Business Development Manager" value="business_development_manager" />
+            <el-option label="Business Development Associate" value="business_development_associate" />
+            <el-option label="Credit Manager" value="credit_manager" />
+            <el-option label="Super User" value="super_user" />
+            <!-- Legacy roles for backward compatibility -->
             <el-option label="Broker" value="broker" />
             <el-option label="Business Development" value="bd" />
             <el-option label="Client" value="client" />
@@ -228,7 +234,13 @@ const formattedRole = computed(() => {
   if (!user.value?.role) return 'N/A';
   
   const roleMap = {
+    'accounts': 'Accounts',
     'admin': 'Administrator',
+    'business_development_manager': 'Business Development Manager',
+    'business_development_associate': 'Business Development Associate',
+    'credit_manager': 'Credit Manager',
+    'super_user': 'Super User',
+    // Legacy roles for backward compatibility
     'broker': 'Broker',
     'bd': 'Business Development',
     'client': 'Client'
@@ -408,7 +420,13 @@ const confirmDelete = () => {
 
 const getRoleType = (role) => {
   const types = {
+    'accounts': 'success',
     'admin': 'danger',
+    'business_development_manager': 'warning',
+    'business_development_associate': 'info',
+    'credit_manager': 'primary',
+    'super_user': 'danger',
+    // Legacy roles for backward compatibility
     'broker': 'success',
     'bd': 'warning',
     'client': 'info'

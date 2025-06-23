@@ -129,7 +129,7 @@
                                 <p :style="{color: isExitValid ? '#2984DE' : '#272727'}">Proposed Exit Strategy</p>
                             </div>
                         </template>
-                        <Exit :detail="application"></Exit>
+                        <Exit :exit="application"></Exit>
                     </el-collapse-item>
                 </el-collapse>
             </div>

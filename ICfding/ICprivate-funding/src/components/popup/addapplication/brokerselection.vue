@@ -56,10 +56,10 @@
         </div>
 
         <div class="item">
-            <p>Branch</p>
+            <p>Branch/Subsidiary</p>
             <el-select 
                 v-model="selection.branch_id" 
-                placeholder="Select a branch (optional)"
+                placeholder="Select a branch/subsidiary (optional)"
                 filterable
                 clearable
                 loading-text="Loading branches..."
@@ -77,7 +77,7 @@
                     <span style="float: right; color: #8492a6; font-size: 13px">ID: {{ branch.id }}</span>
                 </el-option>
             </el-select>
-            <span class="hint">Optional: Select the branch for this application</span>
+            <span class="hint">Optional: Select the branch/subsidiary for this application</span>
         </div>
 
         <div v-if="selection.broker || selection.bd_id || selection.branch_id" class="summary">
@@ -89,7 +89,7 @@
                 <strong>BDM:</strong> {{ selectedBDM.display_name }}
             </div>
             <div class="summary-item" v-if="selectedBranch">
-                <strong>Branch:</strong> {{ selectedBranch.display_name }}
+                <strong>Branch/Subsidiary:</strong> {{ selectedBranch.display_name }}
             </div>
         </div>
     </div>

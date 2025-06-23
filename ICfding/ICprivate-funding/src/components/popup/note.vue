@@ -108,7 +108,13 @@
         const [err, res] = await api.users()
         if (!err) {            
             assign.value = res.results.filter(item => 
-                item.role === 'admin' || item.role === 'bd'
+                item.role === 'admin' || 
+                item.role === 'bd' || 
+                item.role === 'super_user' || 
+                item.role === 'accounts' || 
+                item.role === 'business_development_manager' || 
+                item.role === 'business_development_associate' || 
+                item.role === 'credit_manager'
             )
             console.log(assign.value);
         } else {

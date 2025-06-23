@@ -38,12 +38,12 @@ class ApplicationAdmin(admin.ModelAdmin):
     list_display = ('reference_number', 'stage', 'loan_amount', 'created_at', 'updated_at')
     list_filter = ('stage', 'application_type', 'loan_purpose')
     search_fields = ('reference_number', 'purpose', 'security_address')
-    readonly_fields = ('reference_number', 'created_at', 'updated_at', 'stage_last_updated')
+    readonly_fields = ('reference_number', 'created_at', 'updated_at', 'stage_history')
     date_hierarchy = 'created_at'
     
     fieldsets = (
         ('Basic Information', {
-            'fields': ('reference_number', 'stage', 'stage_last_updated', 'application_type', 'purpose')
+            'fields': ('reference_number', 'stage', 'stage_history', 'application_type', 'purpose')
         }),
         ('Loan Details', {
             'fields': ('loan_amount', 'loan_term', 'capitalised_interest_term', 'interest_rate', 'repayment_frequency', 

@@ -14,7 +14,7 @@ from .serializers import (
     BranchDropdownSerializer
 )
 from .filters import BrokerFilter, BranchFilter, BDMFilter
-from users.permissions import IsAdmin, IsAdminOrBD
+from users.permissions import IsAdmin, IsAdminOrBD, IsSuperUserOrAccounts, CanModifyCommissionAccount
 from django.db.models import Count, Sum
 from rest_framework.views import APIView
 
@@ -27,11 +27,16 @@ class BranchViewSet(viewsets.ModelViewSet):
     serializer_class = BranchSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     filterset_class = BranchFilter
-    search_fields = ['name', 'address']
+    search_fields = ['name']
     
     def get_permissions(self):
+        user = getattr(self.request, 'user', None)
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [IsAuthenticated, IsAdmin]
+            # Super user, accounts, and admin users can manage branches
+            if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts', 'admin']:
+                permission_classes = [IsAuthenticated]
+            else:
+                permission_classes = [IsAuthenticated, IsAdmin]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
@@ -96,8 +101,13 @@ class BrokerViewSet(viewsets.ModelViewSet):
         return BrokerDetailSerializer
     
     def get_permissions(self):
+        user = getattr(self.request, 'user', None)
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [IsAuthenticated, IsAdmin]
+            # Super user, accounts, and admin users can manage brokers
+            if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts', 'admin']:
+                permission_classes = [IsAuthenticated]
+            else:
+                permission_classes = [IsAuthenticated, IsAdmin]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
@@ -105,6 +115,10 @@ class BrokerViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         queryset = super().get_queryset()
+        
+        # Super user and accounts can see all brokers
+        if hasattr(user, 'role') and user.role in ['super_user', 'accounts']:
+            return queryset
         
         # Filter brokers based on user role
         if user.role == 'admin':
@@ -175,6 +189,62 @@ class BrokerViewSet(viewsets.ModelViewSet):
             queryset = Broker.objects.all().order_by('name')
         serializer = BrokerDropdownSerializer(queryset, many=True)
         return Response(serializer.data)
+    
+    @action(detail=True, methods=['post'])
+    def lock_commission_account(self, request, pk=None):
+        """
+        Lock the commission account for a broker
+        Only super user and accounts can lock commission accounts
+        """
+        broker = self.get_object()
+        
+        if not request.user.can_modify_commission_account():
+            return Response(
+                {"error": "Only super user and accounts can lock commission accounts"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        try:
+            broker.lock_commission_account(request.user)
+            return Response({
+                "message": "Commission account locked successfully",
+                "commission_account_locked": True,
+                "commission_account_locked_by": request.user.email,
+                "commission_account_locked_at": broker.commission_account_locked_at
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to lock commission account: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    @action(detail=True, methods=['post'])
+    def unlock_commission_account(self, request, pk=None):
+        """
+        Unlock the commission account for a broker
+        Only super user and accounts can unlock commission accounts
+        """
+        broker = self.get_object()
+        
+        if not request.user.can_modify_commission_account():
+            return Response(
+                {"error": "Only super user and accounts can unlock commission accounts"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        
+        try:
+            broker.unlock_commission_account(request.user)
+            return Response({
+                "message": "Commission account unlocked successfully",
+                "commission_account_locked": False,
+                "commission_account_locked_by": None,
+                "commission_account_locked_at": None
+            }, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": f"Failed to unlock commission account: {str(e)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class BDMViewSet(viewsets.ModelViewSet):
@@ -188,8 +258,13 @@ class BDMViewSet(viewsets.ModelViewSet):
     search_fields = ['name', 'email', 'phone']
     
     def get_permissions(self):
+        user = getattr(self.request, 'user', None)
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [IsAuthenticated, IsAdmin]
+            # Super user, accounts, and admin users can manage BDMs
+            if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts', 'admin']:
+                permission_classes = [IsAuthenticated]
+            else:
+                permission_classes = [IsAuthenticated, IsAdmin]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
@@ -197,6 +272,10 @@ class BDMViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         queryset = super().get_queryset()
+        
+        # Super user and accounts can see all BDMs
+        if hasattr(user, 'role') and user.role in ['super_user', 'accounts']:
+            return queryset
         
         # Filter BDMs based on user role
         if user.role == 'admin':
@@ -231,6 +310,16 @@ class BDMViewSet(viewsets.ModelViewSet):
         from applications.serializers import ApplicationListSerializer
         applications = bdm.bdm_applications.all().order_by('-created_at')
         serializer = ApplicationListSerializer(applications, many=True)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['get'])
+    def brokers(self, request, pk=None):
+        """
+        Get all brokers assigned to a BDM
+        """
+        bdm = self.get_object()
+        brokers = bdm.bdm_brokers.all().order_by('name')
+        serializer = BrokerListSerializer(brokers, many=True)
         return Response(serializer.data)
 
     @action(detail=False, methods=['post'])

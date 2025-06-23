@@ -1,5 +1,5 @@
 <template>
-    <div class="form">
+    <div class="form" v-if="exit">
         <h1>Finance Takeout Method <span class="required">*</span></h1>
         <div class="item">
             <p>Exit Strategy <span class="required">*</span></p>
@@ -25,20 +25,36 @@
             <span class="hint">Provide additional information about your exit strategy</span>
         </div>
     </div>
+    <div v-else class="form">
+        <p>Loading exit strategy data...</p>
+    </div>
 </template>
 
 <script setup>
-    import { ref, watch, onMounted } from 'vue';
+    import { ref, watch, onMounted, computed } from 'vue';
 
     const props = defineProps({
-        exit: Object
+        exit: {
+            type: Object,
+            required: true,
+            default: () => ({})
+        }
     });
+
+    // Create a computed property to ensure reactivity
+    const exit = computed(() => props.exit || {});
 
     // Create a local ref for the other strategy
     const otherStrategy = ref("");
 
     // Initialize values from props
     onMounted(() => {
+        // Safety check: ensure props.exit exists
+        if (!props.exit) {
+            console.warn('Exit component: props.exit is undefined');
+            return;
+        }
+        
         // Check if exit_strategy is already set and is a valid enum value
         const validStrategies = ["sale", "refinance", "income", "other"];
         if (props.exit.exit_strategy && validStrategies.includes(props.exit.exit_strategy)) {
@@ -55,14 +71,14 @@
 
     // Function to update the exit strategy when "other" is selected
     const updateOtherStrategy = () => {
-        if (props.exit.exit_strategy === 'other' && otherStrategy.value) {
+        if (props.exit && props.exit.exit_strategy === 'other' && otherStrategy.value) {
             // Store the custom value in a separate field
             props.exit.custom_exit_strategy = otherStrategy.value;
         }
     };
 
     // Watch for changes in the exit strategy
-    watch(() => props.exit.exit_strategy, (newVal) => {
+    watch(() => props.exit?.exit_strategy, (newVal) => {
         if (newVal !== 'other') {
             // Reset the other strategy input when a predefined strategy is selected
             otherStrategy.value = "";

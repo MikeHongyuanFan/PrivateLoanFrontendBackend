@@ -132,6 +132,76 @@ class ApplicationWorkflowIntegrationTest(BaseApplicationTestCase, ApplicationTes
         rejection_note = next((note for note in notes if 'declined' in note['content'].lower()), None)
         self.assertIsNotNone(rejection_note)
 
+    def test_application_stage_progression(self):
+        """Test complete application stage progression with history tracking."""
+        # Create application in received stage
+        url = self.get_application_url()
+        data = self.get_application_data(stage='received')
+        
+        response = self.client.post(url, data, format='json')
+        app_id = response.data['id']
+        
+        # Progress through multiple stages
+        stage_url = self.get_application_url(app_id, 'stage')
+        stages = [
+            ('sent_to_lender', 'Application sent to lender for review'),
+            ('funding_table_issued', 'Funding table prepared and issued'),
+            ('indicative_letter_issued', 'Indicative letter issued to client'),
+            ('indicative_letter_signed', 'Indicative letter signed by client'),
+        ]
+        
+        for stage, note in stages:
+            response = self.client.put(
+                stage_url,
+                {'stage': stage, 'notes': note},
+                format='json'
+            )
+            self.assertResponseSuccess(response)
+            
+            # Verify response contains updated application
+            self.assertIn('application', response.data)
+            app_data = response.data['application']
+            
+            # Verify stage was updated
+            self.assertEqual(app_data['stage'], stage)
+            
+            # Verify stage history was recorded
+            self.assertIn('stage_history_summary', app_data)
+            self.assertGreater(len(app_data['stage_history_summary']), 0)
+            
+            # Verify last stage change
+            self.assertIn('last_stage_change', app_data)
+            last_change = app_data['last_stage_change']
+            self.assertEqual(last_change['to_stage'], dict(Application.STAGE_CHOICES)[stage])
+            self.assertIn('notes', last_change)
+            self.assertEqual(last_change['notes'], note)
+    
+    def test_invalid_stage_transitions(self):
+        """Test invalid stage transitions are prevented."""
+        # Create application in sent_to_lender stage
+        url = self.get_application_url()
+        data = self.get_application_data(stage='sent_to_lender')
+        
+        response = self.client.post(url, data, format='json')
+        app_id = response.data['id']
+        
+        # Try to move back to received stage
+        stage_url = self.get_application_url(app_id, 'stage')
+        response = self.client.put(
+            stage_url,
+            {'stage': 'received', 'notes': 'Attempting to move back'},
+            format='json'
+        )
+        
+        # Verify transition was rejected
+        self.assertResponseError(response, 400)
+        self.assertIn('stage', response.data)
+        
+        # Verify application stage didn't change
+        app_url = self.get_application_url(app_id)
+        response = self.client.get(app_url)
+        self.assertEqual(response.data['stage'], 'sent_to_lender')
+
 
 class ApplicationBorrowerIntegrationTest(BaseApplicationTestCase, ApplicationTestMixin):
     """Test integration between applications and borrowers."""

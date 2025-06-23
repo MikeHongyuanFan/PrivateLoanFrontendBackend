@@ -270,14 +270,20 @@ class UserViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         if self.action == 'list':
-            # Only admin users can list all users
-            permission_classes = [IsAuthenticated, IsAdmin]
+            # Super user, accounts, and admin users can list all users
+            if hasattr(self.request.user, 'role') and self.request.user.role in ['super_user', 'accounts', 'admin']:
+                permission_classes = [IsAuthenticated]
+            else:
+                permission_classes = [IsAuthenticated, IsAdmin]
         elif self.action == 'retrieve':
             # Admin users can retrieve any user, other users can only retrieve themselves
             permission_classes = [IsAuthenticated, IsSelfOrAdmin]
         elif self.action in ['create', 'update', 'partial_update', 'destroy']:
-            # Only admin users can create, update, or delete users
-            permission_classes = [IsAuthenticated, IsAdmin]
+            # Super user, accounts, and admin users can create, update, or delete users
+            if hasattr(self.request.user, 'role') and self.request.user.role in ['super_user', 'accounts', 'admin']:
+                permission_classes = [IsAuthenticated]
+            else:
+                permission_classes = [IsAuthenticated, IsAdmin]
         else:
             # Default to authenticated users for other actions
             permission_classes = [IsAuthenticated]
@@ -477,13 +483,22 @@ class PasswordResetConfirmView(APIView):
                 return Response({"error": "Failed to reset password."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class EmailPreviewView(APIView):
     """
     View for previewing email templates in development mode.
     Only available when DEBUG=True.
     """
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated]
     serializer_class = EmailPreviewSerializer
+    
+    def get_permissions(self):
+        user = getattr(self.request, 'user', None)
+        # Super user, accounts, and admin users can access email preview
+        if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts', 'admin']:
+            return [IsAuthenticated()]
+        return [IsAdminUser()]
     
     def get(self, request):
         if not settings.DEBUG:
@@ -523,10 +538,17 @@ class EmailPreviewView(APIView):
 class DownloadEmailLogsView(APIView):
     """
     View for downloading email logs as a DOCX file.
-    Only available to admin users.
+    Only available to super user, accounts, and admin users.
     """
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    permission_classes = [IsAuthenticated]
     serializer_class = DownloadEmailLogsSerializer
+    
+    def get_permissions(self):
+        user = getattr(self.request, 'user', None)
+        # Super user, accounts, and admin users can access email logs
+        if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts', 'admin']:
+            return [IsAuthenticated()]
+        return [IsAdminUser()]
     
     def get(self, request):
         from crm_backend.tasks import export_email_logs_to_docx

@@ -19,8 +19,14 @@ class GenerateFilledFormView(generics.GenericAPIView):
     """
     API endpoint for generating a filled PDF form from an Application instance.
     """
-    permission_classes = [IsAuthenticated, IsAdminOrBroker]
+    permission_classes = [IsAuthenticated]
     serializer_class = GeneratePDFSerializer
+    
+    def get_permissions(self):
+        user = getattr(self.request, 'user', None)
+        if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts']:
+            return [IsAuthenticated()]
+        return [IsAdminOrBroker()]
     
     def get(self, request, application_id):
         """

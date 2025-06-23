@@ -1,6 +1,14 @@
 from rest_framework import permissions
 
 
+class IsSuperUserOrAccounts(permissions.BasePermission):
+    """
+    Permission to only allow super user or accounts users
+    """
+    def has_permission(self, request, view):
+        return request.user and request.user.role in ['super_user', 'accounts']
+
+
 class IsAdmin(permissions.BasePermission):
     """
     Permission to only allow admin users
@@ -33,12 +41,54 @@ class IsAdminOrBrokerOrBD(permissions.BasePermission):
         return request.user and request.user.role in ['admin', 'broker', 'bd']
 
 
+class CanModifyCommissionAccount(permissions.BasePermission):
+    """
+    Permission to modify commission account details
+    Only super user and accounts can modify commission accounts
+    """
+    def has_permission(self, request, view):
+        if not request.user:
+            return False
+        
+        # Super user and accounts can always modify
+        if request.user.can_modify_commission_account():
+            return True
+        
+        # For other users, check if this is a create operation (first time entry)
+        if request.method == 'POST':
+            return True
+        
+        return False
+    
+    def has_object_permission(self, request, view, obj):
+        if not request.user:
+            return False
+        
+        # Super user and accounts can always modify
+        if request.user.can_modify_commission_account():
+            return True
+        
+        # For other users, check if commission account is locked
+        if hasattr(obj, 'commission_account_locked') and obj.commission_account_locked:
+            return False
+        
+        # If commission account has data and is not locked, only super user/accounts can modify
+        if hasattr(obj, 'has_commission_account_data') and obj.has_commission_account_data():
+            return False
+        
+        return True
+
+
 class IsOwnerOrAdmin(permissions.BasePermission):
     """
     Permission to only allow owners of an object or admin users
     """
     def has_object_permission(self, request, view, obj):
-        # Admin can do anything
+        # Super user and accounts can do anything
+        if request.user.role in ['super_user', 'accounts']:
+            return True
+        
+        # Admin can do anything (except commission account modifications)
         if request.user.role == 'admin':
             return True
         
@@ -58,6 +108,10 @@ class IsSelfOrAdmin(permissions.BasePermission):
     Permission to only allow users to access their own details or admin users to access any user details
     """
     def has_permission(self, request, view):
+        # Super user and accounts can do anything
+        if request.user and request.user.role in ['super_user', 'accounts']:
+            return True
+        
         # Admin can do anything
         if request.user and request.user.role == 'admin':
             return True
@@ -70,6 +124,10 @@ class IsSelfOrAdmin(permissions.BasePermission):
         return False
         
     def has_object_permission(self, request, view, obj):
+        # Super user and accounts can do anything
+        if request.user.role in ['super_user', 'accounts']:
+            return True
+        
         # Admin can do anything
         if request.user.role == 'admin':
             return True
@@ -88,6 +146,10 @@ class CanAccessNote(permissions.BasePermission):
     
     def has_object_permission(self, request, view, obj):
         user = request.user
+        
+        # Super user and accounts can access any note
+        if user.role in ['super_user', 'accounts']:
+            return True
         
         # Admin can access any note
         if user.role == 'admin':

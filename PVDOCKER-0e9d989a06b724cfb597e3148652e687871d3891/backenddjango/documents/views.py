@@ -35,8 +35,13 @@ class DocumentViewSet(viewsets.ModelViewSet):
     parser_classes = [MultiPartParser, FormParser]
     
     def get_permissions(self):
+        user = getattr(self.request, 'user', None)
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [IsAdminOrBrokerOrBD]
+            # Super user, accounts, and admin/broker/BD users can manage documents
+            if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts']:
+                permission_classes = [IsAuthenticated]
+            else:
+                permission_classes = [IsAdminOrBrokerOrBD]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
@@ -44,6 +49,10 @@ class DocumentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         queryset = super().get_queryset()
+        
+        # Super user and accounts can see all documents
+        if hasattr(user, 'role') and user.role in ['super_user', 'accounts']:
+            return queryset
         
         # Filter documents based on user role
         if user.role == 'admin':
@@ -88,8 +97,15 @@ class DocumentCreateVersionView(GenericAPIView):
     API endpoint for creating a new version of a document
     """
     serializer_class = DocumentSerializer
-    permission_classes = [IsAdminOrBrokerOrBD]
+    permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
+    
+    def get_permissions(self):
+        user = getattr(self.request, 'user', None)
+        # Super user, accounts, and admin/broker/BD users can create document versions
+        if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts']:
+            return [IsAuthenticated()]
+        return [IsAdminOrBrokerOrBD()]
     
     def post(self, request, pk):
         try:
@@ -126,8 +142,13 @@ class NoteViewSet(viewsets.ModelViewSet):
     ordering_fields = ['created_at', 'updated_at', 'title', 'remind_date']
     
     def get_permissions(self):
+        user = getattr(self.request, 'user', None)
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [IsAdminOrBrokerOrBD]
+            # Super user, accounts, and admin/broker/BD users can manage notes
+            if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts']:
+                permission_classes = [IsAuthenticated]
+            else:
+                permission_classes = [IsAdminOrBrokerOrBD]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
@@ -135,6 +156,10 @@ class NoteViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         queryset = super().get_queryset()
+        
+        # Super user and accounts can see all notes
+        if hasattr(user, 'role') and user.role in ['super_user', 'accounts']:
+            return queryset
         
         # Filter notes based on user role
         if user.role == 'admin':
@@ -200,8 +225,13 @@ class NoteCommentViewSet(viewsets.ModelViewSet):
     ordering_fields = ['created_at']
     
     def get_permissions(self):
+        user = getattr(self.request, 'user', None)
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [IsAdminOrBrokerOrBD]
+            # Super user, accounts, and admin/broker/BD users can manage note comments
+            if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts']:
+                permission_classes = [IsAuthenticated]
+            else:
+                permission_classes = [IsAdminOrBrokerOrBD]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
@@ -209,6 +239,10 @@ class NoteCommentViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         queryset = super().get_queryset()
+        
+        # Super user and accounts can see all note comments
+        if hasattr(user, 'role') and user.role in ['super_user', 'accounts']:
+            return queryset
         
         # Filter comments based on user role
         if user.role == 'admin':
@@ -247,8 +281,13 @@ class FeeViewSet(viewsets.ModelViewSet):
     ordering_fields = ['due_date', 'paid_date', 'amount', 'fee_type']
     
     def get_permissions(self):
+        user = getattr(self.request, 'user', None)
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [IsAdminOrBD]
+            # Super user, accounts, and admin/broker/BD users can manage fees
+            if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts']:
+                permission_classes = [IsAuthenticated]
+            else:
+                permission_classes = [IsAdminOrBD]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
@@ -283,7 +322,14 @@ class FeeMarkPaidView(GenericAPIView):
     API endpoint for marking a fee as paid
     """
     serializer_class = FeeSerializer
-    permission_classes = [IsAdminOrBD]
+    permission_classes = [IsAuthenticated]
+    
+    def get_permissions(self):
+        user = getattr(self.request, 'user', None)
+        # Super user, accounts, and admin/BD users can mark fees as paid
+        if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts']:
+            return [IsAuthenticated()]
+        return [IsAdminOrBD()]
     
     def post(self, request, pk):
         try:
@@ -309,8 +355,13 @@ class RepaymentViewSet(viewsets.ModelViewSet):
     ordering_fields = ['due_date', 'paid_date', 'amount']
     
     def get_permissions(self):
+        user = getattr(self.request, 'user', None)
         if self.action in ['create', 'update', 'partial_update', 'destroy']:
-            permission_classes = [IsAdminOrBD]
+            # Super user, accounts, and admin/BD users can manage repayments
+            if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts']:
+                permission_classes = [IsAuthenticated]
+            else:
+                permission_classes = [IsAdminOrBD]
         else:
             permission_classes = [IsAuthenticated]
         return [permission() for permission in permission_classes]
@@ -345,7 +396,14 @@ class RepaymentMarkPaidView(GenericAPIView):
     API endpoint for marking a repayment as paid
     """
     serializer_class = RepaymentSerializer
-    permission_classes = [IsAdminOrBD]
+    permission_classes = [IsAuthenticated]
+    
+    def get_permissions(self):
+        user = getattr(self.request, 'user', None)
+        # Super user, accounts, and admin/BD users can mark repayments as paid
+        if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts']:
+            return [IsAuthenticated()]
+        return [IsAdminOrBD()]
     
     def post(self, request, pk):
         try:

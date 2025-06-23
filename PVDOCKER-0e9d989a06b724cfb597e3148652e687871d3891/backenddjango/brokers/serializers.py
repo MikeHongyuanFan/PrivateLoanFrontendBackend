@@ -7,13 +7,10 @@ class BranchSerializer(serializers.ModelSerializer):
     """Serializer for branch information with null/blank handling for minimal data creation"""
     class Meta:
         model = Branch
-        fields = ['id', 'name', 'address', 'phone', 'email']
+        fields = ['id', 'name']  # Removed address, phone, email fields
         extra_kwargs = {
-            # Make most fields optional and allow null/blank values for minimal data creation
+            # Make name field optional and allow null/blank values for minimal data creation
             'name': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'address': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'phone': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'email': {'required': False, 'allow_null': True, 'allow_blank': True},
         }
 
 
@@ -22,16 +19,9 @@ class BDMSerializer(serializers.ModelSerializer):
     branch = BranchSerializer(read_only=True)
     branch_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     
-    # Branch address fields (write-only)
-    branch_name = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
-    address = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
-    branch_phone = serializers.CharField(write_only=True, required=False, allow_null=True, allow_blank=True)
-    branch_email = serializers.EmailField(write_only=True, required=False, allow_null=True, allow_blank=True)
-    
     class Meta:
         model = BDM
-        fields = ['id', 'name', 'email', 'phone', 'branch', 'branch_id', 
-                 'branch_name', 'address', 'branch_phone', 'branch_email']
+        fields = ['id', 'name', 'email', 'phone', 'branch', 'branch_id']
         extra_kwargs = {
             # Make most fields optional and allow null/blank values for minimal data creation
             'name': {'required': False, 'allow_null': True, 'allow_blank': True},
@@ -41,10 +31,6 @@ class BDMSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         branch_id = validated_data.pop('branch_id', None)
-        branch_name = validated_data.pop('branch_name', None)
-        address = validated_data.pop('address', None)
-        branch_phone = validated_data.pop('branch_phone', None)
-        branch_email = validated_data.pop('branch_email', None)
         
         # Handle branch association
         branch = None
@@ -54,15 +40,6 @@ class BDMSerializer(serializers.ModelSerializer):
                 branch = Branch.objects.get(id=branch_id)
             except Branch.DoesNotExist:
                 raise serializers.ValidationError({"branch_id": "Branch with this ID does not exist"})
-        elif branch_name:
-            # Create new branch if branch_name is provided
-            branch = Branch.objects.create(
-                name=branch_name,
-                address=address,
-                phone=branch_phone,
-                email=branch_email,
-                created_by=validated_data.get('created_by')
-            )
         
         # Create BDM instance
         bdm = BDM.objects.create(branch=branch, **validated_data)
@@ -70,10 +47,6 @@ class BDMSerializer(serializers.ModelSerializer):
         
     def update(self, instance, validated_data):
         branch_id = validated_data.pop('branch_id', None)
-        branch_name = validated_data.pop('branch_name', None)
-        address = validated_data.pop('address', None)
-        branch_phone = validated_data.pop('branch_phone', None)
-        branch_email = validated_data.pop('branch_email', None)
         
         # Handle branch association
         if branch_id:
@@ -83,25 +56,6 @@ class BDMSerializer(serializers.ModelSerializer):
                 instance.branch = branch
             except Branch.DoesNotExist:
                 raise serializers.ValidationError({"branch_id": "Branch with this ID does not exist"})
-        elif branch_name and not instance.branch:
-            # Create new branch if branch_name is provided and BDM doesn't have a branch
-            branch = Branch.objects.create(
-                name=branch_name,
-                address=address,
-                phone=branch_phone,
-                email=branch_email,
-                created_by=validated_data.get('created_by', instance.created_by)
-            )
-            instance.branch = branch
-        elif instance.branch and (address or branch_phone or branch_email):
-            # Update existing branch if BDM already has one
-            if address:
-                instance.branch.address = address
-            if branch_phone:
-                instance.branch.phone = branch_phone
-            if branch_email:
-                instance.branch.email = branch_email
-            instance.branch.save()
         
         # Update BDM fields
         for attr, value in validated_data.items():
@@ -129,12 +83,19 @@ class BrokerDetailSerializer(serializers.ModelSerializer):
     branch = BranchSerializer(read_only=True)
     branch_id = serializers.IntegerField(write_only=True, required=False, allow_null=True)
     bdms = BDMSerializer(many=True, read_only=True)
+    bdm_ids = serializers.ListField(
+        child=serializers.IntegerField(),
+        write_only=True,
+        required=False,
+        allow_empty=True
+    )
     created_by = UserSerializer(read_only=True)
+    commission_account_locked_by = UserSerializer(read_only=True)
     
     class Meta:
         model = Broker
         fields = '__all__'
-        read_only_fields = ['created_at', 'updated_at', 'created_by']
+        read_only_fields = ['created_at', 'updated_at', 'created_by', 'commission_account_locked_by', 'commission_account_locked_at']
         extra_kwargs = {
             # Make most fields optional and allow null/blank values for minimal data creation
             'name': {'required': False, 'allow_null': True, 'allow_blank': True},
@@ -153,8 +114,39 @@ class BrokerDetailSerializer(serializers.ModelSerializer):
             'branch_id': {'required': False, 'allow_null': True},
         }
     
+    def validate(self, data):
+        """
+        Validate commission account modifications based on user permissions
+        """
+        request = self.context.get('request')
+        if not request or not request.user:
+            return data
+        
+        # Check if this is an update operation
+        if self.instance:
+            # If commission account is locked, only super user/accounts can modify
+            if self.instance.commission_account_locked and not request.user.can_modify_commission_account():
+                commission_fields = ['commission_bank_name', 'commission_account_name', 'commission_account_number', 'commission_bsb']
+                for field in commission_fields:
+                    if field in data:
+                        raise serializers.ValidationError({
+                            field: f"Commission account is locked. Only super user and accounts can modify this field."
+                        })
+            
+            # If commission account has data and is not locked, only super user/accounts can modify
+            elif self.instance.has_commission_account_data() and not request.user.can_modify_commission_account():
+                commission_fields = ['commission_bank_name', 'commission_account_name', 'commission_account_number', 'commission_bsb']
+                for field in commission_fields:
+                    if field in data:
+                        raise serializers.ValidationError({
+                            field: f"Commission account has been entered. Only super user and accounts can modify this field."
+                        })
+        
+        return data
+    
     def create(self, validated_data):
         branch_id = validated_data.pop('branch_id', None)
+        bdm_ids = validated_data.pop('bdm_ids', [])
         
         # Handle branch association
         branch = None
@@ -166,10 +158,27 @@ class BrokerDetailSerializer(serializers.ModelSerializer):
         
         # Create broker instance
         broker = Broker.objects.create(branch=branch, **validated_data)
+        
+        # Handle BDM assignments
+        if bdm_ids:
+            try:
+                bdms = BDM.objects.filter(id__in=bdm_ids)
+                broker.bdms.set(bdms)
+            except Exception as e:
+                # If BDM assignment fails, still create the broker but log the error
+                print(f"Warning: Failed to assign BDMs to broker {broker.id}: {e}")
+        
+        # Auto-lock commission account if data is entered and user is not super user/accounts
+        request = self.context.get('request')
+        if request and request.user and not request.user.can_modify_commission_account():
+            if broker.has_commission_account_data():
+                broker.lock_commission_account(request.user)
+        
         return broker
     
     def update(self, instance, validated_data):
         branch_id = validated_data.pop('branch_id', None)
+        bdm_ids = validated_data.pop('bdm_ids', None)
         
         # Handle branch association
         if branch_id is not None:  # Allow setting to None to remove branch
@@ -182,10 +191,29 @@ class BrokerDetailSerializer(serializers.ModelSerializer):
             else:
                 instance.branch = None
         
+        # Handle BDM assignments
+        if bdm_ids is not None:  # Allow clearing BDMs by passing empty list
+            try:
+                if bdm_ids:
+                    bdms = BDM.objects.filter(id__in=bdm_ids)
+                    instance.bdms.set(bdms)
+                else:
+                    instance.bdms.clear()
+            except Exception as e:
+                # If BDM assignment fails, still update the broker but log the error
+                print(f"Warning: Failed to update BDM assignments for broker {instance.id}: {e}")
+        
         # Update broker fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         instance.save()
+        
+        # Auto-lock commission account if data is entered and user is not super user/accounts
+        request = self.context.get('request')
+        if request and request.user and not request.user.can_modify_commission_account():
+            if instance.has_commission_account_data() and not instance.commission_account_locked:
+                instance.lock_commission_account(request.user)
+        
         return instance
 
 
@@ -227,10 +255,8 @@ class BranchDropdownSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Branch
-        fields = ['id', 'name', 'address', 'display_name']
+        fields = ['id', 'name', 'display_name']
     
     def get_display_name(self, obj):
-        """Create a display name with address info"""
-        if obj.address:
-            return f"{obj.name} - {obj.address}"
+        """Create a display name - just the branch name"""
         return obj.name or f"Branch #{obj.id}"

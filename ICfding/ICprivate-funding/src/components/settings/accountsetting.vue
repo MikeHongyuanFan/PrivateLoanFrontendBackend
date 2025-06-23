@@ -44,7 +44,7 @@
             </div>
             <el-input v-model="account.phone" :placeholder=account.phone style="width: 150px"/>
         </div>
-        <div class="setting" v-if="account.role !== 'admin'">
+        <div class="setting" v-if="account.role !== 'admin' && account.role !== 'super_user' && account.role !== 'accounts'">
             <div class="text">
                 <h1>Your Role</h1>
                 <p>If your role changes, please contact your admin.</p>

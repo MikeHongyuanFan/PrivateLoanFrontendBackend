@@ -48,6 +48,13 @@
                                     :value="item.id" />
                             </el-select>
                         </div>
+                        <div class="item">
+                            <p>Assigned BDMs</p>
+                            <el-select v-model="overview.bdm_ids" multiple placeholder="Please Select BDMs..." style="width: 100%;">
+                                <el-option v-for="item in bdmList" :key="item.id" :label="item.display_name"
+                                    :value="item.id" />
+                            </el-select>
+                        </div>
                         <!-- <div class="item">
                             <p>Lisence Number</p>
                             <el-input v-model="overview.license" />
@@ -60,25 +67,55 @@
                             <el-icon style="font-size: 20px" :color="isCommissionValid ? '#2984DE' : '#E1E1E1'">
                                 <SuccessFilled />
                             </el-icon>
-                            <p :style="{ color: isCommissionValid ? '#2984DE' : '#272727' }">Commission Account</p>
+                            <p :style="{ color: isCommissionValid ? '#2984DE' : '#272727' }">
+                                Commission Account
+                                <el-tag v-if="isCommissionDisabled && !canModifyCommission" size="small" type="warning" style="margin-left: 8px;">
+                                    Locked
+                                </el-tag>
+                            </p>
                         </div>
                     </template>
                     <div class="form">
                         <div class="item">
                             <p>Bank Name</p>
-                            <el-input v-model="commission.commission_bank_name" />
+                            <el-input 
+                                v-model="commission.commission_bank_name" 
+                                :disabled="isCommissionDisabled && !canModifyCommission"
+                                :placeholder="isCommissionDisabled && !canModifyCommission ? 'Contact super user or accounts to modify' : 'Enter bank name'"
+                            />
                         </div>
                         <div class="item">
                             <p>Account Name</p>
-                            <el-input v-model="commission.commission_account_name" />
+                            <el-input 
+                                v-model="commission.commission_account_name" 
+                                :disabled="isCommissionDisabled && !canModifyCommission"
+                                :placeholder="isCommissionDisabled && !canModifyCommission ? 'Contact super user or accounts to modify' : 'Enter account name'"
+                            />
                         </div>
                         <div class="item">
                             <p>Account No.</p>
-                            <el-input v-model="commission.commission_account_number" />
+                            <el-input 
+                                v-model="commission.commission_account_number" 
+                                :disabled="isCommissionDisabled && !canModifyCommission"
+                                :placeholder="isCommissionDisabled && !canModifyCommission ? 'Contact super user or accounts to modify' : 'Enter account number'"
+                            />
                         </div>
                         <div class="item">
                             <p>BSB</p>
-                            <el-input v-model="commission.commission_bsb" />
+                            <el-input 
+                                v-model="commission.commission_bsb" 
+                                :disabled="isCommissionDisabled && !canModifyCommission"
+                                :placeholder="isCommissionDisabled && !canModifyCommission ? 'Contact super user or accounts to modify' : 'Enter BSB'"
+                            />
+                        </div>
+                        <div v-if="isCommissionDisabled && !canModifyCommission" class="commission-lock-notice">
+                            <el-alert
+                                title="Commission Account Locked"
+                                description="Commission account details have been entered and are now locked. Only super user and accounts can modify these fields."
+                                type="warning"
+                                :closable="false"
+                                show-icon
+                            />
                         </div>
                     </div>
                 </el-collapse-item>
@@ -98,9 +135,11 @@ import Cancel from '../buttons/cancel.vue';
 import Save from '../buttons/save.vue';
 import useSystem from '@/hooks/useSystem';
 import useBranches from '@/hooks/useBranches'
+import useBdm from '@/hooks/useBdm'
 import { ElMessage } from 'element-plus'
 
 const { branchesList } = useBranches()
+const { bdmList } = useBdm()
 
 const { userInfo } = useSystem()
 
@@ -118,6 +157,7 @@ const overview = ref({
     phone: "",
     email: "",
     branch: "",
+    bdm_ids: [],
     // license: "",
     // Don't automatically assign current user - let backend handle this or make it explicitly optional
     // user: userInfo.value?.user_id || "",
@@ -129,6 +169,26 @@ const commission = ref({
     commission_account_name: "",
     commission_account_number: "",
     commission_bsb: ""
+})
+
+// Check if user can modify commission account
+const canModifyCommission = computed(() => {
+    return userInfo.value?.role === 'super_user' || userInfo.value?.role === 'accounts'
+})
+
+// Check if commission fields should be disabled
+const isCommissionDisabled = computed(() => {
+    if (canModifyCommission.value) {
+        return false // Super user and accounts can always modify
+    }
+    
+    // Check if commission account is locked from backend
+    if (commission.value._locked) {
+        return true
+    }
+    
+    // For other users, check if commission data exists
+    return Object.values(commission.value).some(value => value && value.trim() !== '')
 })
 
 watch(() => props.editId, (newVal) => {
@@ -165,6 +225,8 @@ async function getBroker() {
         overview.value.phone = res.phone
         // Handle branch properly - if it's an object, get the ID; if it's already an ID, use as is
         overview.value.branch = res.branch?.id || res.branch || ""
+        // Handle BDM assignments - extract IDs from the bdms array
+        overview.value.bdm_ids = res.bdms?.map(bdm => bdm.id) || []
         // Don't set user field since we removed it from overview object
         // overview.value.user = ""
         // overview.value.bdms = res.bdms
@@ -172,6 +234,12 @@ async function getBroker() {
         commission.value.commission_account_number = res.commission_account_number
         commission.value.commission_bank_name = res.commission_bank_name
         commission.value.commission_bsb = res.commission_bsb
+        
+        // Check if commission account is locked from backend
+        if (res.commission_account_locked) {
+            // Force disable commission fields if locked
+            commission.value._locked = true
+        }
     } else {
         console.log(err)
     }
@@ -323,5 +391,10 @@ h1 {
     align-items: center;
     border-top: 1.5px solid #E1E1E1;
     gap: 10px;
+}
+
+.commission-lock-notice {
+    grid-column: 1 / -1;
+    margin-top: 10px;
 }
 </style>

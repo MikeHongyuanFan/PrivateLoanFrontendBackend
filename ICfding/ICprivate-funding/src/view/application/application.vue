@@ -96,6 +96,31 @@
                         </div>
                     </div>
                 </el-scrollbar>
+                
+                <!-- Stage History Section -->
+                <div class="stage-history" v-if="stageHistory.length > 0">
+                    <h4>Stage History</h4>
+                    <el-timeline>
+                        <el-timeline-item
+                            v-for="(change, index) in stageHistory"
+                            :key="index"
+                            :timestamp="change.timestamp"
+                            :type="getTimelineItemType(change)"
+                        >
+                            <div class="history-item">
+                                <div class="stage-change">
+                                    <span class="from-stage">{{ change.from }}</span>
+                                    <el-icon><ArrowRight /></el-icon>
+                                    <span class="to-stage">{{ change.to }}</span>
+                                </div>
+                                <div class="change-details">
+                                    <span class="user">By: {{ change.user }}</span>
+                                    <p v-if="change.notes" class="notes">{{ change.notes }}</p>
+                                </div>
+                            </div>
+                        </el-timeline-item>
+                    </el-timeline>
+                </div>
             </div>
         </div>
         <div class="tabs">
@@ -176,7 +201,7 @@
     import Calculator from '@/components/popup/calculator.vue';
     import Note from '@/components/popup/note.vue';
     import Fee from '@/components/popup/fee.vue';
-    import { SuccessFilled } from '@element-plus/icons-vue';
+    import { SuccessFilled, ArrowRight } from '@element-plus/icons-vue';
 
     const route = useRoute()
 
@@ -189,25 +214,24 @@
     const guarantorSummary = ref([])
     
     const stages = ref([
-        {name: "Inquiry", value: "inquiry", status: "complete"},
-        {name: "Send to Lender", value: "sent_to_lender", status: "complete"},
-        {name: "Funding Table lssued", value: "funding_table_issued", status: "complete"},
-        {name: "ILOO lssued", value: "iloo_issued", status: "complete"},
-        {name: "ILOO Signed", value: "iloo_signed", status: "processing"},
-        {name: "Commitment Fee Paid", value: "commitment_fee_paid", status: "incomplete"},
-        {name: "App Submitted", value: "app_submitted", status: "incomplete"},
+        {name: "Received", value: "received", status: "complete"},
+        {name: "Sent to Lender/Investor", value: "sent_to_lender", status: "complete"},
+        {name: "Funding Table Issued", value: "funding_table_issued", status: "complete"},
+        {name: "Indicative Letter Issued", value: "indicative_letter_issued", status: "complete"},
+        {name: "Indicative Letter Signed", value: "indicative_letter_signed", status: "processing"},
+        {name: "Commitment Fee Received", value: "commitment_fee_received", status: "incomplete"},
+        {name: "Application Submitted", value: "application_submitted", status: "incomplete"},
         {name: "Valuation Ordered", value: "valuation_ordered", status: "incomplete"},
         {name: "Valuation Received", value: "valuation_received", status: "incomplete"},
-        {name: "More Info Required", value: "more_info_required", status: "incomplete"},
+        {name: "More Information Required", value: "more_info_required", status: "incomplete"},
         {name: "Formal Approval", value: "formal_approval", status: "incomplete"},
-        {name: "Loan Docs instructed", value: "loan_docs_instructed", status: "incomplete"},
-        {name: "Loan Docs lssued", value: "loan_docs_issued", status: "incomplete"},
-        {name: "Loan Docs Signed", value: "loan_docs_signed", status: "incomplete"},
+        {name: "Loan Documents Instructed", value: "loan_docs_instructed", status: "incomplete"},
+        {name: "Loan Documents Issued", value: "loan_docs_issued", status: "incomplete"},
+        {name: "Loan Documents Signed", value: "loan_docs_signed", status: "incomplete"},
         {name: "Settlement Conditions", value: "settlement_conditions", status: "incomplete"},
         {name: "Settled", value: "settled", status: "incomplete"},
         {name: "Closed", value: "closed", status: "incomplete"},
-        {name: "Declined", value: "declined", status: "incomplete"},
-        {name: "Withdrawn", value: "withdrawn", status: "incomplete"},
+        {name: "Discharged", value: "discharged", status: "incomplete"}
     ])
     const infos = ref([
         {name: "Company Borrower Details", count: 0},
@@ -256,6 +280,18 @@
     const totalSecurityValue = computed(() => {
         return application.value.security_properties?.reduce((sum, prop) => 
             sum + (parseFloat(prop.estimated_value) || 0), 0) || 0
+    })
+
+    // Add stage history display
+    const stageHistory = computed(() => {
+        if (!application.value?.stage_history) return []
+        return application.value.stage_history.map(change => ({
+            from: stages.value.find(s => s.value === change.from_stage)?.name || change.from_stage,
+            to: stages.value.find(s => s.value === change.to_stage)?.name || change.to_stage,
+            timestamp: new Date(change.timestamp).toLocaleString(),
+            user: change.user,
+            notes: change.notes
+        }))
     })
 
     onMounted(() => {
@@ -468,6 +504,28 @@
     }
     const selectInfo = (index) => {
         activeInfo.value = index
+    }
+
+    // Add stage history section to template
+    const getTimelineItemType = (change) => {
+        if (change.from === 'received' && change.to === 'sent_to_lender') return 'primary'
+        if (change.from === 'sent_to_lender' && change.to === 'funding_table_issued') return 'primary'
+        if (change.from === 'funding_table_issued' && change.to === 'indicative_letter_issued') return 'primary'
+        if (change.from === 'indicative_letter_issued' && change.to === 'indicative_letter_signed') return 'primary'
+        if (change.from === 'indicative_letter_signed' && change.to === 'commitment_fee_received') return 'primary'
+        if (change.from === 'commitment_fee_received' && change.to === 'application_submitted') return 'primary'
+        if (change.from === 'application_submitted' && change.to === 'valuation_ordered') return 'primary'
+        if (change.from === 'valuation_ordered' && change.to === 'valuation_received') return 'primary'
+        if (change.from === 'valuation_received' && change.to === 'more_info_required') return 'primary'
+        if (change.from === 'more_info_required' && change.to === 'formal_approval') return 'primary'
+        if (change.from === 'formal_approval' && change.to === 'loan_docs_instructed') return 'primary'
+        if (change.from === 'loan_docs_instructed' && change.to === 'loan_docs_issued') return 'primary'
+        if (change.from === 'loan_docs_issued' && change.to === 'loan_docs_signed') return 'primary'
+        if (change.from === 'loan_docs_signed' && change.to === 'settlement_conditions') return 'primary'
+        if (change.from === 'settlement_conditions' && change.to === 'settled') return 'primary'
+        if (change.from === 'settled' && change.to === 'closed') return 'primary'
+        if (change.from === 'closed' && change.to === 'discharged') return 'primary'
+        return 'success'
     }
 </script>
 
@@ -822,5 +880,49 @@
         .assignment-item {
             padding: 10px 12px;
         }
+    }
+
+    .stage-history {
+        margin-top: 20px;
+        padding: 15px;
+        border-top: 1px solid #E8EBEE;
+    }
+
+    .stage-history h4 {
+        color: #384144;
+        font-size: 1rem;
+        margin-bottom: 15px;
+    }
+
+    .history-item {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .stage-change {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #2984DE;
+        font-weight: 500;
+    }
+
+    .change-details {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .user {
+        color: #666;
+        font-size: 0.9rem;
+    }
+
+    .notes {
+        color: #384144;
+        font-size: 0.9rem;
+        margin: 0;
+        white-space: pre-wrap;
     }
 </style>

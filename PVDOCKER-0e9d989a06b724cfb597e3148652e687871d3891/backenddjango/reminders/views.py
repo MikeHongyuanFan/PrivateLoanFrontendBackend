@@ -18,9 +18,13 @@ class ReminderViewSet(viewsets.ModelViewSet):
     
     def get_permissions(self):
         """
-        Only authenticated users with admin, broker, or BD roles can manage reminders
+        Super user, accounts, and admin/broker/BD users can manage reminders
         """
-        permission_classes = [IsAuthenticated, IsAdminOrBrokerOrBD]
+        user = getattr(self.request, 'user', None)
+        if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts']:
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAuthenticated, IsAdminOrBrokerOrBD]
         return [permission() for permission in permission_classes]
     
     def get_queryset(self):
@@ -29,6 +33,10 @@ class ReminderViewSet(viewsets.ModelViewSet):
         """
         user = self.request.user
         queryset = super().get_queryset()
+        
+        # Super user and accounts can see all reminders
+        if hasattr(user, 'role') and user.role in ['super_user', 'accounts']:
+            return queryset
         
         # Filter reminders based on user role
         if user.role == 'admin':

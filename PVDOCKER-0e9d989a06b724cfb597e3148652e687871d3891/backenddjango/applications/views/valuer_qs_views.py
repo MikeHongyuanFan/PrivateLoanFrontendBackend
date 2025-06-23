@@ -19,7 +19,17 @@ class ValuerViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['company_name', 'contact_name', 'email', 'phone']
     ordering_fields = ['company_name', 'contact_name', 'created_at']
-    permission_classes = [IsAuthenticated]
+    
+    def get_permissions(self):
+        """
+        Super user, accounts, and admin/broker users can manage valuers
+        """
+        user = getattr(self.request, 'user', None)
+        if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts']:
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAuthenticated, IsAdminOrBroker]
+        return [permission() for permission in permission_classes]
     
     def get_serializer_class(self):
         if self.action == 'list':
@@ -31,7 +41,20 @@ class ValuerViewSet(viewsets.ModelViewSet):
         """
         Filter valuers based on user role and active status
         """
+        user = self.request.user
         queryset = Valuer.objects.all().order_by('company_name', 'contact_name')
+        
+        # Super user and accounts can see all valuers
+        if hasattr(user, 'role') and user.role in ['super_user', 'accounts']:
+            pass  # No filtering needed
+        # Admin can see all valuers
+        elif user.role == 'admin':
+            pass  # No filtering needed
+        # Brokers can only see active valuers
+        elif user.role == 'broker':
+            queryset = queryset.filter(is_active=True)
+        else:
+            return queryset.none()
         
         # Filter by active status if requested
         is_active = self.request.query_params.get('is_active')
@@ -86,7 +109,17 @@ class QuantitySurveyorViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     search_fields = ['company_name', 'contact_name', 'email', 'phone']
     ordering_fields = ['company_name', 'contact_name', 'created_at']
-    permission_classes = [IsAuthenticated]
+    
+    def get_permissions(self):
+        """
+        Super user, accounts, and admin/broker users can manage quantity surveyors
+        """
+        user = getattr(self.request, 'user', None)
+        if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts']:
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAuthenticated, IsAdminOrBroker]
+        return [permission() for permission in permission_classes]
     
     def get_serializer_class(self):
         if self.action == 'list':
@@ -98,7 +131,20 @@ class QuantitySurveyorViewSet(viewsets.ModelViewSet):
         """
         Filter quantity surveyors based on user role and active status
         """
+        user = self.request.user
         queryset = QuantitySurveyor.objects.all().order_by('company_name', 'contact_name')
+        
+        # Super user and accounts can see all quantity surveyors
+        if hasattr(user, 'role') and user.role in ['super_user', 'accounts']:
+            pass  # No filtering needed
+        # Admin can see all quantity surveyors
+        elif user.role == 'admin':
+            pass  # No filtering needed
+        # Brokers can only see active quantity surveyors
+        elif user.role == 'broker':
+            queryset = queryset.filter(is_active=True)
+        else:
+            return queryset.none()
         
         # Filter by active status if requested
         is_active = self.request.query_params.get('is_active')

@@ -22,17 +22,8 @@
                     </template>
                     <el-form ref="ruleFormRef" class="form" :model="overview" label-position="top" :rules="rules"
                         label-width="auto">
-                        <el-form-item class="item" label="Branch Name" prop="name">
-                            <el-input v-model="overview.name" />
-                        </el-form-item>
-                        <el-form-item class="item" label="Branch Address" prop="address">
-                            <el-input v-model="overview.address" />
-                        </el-form-item>
-                        <el-form-item class="item" label="Phone Number" prop="phone">
-                            <el-input v-model="overview.phone" />
-                        </el-form-item>
-                        <el-form-item class="item" label="Email Address" prop="email">
-                            <el-input v-model="overview.email" />
+                        <el-form-item class="item" label="Branch/Subsidiary Name" prop="name">
+                            <el-input v-model="overview.name" placeholder="Enter branch/subsidiary name" />
                         </el-form-item>
                     </el-form>
                 </el-collapse-item>
@@ -69,10 +60,6 @@ const editId = ref("")
 const activeNames = ref("1")
 const overview = ref({
     name: "",
-    address: "",
-    phone: "",
-    email: "",
-    // manager: ""
 })
 const managers = ref([
     { value: "1", label: "1" },
@@ -83,38 +70,15 @@ const ruleFormRef = ref(null)
 //select trigger触发使用'change'
 const rules = reactive({
     name: [
-        { required: true, message: 'Please input Branch Name', trigger: 'blur' },
-    ],
-    address: [
-        { required: true, message: 'Please input Activity name', trigger: 'blur' },
-    ],
-    phone: [
-        { required: true, message: 'Please input Activity name', trigger: 'blur' },
-    ],
-    email: [
-        { required: true, message: 'Please input Activity name', trigger: 'blur' },
-        { validator: validateEmail, trigger: 'blur' }
+        { required: true, message: 'Please input Branch/Subsidiary Name', trigger: 'blur' },
     ],
 })
-
-//校验邮箱格式
-function validateEmail(rule, value, callback) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(value)) {
-        callback(new Error('Please enter a valid email address'));
-    }
-    callback();
-}
 
 watch(() => props.data, (newVal) => {
     if (newVal) {
         editId.value = newVal?.id || ""
         overview.value = {
             name: newVal?.name || "",
-            address: newVal?.address || "",
-            phone: newVal?.phone || "",
-            email: newVal?.email || "",
-            // manager: newVal.manager
         }
     }
 }, { deep: true, immediate: true })
@@ -128,7 +92,7 @@ const handleMinimize = () => {
     emit('minimize')
 }
 const isOverviewValid = computed(() => {
-    return Object.values(overview.value).every(value => value !== '')
+    return overview.value.name !== ''
 })
 const addBranch = async () => {
     const data = {
@@ -141,7 +105,7 @@ const addBranch = async () => {
         emit('close')
     } else {
         console.log(err)
-        ElMessage.error(err?.email[0] || err?.phone[0])
+        ElMessage.error(err?.name?.[0] || 'Failed to create branch/subsidiary')
     }
 }
 
@@ -154,7 +118,7 @@ const editBranch = async () => {
         emit('close')
     } else {
         console.log(err)
-        ElMessage.error(err?.email[0] || err?.phone[0])
+        ElMessage.error(err?.name?.[0] || 'Failed to update branch/subsidiary')
     }
 }
 

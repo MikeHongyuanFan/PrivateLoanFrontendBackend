@@ -10,14 +10,20 @@ class User(AbstractUser):
     Custom User model with role-based permissions
     """
     ROLE_CHOICES = [
+        ('accounts', 'Accounts'),
         ('admin', 'Admin'),
+        ('business_development_manager', 'Business Development Manager'),
+        ('business_development_associate', 'Business Development Associate'),
+        ('credit_manager', 'Credit Manager'),
+        ('super_user', 'Super User'),
+        # Keep legacy roles for backward compatibility during migration
         ('broker', 'Broker'),
         ('bd', 'Business Development'),
         ('client', 'Client'),
     ]
     
     email = models.EmailField(_('email address'), unique=True)
-    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='client')
+    role = models.CharField(max_length=30, choices=ROLE_CHOICES, default='client')
     phone = models.CharField(max_length=20, blank=True, null=True)
     username = models.CharField(max_length=150, blank=True, null=True, default='')
     
@@ -32,6 +38,19 @@ class User(AbstractUser):
     
     def __str__(self):
         return self.email
+    
+    def is_super_user_or_accounts(self):
+        """
+        Check if user has super user or accounts role
+        """
+        return self.role in ['super_user', 'accounts']
+    
+    def can_modify_commission_account(self):
+        """
+        Check if user can modify commission account
+        Only super user and accounts can modify commission accounts
+        """
+        return self.role in ['super_user', 'accounts']
 
 
 class Notification(models.Model):

@@ -35,7 +35,7 @@
                 <el-table-column prop="phone" label="Phone" width="130" />
                 <el-table-column prop="application_count" label="Applications" min-width="120" />
                 <el-table-column prop="email" label="Email Address" min-width="225" />
-                <el-table-column prop="branch_name" label="Branch" width="160" />
+                <el-table-column prop="branch_name" label="Branch/Subsidiary" width="160" />
                 <el-table-column label="Action" align="center" width="60" fixed="right">
                     <template #default="{ row }">
                         <el-popover placement="bottom" trigger="hover" width="160" popper-class="user-popover">

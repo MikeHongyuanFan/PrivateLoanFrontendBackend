@@ -1,6 +1,6 @@
 <script setup>
     import { ref, onMounted, computed } from 'vue'
-    import { CircleCheck, View, Upload } from '@element-plus/icons-vue'
+    import { CircleCheck, View, Upload, InfoFilled } from '@element-plus/icons-vue'
     import { useRouter } from 'vue-router'
     import { api } from '@/api'
     import { ElMessageBox } from 'element-plus'
@@ -44,6 +44,37 @@
             })
         // borrowers.value = borrowers.value.filter(item => item !== row)
     }
+
+    const getStageTagType = (stage) => {
+        // Define tag types based on stage
+        const stageTypes = {
+            'received': 'info',
+            'sent_to_lender': 'primary',
+            'funding_table_issued': 'primary',
+            'indicative_letter_issued': 'warning',
+            'indicative_letter_signed': 'warning',
+            'commitment_fee_received': 'success',
+            'application_submitted': 'primary',
+            'valuation_ordered': 'warning',
+            'valuation_received': 'warning',
+            'more_info_required': 'danger',
+            'formal_approval': 'success',
+            'loan_docs_instructed': 'primary',
+            'loan_docs_issued': 'primary',
+            'loan_docs_signed': 'success',
+            'settlement_conditions': 'warning',
+            'settled': 'success',
+            'closed': 'info',
+            'discharged': 'info'
+        }
+        return stageTypes[stage] || 'info'
+    }
+
+    const formatStageChange = (change) => {
+        if (!change) return ''
+        const timestamp = new Date(change.timestamp).toLocaleString()
+        return `Changed from ${change.from_stage} to ${change.to_stage}\nBy: ${change.user}\nAt: ${timestamp}\n${change.notes ? `Notes: ${change.notes}` : ''}`
+    }
 </script>
 
 <template>
@@ -51,10 +82,26 @@
         <el-table-column type="selection" width="50" align="center" fixed />
         <el-table-column prop="reference_number" label="Reference Number" sortable width="200" />
         <el-table-column prop="borrower_name" label="Borrower" width="150" />
-        <el-table-column prop="stage" label="Status" width="150" />
+        <el-table-column prop="stage" label="Status" width="150">
+            <template #default="scope">
+                <div class="stage-info">
+                    <el-tag :type="getStageTagType(scope.row.stage)" size="small">
+                        {{ scope.row.stage_display || scope.row.stage }}
+                    </el-tag>
+                    <el-tooltip
+                        v-if="scope.row.last_stage_change"
+                        :content="formatStageChange(scope.row.last_stage_change)"
+                        placement="right"
+                        effect="light"
+                    >
+                        <el-icon class="history-icon"><InfoFilled /></el-icon>
+                    </el-tooltip>
+                </div>
+            </template>
+        </el-table-column>
         <el-table-column prop="broker_name" label="Broker" width="120" />
         <el-table-column prop="bdm_name" label="BDM" width="100" />
-        <el-table-column prop="branch_name" label="Branch" width="120" />
+        <el-table-column prop="branch_name" label="Branch/Subsidiary" width="120" />
         <el-table-column prop="guarantor_name" label="Guarantor" width="120" />
         <el-table-column prop="purpose" label="Case Purpose" width="150" />
         <el-table-column prop="product_name" label="Product" />
@@ -165,5 +212,21 @@
     text-align: center;
     cursor: pointer;
     margin: 0;
+}
+
+.stage-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.history-icon {
+    color: #909399;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.history-icon:hover {
+    color: #2984DE;
 }
 </style>

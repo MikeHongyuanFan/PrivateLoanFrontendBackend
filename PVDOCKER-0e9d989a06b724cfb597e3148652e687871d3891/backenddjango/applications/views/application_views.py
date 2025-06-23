@@ -1,8 +1,10 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from django.db.models import Prefetch
 from ..models import Application
+from users.permissions import IsAdminOrBrokerOrBD
 
 class ApplicationViewSet(viewsets.ModelViewSet):
     """
@@ -10,11 +12,47 @@ class ApplicationViewSet(viewsets.ModelViewSet):
     """
     queryset = Application.objects.all()
     
+    def get_permissions(self):
+        """
+        Super user, accounts, and admin/broker/BD users can manage applications
+        """
+        user = getattr(self.request, 'user', None)
+        if user and user.is_authenticated and getattr(user, 'role', None) in ['super_user', 'accounts']:
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAuthenticated, IsAdminOrBrokerOrBD]
+        return [permission() for permission in permission_classes]
+    
     def get_queryset(self):
         """
         Get the queryset with optimized prefetching for list and detail views
         """
+        user = self.request.user
         queryset = Application.objects.all()
+        
+        # Super user and accounts can see all applications
+        if hasattr(user, 'role') and user.role in ['super_user', 'accounts']:
+            pass  # No filtering needed
+        # Admin can see all applications
+        elif user.role == 'admin':
+            pass  # No filtering needed
+        # Brokers can only see their own applications
+        elif user.role == 'broker':
+            queryset = queryset.filter(broker__user=user)
+        # BDs can only see applications they are assigned to
+        elif user.role == 'bd':
+            if hasattr(user, 'bdm_profile'):
+                queryset = queryset.filter(bd=user.bdm_profile)
+            else:
+                return queryset.none()
+        # Clients can only see applications they are borrowers on
+        elif user.role == 'client':
+            if hasattr(user, 'borrower_profile'):
+                queryset = queryset.filter(borrowers=user.borrower_profile)
+            else:
+                return queryset.none()
+        else:
+            return queryset.none()
         
         if self.action == 'list':
             # Optimize the list view with prefetches for the enhanced fields
@@ -73,25 +111,55 @@ class ApplicationViewSet(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['put'])
     def update_stage(self, request, pk=None):
+        """
+        Update application stage with history tracking
+        
+        Updates the stage of an application and maintains a history of changes.
+        Also creates notifications for relevant users.
+        """
         application = self.get_object()
         
         from ..serializers import ApplicationStageUpdateSerializer
-        serializer = ApplicationStageUpdateSerializer(data=request.data)
+        serializer = ApplicationStageUpdateSerializer(
+            instance=application,
+            data=request.data,
+            context={'request': request}
+        )
         
         if serializer.is_valid():
-            application.stage = serializer.validated_data['stage']
-            application.save()
+            application = serializer.save()
             
-            # Add note if provided
-            if 'notes' in serializer.validated_data and serializer.validated_data['notes']:
-                from documents.models import Note
-                Note.objects.create(
+            # Create notifications for stage change
+            from users.services import create_application_notification
+            
+            # Notify broker
+            if application.broker:
+                create_application_notification(
+                    user=application.broker.user,
                     application=application,
-                    content=f"Stage updated to {application.get_stage_display()}: {serializer.validated_data['notes']}",
-                    created_by=request.user
+                    message=f"Application {application.reference_number} stage updated to {application.get_stage_display()}",
+                    notification_type='stage_change'
                 )
             
-            return Response({"message": "Stage updated successfully"}, status=status.HTTP_200_OK)
+            # Notify BD
+            if application.bd:
+                create_application_notification(
+                    user=application.bd,
+                    application=application,
+                    message=f"Application {application.reference_number} stage updated to {application.get_stage_display()}",
+                    notification_type='stage_change'
+                )
+            
+            # Return updated application data
+            from ..serializers import ApplicationListSerializer
+            return Response(
+                {
+                    "message": "Stage updated successfully",
+                    "application": ApplicationListSerializer(application).data
+                },
+                status=status.HTTP_200_OK
+            )
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['put'])

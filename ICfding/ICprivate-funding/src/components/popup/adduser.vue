@@ -80,8 +80,17 @@
         password: ""
     })
     const roles = ref([
+        {value: "accounts", label: "Accounts"},
+        {value: "admin", label: "Administrator"},
+        {value: "business_development_manager", label: "Business Development Manager"},
+        {value: "business_development_associate", label: "Business Development Associate"},
+        {value: "credit_manager", label: "Credit Manager"},
+        {value: "super_user", label: "Super User"},
+        // Legacy roles for backward compatibility
         {value: "employee", label: "Employee"},
-        {value: "admin", label: "Admin"}
+        {value: "broker", label: "Broker"},
+        {value: "bd", label: "Business Development"},
+        {value: "client", label: "Client"}
     ])
 
     const emit = defineEmits(['close', 'minimize'])

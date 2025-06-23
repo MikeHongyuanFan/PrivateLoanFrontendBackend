@@ -130,6 +130,35 @@ export function bdmApplications(bdmId) {
   })
 }
 
+export function bdmBrokers(bdmId) {
+  return sendRequest({
+    url: `/api/brokers/bdms/${bdmId}/brokers/`,
+    method: 'get',
+  })
+}
+
+export function lockCommissionAccount(brokerId) {
+  return sendRequest({
+    url: `/api/brokers/${brokerId}/lock_commission_account/`,
+    method: 'post',
+  })
+}
+
+export function unlockCommissionAccount(brokerId) {
+  return sendRequest({
+    url: `/api/brokers/${brokerId}/unlock_commission_account/`,
+    method: 'post',
+  })
+}
+
+export function bdmDropdown(params) {
+  return sendRequest({
+    url: '/api/brokers/bdms/dropdown/',
+    method: 'get',
+    params: params,
+  })
+}
+
 // Branch related endpoints
 export function branchBrokers(branchId) {
   return sendRequest({
@@ -157,6 +186,10 @@ export const brokerApi = {
   brokerApplications,
   branchApplications,
   bdmApplications,
+  bdmBrokers,
   branchBrokers,
+  bdmDropdown,
+  lockCommissionAccount,
+  unlockCommissionAccount,
 }
 

@@ -16,13 +16,13 @@
                 :default-sort="{ prop: 'id', order: 'ascending' }" :cell-style="{ padding: '10px 0' }"
                 @selection-change="handleSelectionChange">
                 <el-table-column type="selection" align="center" width="50" fixed />
-                <el-table-column prop="id" label="Branch ID" sortable="" width="120" />
-                <el-table-column prop="name" label="Branch Name" width="139" />
-                <el-table-column prop="address" label="Branch Address" min-width="150" />
-                <el-table-column prop="phone" label="Phone" width="120" />
-                <el-table-column prop="manager" label="Branch Manager" width="130" />
-                <el-table-column prop="email" label="Email Address" min-width="130" />
-                <el-table-column label="Create At" width="100" />
+                <el-table-column prop="id" label="Branch/Subsidiary ID" sortable="" width="150" />
+                <el-table-column prop="name" label="Branch/Subsidiary Name" min-width="200" />
+                <el-table-column label="Created At" width="120">
+                    <template #default="scope">
+                        {{ formatDate(scope.row.created_at) }}
+                    </template>
+                </el-table-column>
                 <el-table-column label="Action" align="center" width="60" fixed="right">
                     <template #default="{ row }">
                         <el-popover placement="bottom" trigger="hover" width="160" popper-class="user-popover">
@@ -101,7 +101,7 @@ const selected = ref({
     page: 1,
     page_size: 10
 })
-const action = ref("Create Branch")
+const action = ref("Create Branch/Subsidiary")
 const popupAction = ref("")
 const branches = ref([
 ])
@@ -111,6 +111,13 @@ const selectedItem = ref([])
 const selectAll = ref(false)
 const isSelected = ref(false)
 const total = ref(0)
+
+// Helper function to format dates
+const formatDate = (dateString) => {
+    if (!dateString) return '-';
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+}
 
 onMounted(() => {
     // getBranches()
@@ -179,10 +186,6 @@ const handleEdit = (row) => {
     popData.value = {
         id: row.id,
         name: row.name,
-        address: row.address,
-        phone: row.phone,
-        email: row.email,
-        // manager: row.manager
     }
     console.log(popData.value);
 }

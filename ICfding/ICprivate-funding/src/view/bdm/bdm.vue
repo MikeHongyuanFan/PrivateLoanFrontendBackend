@@ -98,6 +98,67 @@
                     </div>
                 </div>
             </el-tab-pane>
+            <el-tab-pane name="3">
+                <template #label>
+                    <div class="label">Brokers</div>
+                </template>
+                <div class="brokers-section">
+                    <div v-if="loadingBrokers" class="loading">Loading brokers...</div>
+                    <div v-else-if="!brokers || brokers.length === 0" class="no-data">No brokers found for this BDM</div>
+                    <div v-else>
+                        <div class="brokers-header">
+                            <h3>Brokers ({{ brokers.length }})</h3>
+                        </div>
+                        <el-table 
+                            :data="brokers" 
+                            style="width: 100%" 
+                            class="brokers-table"
+                            :key="`bdm-brokers-${bdmId}`"
+                            v-loading="loadingBrokers"
+                        >
+                            <el-table-column prop="name" label="Name" min-width="150">
+                                <template #default="scope">
+                                    <router-link :to="`/broker/${scope.row.id}`" class="broker-link">
+                                        {{ scope.row.name }}
+                                    </router-link>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="company" label="Company" min-width="150">
+                                <template #default="scope">
+                                    {{ scope.row.company || '-' }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="email" label="Email" min-width="200">
+                                <template #default="scope">
+                                    {{ scope.row.email || '-' }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="phone" label="Phone" width="120">
+                                <template #default="scope">
+                                    {{ scope.row.phone || '-' }}
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="branch" label="Branch" min-width="150">
+                                <template #default="scope">
+                                    <router-link 
+                                        v-if="scope.row.branch?.id" 
+                                        :to="`/branch/${scope.row.branch.id}`" 
+                                        class="branch-link"
+                                    >
+                                        {{ scope.row.branch.name }}
+                                    </router-link>
+                                    <span v-else>{{ scope.row.branch?.name || '-' }}</span>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="created_at" label="Created" width="120">
+                                <template #default="scope">
+                                    {{ formatDate(scope.row.created_at) }}
+                                </template>
+                            </el-table-column>
+                        </el-table>
+                    </div>
+                </div>
+            </el-tab-pane>
         </el-tabs>
     </div>
 </template>
@@ -118,6 +179,8 @@ const bdmId = route.params.bdmId
 const overview = ref({})
 const applications = ref([])
 const loadingApplications = ref(false)
+const brokers = ref([])
+const loadingBrokers = ref(false)
 
 onMounted(async () => {
     try {
@@ -134,6 +197,7 @@ const getBdm = async () => {
             overview.value = res
             console.log(overview.value);
             await getApplications()
+            await getBrokers()
         } else {
             console.log(err)
         }
@@ -158,6 +222,25 @@ const getApplications = async () => {
         applications.value = []
     } finally {
         loadingApplications.value = false
+    }
+}
+
+const getBrokers = async () => {
+    try {
+        loadingBrokers.value = true
+        const [err, res] = await api.bdmBrokers(bdmId)
+        if (!err) {
+            console.log(res);
+            brokers.value = Array.isArray(res) ? res : []
+        } else {
+            console.log(err)
+            brokers.value = []
+        }
+    } catch (error) {
+        console.error('Error in getBrokers:', error)
+        brokers.value = []
+    } finally {
+        loadingBrokers.value = false
     }
 }
 
@@ -318,6 +401,27 @@ p {
 }
 
 .branch-link:hover {
+    text-decoration: underline;
+}
+
+.brokers-section {
+    padding: 20px;
+}
+
+.brokers-header {
+    margin-bottom: 20px;
+}
+
+.brokers-table {
+    width: 100%;
+}
+
+.broker-link {
+    color: #409EFF;
+    text-decoration: none;
+}
+
+.broker-link:hover {
     text-decoration: underline;
 }
 </style>
