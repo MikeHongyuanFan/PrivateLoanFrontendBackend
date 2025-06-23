@@ -508,9 +508,11 @@ class Application(BaseApplicationModel):
                 old_instance = Application.objects.get(pk=self.pk)
                 if old_instance.stage != self.stage:
                     self.stage_history.append({
-                        'stage': old_instance.stage,
-                        'timestamp': timezone.now(),
-                        'user': self.assigned_bd.username if self.assigned_bd else 'System'
+                        'from_stage': old_instance.stage,
+                        'to_stage': self.stage,
+                        'timestamp': timezone.now().isoformat(),
+                        'user': self.assigned_bd.username if self.assigned_bd else 'System',
+                        'notes': ''
                     })
             except Application.DoesNotExist:
                 pass

@@ -9,6 +9,7 @@
                 <div v-for="(borrower, index) in summary" :key="index" class="borrower_section">
                     <div class="borrower_header">
                         <h3>{{ borrower.is_company ? borrower.company_name : `${borrower.first_name} ${borrower.last_name}` }}</h3>
+                        <p class="borrower_type">{{ borrower.is_company ? 'Company Borrower' : 'Individual Borrower/Guarantor' }}</p>
                     </div>
                     
                     <!-- Assets Table -->
@@ -60,7 +61,7 @@
                     
                     <!-- No Data Messages -->
                     <div v-if="(!borrower.assets || borrower.assets.length === 0) && (!borrower.liabilities || borrower.liabilities.length === 0)" class="no_data">
-                        <p>No assets or liabilities found for this borrower</p>
+                        <p>No assets or liabilities found for this {{ borrower.is_company ? 'company' : 'borrower/guarantor' }}</p>
                     </div>
                 </div>
             </div>
@@ -204,6 +205,11 @@ onMounted(() => {
     font-size: 1rem;
     font-weight: 600;
     margin: 0;
+}
+.borrower_type {
+    color: #909399;
+    font-size: 0.8rem;
+    font-weight: 400;
 }
 
 /* Section Styles */

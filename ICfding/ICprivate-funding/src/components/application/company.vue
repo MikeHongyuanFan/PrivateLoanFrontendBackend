@@ -253,29 +253,55 @@
                 </div>
 
                 <!-- Address Information -->
-                <div v-if="borrower.address" class="part">
+                <div v-if="borrower.address || borrower.residential_address" class="part">
                     <h4>Address Information</h4>
                 </div>
-                <div v-if="borrower.address" class="form">
-                    <div class="item">
-                        <p class="title">Street Address</p>
-                        <p>{{ borrower.address.street || '-' }}</p>
+                <div v-if="borrower.address || borrower.residential_address" class="form">
+                    <!-- Debug info (remove in production) -->
+                    <div v-if="true" class="debug-info" style="grid-column: 1 / 4; background: #f0f0f0; padding: 10px; margin-bottom: 10px; font-size: 0.7rem;">
+                        <p><strong>Debug:</strong> address: {{ JSON.stringify(borrower.address) }}</p>
+                        <p><strong>Debug:</strong> residential_address: {{ borrower.residential_address }}</p>
+                        <p><strong>Debug:</strong> hasStructuredAddress: {{ hasStructuredAddress(borrower.address) }}</p>
                     </div>
-                    <div class="item">
-                        <p class="title">City</p>
-                        <p>{{ borrower.address.city || '-' }}</p>
+                    
+                    <!-- Show structured address if available and has content -->
+                    <div v-if="borrower.address && hasStructuredAddress(borrower.address)" class="structured_address">
+                        <div class="item">
+                            <p class="title">Street Address</p>
+                            <p>{{ borrower.address.street || '-' }}</p>
+                        </div>
+                        <div class="item">
+                            <p class="title">City</p>
+                            <p>{{ borrower.address.city || '-' }}</p>
+                        </div>
+                        <div class="item">
+                            <p class="title">State</p>
+                            <p>{{ borrower.address.state || '-' }}</p>
+                        </div>
+                        <div class="item">
+                            <p class="title">Postal Code</p>
+                            <p>{{ borrower.address.postal_code || '-' }}</p>
+                        </div>
+                        <div class="item">
+                            <p class="title">Country</p>
+                            <p>{{ borrower.address.country || '-' }}</p>
+                        </div>
                     </div>
-                    <div class="item">
-                        <p class="title">State</p>
-                        <p>{{ borrower.address.state || '-' }}</p>
+                    
+                    <!-- Fallback to raw address if structured address is empty or incomplete -->
+                    <div v-else-if="borrower.residential_address" class="raw_address">
+                        <div class="item">
+                            <p class="title">Full Address</p>
+                            <p>{{ borrower.residential_address || '-' }}</p>
+                        </div>
                     </div>
-                    <div class="item">
-                        <p class="title">Postal Code</p>
-                        <p>{{ borrower.address.postal_code || '-' }}</p>
-                    </div>
-                    <div class="item">
-                        <p class="title">Country</p>
-                        <p>{{ borrower.address.country || '-' }}</p>
+                    
+                    <!-- Show mailing address if different from residential -->
+                    <div v-if="borrower.mailing_address && borrower.mailing_address !== borrower.residential_address" class="mailing_address">
+                        <div class="item">
+                            <p class="title">Mailing Address</p>
+                            <p>{{ borrower.mailing_address || '-' }}</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -351,6 +377,21 @@
             company.registered_address_suburb
         ]
         return parts.filter(Boolean).join(' ')
+    }
+
+    const hasStructuredAddress = (address) => {
+        // Check if address object exists and has any meaningful content
+        if (!address) return false;
+        
+        // Check if any of the structured fields have content
+        const hasContent = address.street || address.city || address.state || address.postal_code || address.country;
+        
+        // Also check if the address object has any non-empty string values
+        const hasNonEmptyValues = Object.values(address).some(value => 
+            value && typeof value === 'string' && value.trim() !== ''
+        );
+        
+        return hasContent || hasNonEmptyValues;
     }
 </script>
 

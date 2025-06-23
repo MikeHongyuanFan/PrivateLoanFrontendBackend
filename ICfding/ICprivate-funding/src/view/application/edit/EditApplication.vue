@@ -301,6 +301,11 @@ onMounted(async () => {
                 if (!company.assets) company.assets = [];
                 if (!company.liabilities) company.liabilities = [];
                 if (!company.directors) company.directors = [];
+                
+                // Convert numeric fields from strings to numbers for el-input-number components
+                if (company.annual_company_income && typeof company.annual_company_income === 'string') {
+                    company.annual_company_income = parseFloat(company.annual_company_income) || 0;
+                }
             });
         }
         
@@ -333,7 +338,28 @@ onMounted(async () => {
         
         // Transform address data from backend format to frontend format
         if (res.borrowers && res.borrowers.length > 0) {
-            res.borrowers.forEach(borrower => {
+            res.borrowers.forEach((borrower, index) => {
+                console.log(`=== LOADING BORROWER ${index} ADDRESS DATA ===`);
+                console.log('Backend borrower data:', {
+                    address: borrower.address,
+                    residential_address: borrower.residential_address,
+                    mailing_address: borrower.mailing_address
+                });
+                
+                // Convert numeric fields from strings to numbers for el-input-number components
+                if (borrower.annual_income && typeof borrower.annual_income === 'string') {
+                    borrower.annual_income = parseFloat(borrower.annual_income) || 0;
+                }
+                if (borrower.employment_duration && typeof borrower.employment_duration === 'string') {
+                    borrower.employment_duration = parseFloat(borrower.employment_duration) || 0;
+                }
+                if (borrower.other_income && typeof borrower.other_income === 'string') {
+                    borrower.other_income = parseFloat(borrower.other_income) || 0;
+                }
+                if (borrower.monthly_expenses && typeof borrower.monthly_expenses === 'string') {
+                    borrower.monthly_expenses = parseFloat(borrower.monthly_expenses) || 0;
+                }
+                
                 // Parse structured address data from address object if available
                 if (borrower.address) {
                     borrower.address_street = borrower.address.street || '';
@@ -341,6 +367,21 @@ onMounted(async () => {
                     borrower.address_state = borrower.address.state || '';
                     borrower.address_postal_code = borrower.address.postal_code || '';
                     borrower.address_country = borrower.address.country || '';
+                    console.log('Parsed address fields from nested object:', {
+                        address_street: borrower.address_street,
+                        address_city: borrower.address_city,
+                        address_state: borrower.address_state,
+                        address_postal_code: borrower.address_postal_code,
+                        address_country: borrower.address_country
+                    });
+                } else {
+                    console.log('No nested address object found, fields will remain empty');
+                    // Initialize empty fields
+                    borrower.address_street = '';
+                    borrower.address_city = '';
+                    borrower.address_state = '';
+                    borrower.address_postal_code = '';
+                    borrower.address_country = '';
                 }
             });
         }
@@ -457,9 +498,45 @@ const handleSave = async () => {
             applicationData.stage = 'received';
         }
         
+        // Transform related objects to IDs for API compatibility
+        // Convert broker object to broker ID
+        if (applicationData.broker && typeof applicationData.broker === 'object' && applicationData.broker.id) {
+            applicationData.broker = applicationData.broker.id;
+        }
+        
+        // Convert bd object to bd ID
+        if (applicationData.bd && typeof applicationData.bd === 'object' && applicationData.bd.id) {
+            applicationData.bd = applicationData.bd.id;
+        }
+        
+        // Convert branch object to branch ID
+        if (applicationData.branch && typeof applicationData.branch === 'object' && applicationData.branch.id) {
+            applicationData.branch = applicationData.branch.id;
+        }
+        
+        // Convert valuer object to valuer ID
+        if (applicationData.valuer && typeof applicationData.valuer === 'object' && applicationData.valuer.id) {
+            applicationData.valuer = applicationData.valuer.id;
+        }
+        
+        // Convert quantity_surveyor object to quantity_surveyor ID
+        if (applicationData.quantity_surveyor && typeof applicationData.quantity_surveyor === 'object' && applicationData.quantity_surveyor.id) {
+            applicationData.quantity_surveyor = applicationData.quantity_surveyor.id;
+        }
+        
         // Transform structured address data for borrowers
         if (applicationData.borrowers && applicationData.borrowers.length > 0) {
-            applicationData.borrowers.forEach(borrower => {
+            applicationData.borrowers.forEach((borrower, index) => {
+                console.log(`=== EDIT BORROWER ${index} ADDRESS DEBUG ===`);
+                console.log('Original borrower data:', {
+                    address_street: borrower.address_street,
+                    address_city: borrower.address_city,
+                    address_state: borrower.address_state,
+                    address_postal_code: borrower.address_postal_code,
+                    address_country: borrower.address_country,
+                    mailing_address: borrower.mailing_address
+                });
+                
                 // Create structured address object for API
                 if (borrower.address_street || borrower.address_city || borrower.address_state || borrower.address_postal_code || borrower.address_country) {
                     borrower.address = {
@@ -469,6 +546,9 @@ const handleSave = async () => {
                         postal_code: borrower.address_postal_code || '',
                         country: borrower.address_country || ''
                     };
+                    console.log('Created nested address object:', borrower.address);
+                } else {
+                    console.log('No address fields found, skipping nested address creation');
                 }
                 
                 // Clean up the individual address fields since we're sending them as nested object
@@ -477,6 +557,11 @@ const handleSave = async () => {
                 delete borrower.address_state;
                 delete borrower.address_postal_code;
                 delete borrower.address_country;
+                
+                console.log('Final borrower data:', {
+                    address: borrower.address,
+                    mailing_address: borrower.mailing_address
+                });
             });
         }
         

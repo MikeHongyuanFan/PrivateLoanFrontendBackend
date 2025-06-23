@@ -67,8 +67,7 @@ class DocumentViewSet(viewsets.ModelViewSet):
             'borrower',
             'created_by'
         ).prefetch_related(
-            'application__borrowers',
-            'borrower__address'
+            'application__borrowers'
         )
         
         # Apply role-based filtering

@@ -132,23 +132,13 @@ class ApplicationViewSet(viewsets.ModelViewSet):
             # Create notifications for stage change
             from users.services import create_application_notification
             
-            # Notify broker
-            if application.broker:
-                create_application_notification(
-                    user=application.broker.user,
-                    application=application,
-                    message=f"Application {application.reference_number} stage updated to {application.get_stage_display()}",
-                    notification_type='stage_change'
-                )
-            
-            # Notify BD
-            if application.bd:
-                create_application_notification(
-                    user=application.bd,
-                    application=application,
-                    message=f"Application {application.reference_number} stage updated to {application.get_stage_display()}",
-                    notification_type='stage_change'
-                )
+            # Create notification for all relevant users
+            create_application_notification(
+                application=application,
+                notification_type='stage_change',
+                title=f"Application Stage Updated",
+                message=f"Application {application.reference_number} stage updated to {application.get_stage_display()}"
+            )
             
             # Return updated application data
             from ..serializers import ApplicationListSerializer

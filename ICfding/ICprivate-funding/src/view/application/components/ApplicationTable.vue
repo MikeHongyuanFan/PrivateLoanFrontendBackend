@@ -12,7 +12,7 @@
         paginationInfo: Object,
         data: Array
     })
-    const emit = defineEmits(['getData', 'edit'])
+    const emit = defineEmits(['getData', 'edit', 'click'])
 
     onMounted(() => {
     })
@@ -43,6 +43,10 @@
                 // catch error
             })
         // borrowers.value = borrowers.value.filter(item => item !== row)
+    }
+
+    const handleRowClick = (row) => {
+        emit('click', row.id)
     }
 
     const getStageTagType = (stage) => {
@@ -78,7 +82,7 @@
 </script>
 
 <template>
-    <el-table :data="paginatedData" class="table" :header-cell-style="{ background: '#f8f8f8', color: '#272727' }">
+    <el-table :data="paginatedData" class="table" :header-cell-style="{ background: '#f8f8f8', color: '#272727' }" @row-click="handleRowClick">
         <el-table-column type="selection" width="50" align="center" fixed />
         <el-table-column prop="reference_number" label="Reference Number" width="150">
             <template #default="scope">

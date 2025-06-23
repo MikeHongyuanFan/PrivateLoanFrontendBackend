@@ -7408,9 +7408,7 @@ components:
           format: date
           nullable: true
         address:
-          type: object
-          additionalProperties: {}
-          readOnly: true
+          $ref: '#/components/schemas/Address'
         employment_info:
           type: object
           additionalProperties: {}
@@ -7491,8 +7489,10 @@ components:
         mailing_address:
           type: string
           nullable: true
+        residential_address:
+          type: string
+          nullable: true
       required:
-      - address
       - assets
       - employment_info
       - id
@@ -8202,6 +8202,8 @@ components:
           type: string
           format: date
           nullable: true
+        address:
+          $ref: '#/components/schemas/AddressRequest'
         tax_id:
           type: string
           nullable: true
@@ -8266,6 +8268,9 @@ components:
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
         mailing_address:
+          type: string
+          nullable: true
+        residential_address:
           type: string
           nullable: true
     Branch:
@@ -8491,6 +8496,10 @@ components:
           - $ref: '#/components/schemas/IndustryTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        contact_number:
+          type: string
+          nullable: true
+          maxLength: 20
         annual_company_income:
           type: string
           format: decimal
@@ -8498,6 +8507,14 @@ components:
           nullable: true
         is_company:
           type: boolean
+        is_trustee:
+          type: boolean
+        is_smsf_trustee:
+          type: boolean
+        trustee_name:
+          type: string
+          nullable: true
+          maxLength: 255
         registered_address_unit:
           type: string
           nullable: true
@@ -8561,6 +8578,10 @@ components:
           - $ref: '#/components/schemas/IndustryTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        contact_number:
+          type: string
+          nullable: true
+          maxLength: 20
         annual_company_income:
           type: string
           format: decimal
@@ -8568,6 +8589,14 @@ components:
           nullable: true
         is_company:
           type: boolean
+        is_trustee:
+          type: boolean
+        is_smsf_trustee:
+          type: boolean
+        trustee_name:
+          type: string
+          nullable: true
+          maxLength: 255
         registered_address_unit:
           type: string
           nullable: true
@@ -9281,7 +9310,8 @@ components:
           nullable: true
           maxLength: 10
         address:
-          $ref: '#/components/schemas/Address'
+          type: string
+          nullable: true
         occupation:
           type: string
           nullable: true
@@ -9410,7 +9440,8 @@ components:
           nullable: true
           maxLength: 10
         address:
-          $ref: '#/components/schemas/AddressRequest'
+          type: string
+          nullable: true
         occupation:
           type: string
           nullable: true

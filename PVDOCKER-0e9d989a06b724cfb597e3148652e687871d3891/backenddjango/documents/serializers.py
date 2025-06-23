@@ -52,15 +52,24 @@ class DocumentSerializer(serializers.ModelSerializer):
         return None
     
     def get_borrower_address(self, obj) -> dict:
-        if obj.borrower and hasattr(obj.borrower, 'address'):
-            address = obj.borrower.address
-            return {
-                'street': address.street,
-                'city': address.city,
-                'state': address.state,
-                'postal_code': address.postal_code,
-                'country': address.country
-            }
+        if obj.borrower:
+            if obj.borrower.is_company:
+                # Return company address information
+                return {
+                    'unit': obj.borrower.registered_address_unit,
+                    'street_no': obj.borrower.registered_address_street_no,
+                    'street_name': obj.borrower.registered_address_street_name,
+                    'suburb': obj.borrower.registered_address_suburb,
+                    'state': obj.borrower.registered_address_state,
+                    'postcode': obj.borrower.registered_address_postcode,
+                    'full_address': obj.borrower.company_address or '',
+                }
+            else:
+                # Return individual address information
+                return {
+                    'residential_address': obj.borrower.residential_address or '',
+                    'mailing_address': obj.borrower.mailing_address or '',
+                }
         return None
 
 

@@ -656,23 +656,70 @@ class ApplicationListSerializer(serializers.ModelSerializer):
         if not obj.stage_history:
             return None
         last_change = obj.stage_history[-1]
-        return {
-            'from_stage': dict(Application.STAGE_CHOICES).get(last_change['from_stage'], 'Unknown'),
-            'to_stage': dict(Application.STAGE_CHOICES).get(last_change['to_stage'], 'Unknown'),
-            'timestamp': last_change['timestamp'],
-            'user': last_change['user'],
-            'notes': last_change.get('notes', '')
-        }
+        
+        # Handle both old and new stage_history structures
+        # Old structure: {'stage': 'old_stage', 'timestamp': ..., 'user': ...}
+        # New structure: {'from_stage': 'old_stage', 'to_stage': 'new_stage', 'timestamp': ..., 'user': ..., 'notes': ...}
+        
+        if 'from_stage' in last_change and 'to_stage' in last_change:
+            # New structure
+            return {
+                'from_stage': dict(Application.STAGE_CHOICES).get(last_change['from_stage'], 'Unknown'),
+                'to_stage': dict(Application.STAGE_CHOICES).get(last_change['to_stage'], 'Unknown'),
+                'timestamp': last_change['timestamp'],
+                'user': last_change['user'],
+                'notes': last_change.get('notes', '')
+            }
+        elif 'stage' in last_change:
+            # Old structure - convert to new format
+            return {
+                'from_stage': dict(Application.STAGE_CHOICES).get(last_change['stage'], 'Unknown'),
+                'to_stage': dict(Application.STAGE_CHOICES).get(obj.stage, 'Unknown'),
+                'timestamp': last_change['timestamp'],
+                'user': last_change['user'],
+                'notes': last_change.get('notes', '')
+            }
+        else:
+            # Fallback for unexpected structure
+            return {
+                'from_stage': 'Unknown',
+                'to_stage': dict(Application.STAGE_CHOICES).get(obj.stage, 'Unknown'),
+                'timestamp': last_change.get('timestamp', ''),
+                'user': last_change.get('user', ''),
+                'notes': last_change.get('notes', '')
+            }
     
     def get_stage_history_summary(self, obj):
         """Get a summary of stage changes."""
         if not obj.stage_history:
             return []
-        return [{
-            'stage': dict(Application.STAGE_CHOICES).get(change['to_stage'], 'Unknown'),
-            'timestamp': change['timestamp'],
-            'user': change['user']
-        } for change in obj.stage_history[-5:]]  # Return last 5 changes
+        
+        summary = []
+        for change in obj.stage_history[-5:]:  # Return last 5 changes
+            # Handle both old and new stage_history structures
+            if 'to_stage' in change:
+                # New structure
+                summary.append({
+                    'stage': dict(Application.STAGE_CHOICES).get(change['to_stage'], 'Unknown'),
+                    'timestamp': change['timestamp'],
+                    'user': change['user']
+                })
+            elif 'stage' in change:
+                # Old structure
+                summary.append({
+                    'stage': dict(Application.STAGE_CHOICES).get(change['stage'], 'Unknown'),
+                    'timestamp': change['timestamp'],
+                    'user': change['user']
+                })
+            else:
+                # Fallback for unexpected structure
+                summary.append({
+                    'stage': 'Unknown',
+                    'timestamp': change.get('timestamp', ''),
+                    'user': change.get('user', '')
+                })
+        
+        return summary
     
     def get_borrower_count(self, obj) -> int:
         return obj.borrowers.count()

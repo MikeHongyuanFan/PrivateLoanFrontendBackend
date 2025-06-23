@@ -30,13 +30,9 @@ export function transformGuarantorAssets(guarantorAsset, guarantors) {
   
   // Process each guarantor to ensure borrower and application are properly formatted
   transformedGuarantors.forEach(guarantor => {
-    // Initialize arrays if they don't exist
-    if (!guarantor.assets) {
-      guarantor.assets = [];
-    }
-    if (!guarantor.liabilities) {
-      guarantor.liabilities = [];
-    }
+    // Clear existing assets and liabilities to ensure replacement, not addition
+    guarantor.assets = [];
+    guarantor.liabilities = [];
     
     // For new guarantors, set borrower and application to null
     // The backend will handle the assignment during creation

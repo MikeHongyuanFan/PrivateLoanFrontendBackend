@@ -149,7 +149,7 @@
         <Company v-if="activeInfo === 0" :detail="application" :summary="borrowerSummary"></Company>
         <CompanyAsset v-if="activeInfo === 1" 
             :detail="application" 
-            :summary="borrowerSummary"></CompanyAsset>
+            :summary="combinedBorrowerGuarantorSummary"></CompanyAsset>
         <Enquiries v-if="activeInfo === 2" :detail="application"></Enquiries>
         <Individual v-if="activeInfo === 3" :detail="application" :summary="guarantorSummary"></Individual>
         <GuarantorAsset v-if="activeInfo === 4" :detail="application" :summary="guarantorSummary"></GuarantorAsset>
@@ -234,8 +234,8 @@
         {name: "Discharged", value: "discharged", status: "incomplete"}
     ])
     const infos = ref([
-        {name: "Company Borrower Details", count: 0},
-        {name: "Company Assets & Liabilities", count: 0},
+        {name: "Company/Individual Borrower Detail", count: 0},
+        {name: "Assets & Liabilities", count: 0},
         {name: "General Solvency Enquires", count: 0},
         {name: "Guarantor Details", count: 0},
         {name: "Guarantor Assets & Liability", count: 0},
@@ -294,6 +294,26 @@
         }))
     })
 
+    // Combined borrower and guarantor data for assets/liabilities display
+    const combinedBorrowerGuarantorSummary = computed(() => {
+        const borrowers = borrowerSummary.value || []
+        const guarantors = guarantorSummary.value || []
+        
+        // Filter to only include entities that have assets or liabilities
+        const borrowersWithAssets = borrowers.filter(borrower => 
+            (borrower.assets && borrower.assets.length > 0) || 
+            (borrower.liabilities && borrower.liabilities.length > 0)
+        )
+        
+        const guarantorsWithAssets = guarantors.filter(guarantor => 
+            (guarantor.assets && guarantor.assets.length > 0) || 
+            (guarantor.liabilities && guarantor.liabilities.length > 0)
+        )
+        
+        // Combine all borrowers and guarantors for unified display
+        return [...borrowersWithAssets, ...guarantorsWithAssets]
+    })
+
     onMounted(() => {
         getApplicationWithCascade()
         getBd()
@@ -310,12 +330,23 @@
         infos.value[0].count = totalBorrowers.value // Company Borrower Details (both individual and company)
         
         // Calculate total assets and liabilities from both individual and company borrowers
-        const individualAssets = application.value.borrowers?.reduce((sum, b) => 
-            sum + (b.assets?.length || 0) + (b.liabilities?.length || 0), 0) || 0
-        const companyAssets = application.value.company_borrowers?.reduce((sum, c) => 
-            sum + (c.assets?.length || 0) + (c.liabilities?.length || 0), 0) || 0
+        // Only count entities that actually have assets or liabilities
+        const individualAssets = application.value.borrowers?.reduce((sum, b) => {
+            const hasAssets = (b.assets && b.assets.length > 0) || (b.liabilities && b.liabilities.length > 0)
+            return hasAssets ? sum + (b.assets?.length || 0) + (b.liabilities?.length || 0) : sum
+        }, 0) || 0
         
-        infos.value[1].count = individualAssets + companyAssets // Company Assets & Liabilities
+        const companyAssets = application.value.company_borrowers?.reduce((sum, c) => {
+            const hasAssets = (c.assets && c.assets.length > 0) || (c.liabilities && c.liabilities.length > 0)
+            return hasAssets ? sum + (c.assets?.length || 0) + (c.liabilities?.length || 0) : sum
+        }, 0) || 0
+        
+        const guarantorAssets = application.value.guarantors?.reduce((sum, g) => {
+            const hasAssets = (g.assets && g.assets.length > 0) || (g.liabilities && g.liabilities.length > 0)
+            return hasAssets ? sum + (g.assets?.length || 0) + (g.liabilities?.length || 0) : sum
+        }, 0) || 0
+        
+        infos.value[1].count = individualAssets + companyAssets + guarantorAssets // Assets & Liabilities
         infos.value[2].count = 1 // General Solvency Enquires (always 1 set)
         infos.value[3].count = totalGuarantors.value // Guarantor Details
         infos.value[4].count = application.value.guarantors?.reduce((sum, g) => 

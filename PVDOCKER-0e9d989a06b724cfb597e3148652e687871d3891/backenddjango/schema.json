@@ -11574,9 +11574,7 @@
                         "nullable": true
                     },
                     "address": {
-                        "type": "object",
-                        "additionalProperties": {},
-                        "readOnly": true
+                        "$ref": "#/components/schemas/Address"
                     },
                     "employment_info": {
                         "type": "object",
@@ -11697,10 +11695,13 @@
                     "mailing_address": {
                         "type": "string",
                         "nullable": true
+                    },
+                    "residential_address": {
+                        "type": "string",
+                        "nullable": true
                     }
                 },
                 "required": [
-                    "address",
                     "assets",
                     "employment_info",
                     "id",
@@ -12685,6 +12686,9 @@
                         "format": "date",
                         "nullable": true
                     },
+                    "address": {
+                        "$ref": "#/components/schemas/AddressRequest"
+                    },
                     "tax_id": {
                         "type": "string",
                         "nullable": true,
@@ -12783,6 +12787,10 @@
                         "nullable": true
                     },
                     "mailing_address": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "residential_address": {
                         "type": "string",
                         "nullable": true
                     }
@@ -13079,6 +13087,11 @@
                             }
                         ]
                     },
+                    "contact_number": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 20
+                    },
                     "annual_company_income": {
                         "type": "string",
                         "format": "decimal",
@@ -13087,6 +13100,17 @@
                     },
                     "is_company": {
                         "type": "boolean"
+                    },
+                    "is_trustee": {
+                        "type": "boolean"
+                    },
+                    "is_smsf_trustee": {
+                        "type": "boolean"
+                    },
+                    "trustee_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 255
                     },
                     "registered_address_unit": {
                         "type": "string",
@@ -13177,6 +13201,11 @@
                             }
                         ]
                     },
+                    "contact_number": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 20
+                    },
                     "annual_company_income": {
                         "type": "string",
                         "format": "decimal",
@@ -13185,6 +13214,17 @@
                     },
                     "is_company": {
                         "type": "boolean"
+                    },
+                    "is_trustee": {
+                        "type": "boolean"
+                    },
+                    "is_smsf_trustee": {
+                        "type": "boolean"
+                    },
+                    "trustee_name": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 255
                     },
                     "registered_address_unit": {
                         "type": "string",
@@ -14088,7 +14128,8 @@
                         "maxLength": 10
                     },
                     "address": {
-                        "$ref": "#/components/schemas/Address"
+                        "type": "string",
+                        "nullable": true
                     },
                     "occupation": {
                         "type": "string",
@@ -14267,7 +14308,8 @@
                         "maxLength": 10
                     },
                     "address": {
-                        "$ref": "#/components/schemas/AddressRequest"
+                        "type": "string",
+                        "nullable": true
                     },
                     "occupation": {
                         "type": "string",

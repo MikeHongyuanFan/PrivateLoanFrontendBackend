@@ -172,7 +172,7 @@ class BorrowerSerializer(serializers.ModelSerializer):
     """
     Serializer for individual borrowers with null/blank handling for minimal data creation
     """
-    address = serializers.SerializerMethodField()
+    address = AddressSerializer(required=False)
     employment_info = serializers.SerializerMethodField()
     assets = AssetSerializer(many=True, read_only=True)
     liabilities = LiabilitySerializer(many=True, read_only=True)
@@ -187,7 +187,9 @@ class BorrowerSerializer(serializers.ModelSerializer):
             'employment_type', 'employer_name', 'job_title', 'annual_income', 
             'employment_duration', 'employer_address',
             # Additional financial fields
-            'other_income', 'monthly_expenses', 'mailing_address'
+            'other_income', 'monthly_expenses', 'mailing_address',
+            # Structured address fields for individual borrowers
+            'residential_address'
         ]
         extra_kwargs = {
             # Make most fields optional and allow null/blank values for minimal data creation
@@ -217,17 +219,91 @@ class BorrowerSerializer(serializers.ModelSerializer):
     def get_address(self, obj) -> dict:
         # Try to parse structured address from residential_address if it contains delimiters
         if obj.residential_address:
-            # Simple parsing - you can enhance this logic
-            address_parts = obj.residential_address.split(', ') if ', ' in obj.residential_address else [obj.residential_address]
+            # Enhanced parsing logic for different address formats
+            address_text = obj.residential_address.strip()
             
-            return {
-                'street': address_parts[0] if len(address_parts) > 0 else '',
-                'city': address_parts[1] if len(address_parts) > 1 else '',
-                'state': address_parts[2] if len(address_parts) > 2 else '',
-                'postal_code': address_parts[3] if len(address_parts) > 3 else '',
-                'country': address_parts[4] if len(address_parts) > 4 else ''
-            }
+            # Try different parsing strategies
+            if ', ' in address_text:
+                # Format: "Street, City, State, Postal Code, Country"
+                parts = [part.strip() for part in address_text.split(', ')]
+                return {
+                    'street': parts[0] if len(parts) > 0 else '',
+                    'city': parts[1] if len(parts) > 1 else '',
+                    'state': parts[2] if len(parts) > 2 else '',
+                    'postal_code': parts[3] if len(parts) > 3 else '',
+                    'country': parts[4] if len(parts) > 4 else ''
+                }
+            elif '\n' in address_text:
+                # Format: "Street\nCity, State Postal Code\nCountry"
+                lines = [line.strip() for line in address_text.split('\n') if line.strip()]
+                if len(lines) >= 1:
+                    street = lines[0]
+                    city_state_postal = lines[1] if len(lines) > 1 else ''
+                    country = lines[2] if len(lines) > 2 else ''
+                    
+                    # Parse city, state, postal from second line
+                    city = ''
+                    state = ''
+                    postal_code = ''
+                    
+                    if city_state_postal:
+                        # Try to extract postal code (usually at the end)
+                        import re
+                        postal_match = re.search(r'\b\d{4}\b', city_state_postal)
+                        if postal_match:
+                            postal_code = postal_match.group()
+                            city_state = city_state_postal.replace(postal_code, '').strip().rstrip(',').strip()
+                            # Split remaining by comma or space
+                            if ',' in city_state:
+                                city_parts = city_state.split(',')
+                                city = city_parts[0].strip()
+                                state = city_parts[1].strip() if len(city_parts) > 1 else ''
+                            else:
+                                city = city_state
+                    
+                    return {
+                        'street': street,
+                        'city': city,
+                        'state': state,
+                        'postal_code': postal_code,
+                        'country': country
+                    }
+            else:
+                # Single line format - treat as street address
+                return {
+                    'street': address_text,
+                    'city': '',
+                    'state': '',
+                    'postal_code': '',
+                    'country': ''
+                }
         
+        # Fallback: Check mailing_address if residential_address is empty
+        if obj.mailing_address:
+            address_text = obj.mailing_address.strip()
+            
+            # Try to parse mailing_address as structured data
+            if ', ' in address_text:
+                # Format: "Street, City, State, Postal Code, Country"
+                parts = [part.strip() for part in address_text.split(', ')]
+                return {
+                    'street': parts[0] if len(parts) > 0 else '',
+                    'city': parts[1] if len(parts) > 1 else '',
+                    'state': parts[2] if len(parts) > 2 else '',
+                    'postal_code': parts[3] if len(parts) > 3 else '',
+                    'country': parts[4] if len(parts) > 4 else ''
+                }
+            else:
+                # Single line format - treat as street address
+                return {
+                    'street': address_text,
+                    'city': '',
+                    'state': '',
+                    'postal_code': '',
+                    'country': ''
+                }
+        
+        # If no residential_address or mailing_address, return empty structure
         return {
             'street': '',
             'city': '',
@@ -244,13 +320,31 @@ class BorrowerSerializer(serializers.ModelSerializer):
             'years_employed': obj.employment_duration or 0
         }
     
+    def to_representation(self, instance):
+        """
+        Customize representation to use get_address method for read operations
+        """
+        data = super().to_representation(instance)
+        # Replace the nested address with the parsed address from get_address method
+        data['address'] = self.get_address(instance)
+        return data
+    
     def create(self, validated_data):
         """
         Create borrower with proper created_by attribution
         """
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        logger.info(f"=== BORROWER CREATE DEBUG ===")
+        logger.info(f"Received validated_data keys: {list(validated_data.keys())}")
+        
         # Handle nested address and employment data if provided
         address_data = validated_data.pop('address', None)
         employment_data = validated_data.pop('employment_info', None)
+        
+        logger.info(f"Address data extracted: {address_data}")
+        logger.info(f"Employment data extracted: {employment_data}")
         
         # Ensure is_company is False for individual borrowers
         validated_data['is_company'] = False
@@ -258,6 +352,8 @@ class BorrowerSerializer(serializers.ModelSerializer):
         # Set created_by if not already provided and available from context
         if 'created_by' not in validated_data and hasattr(self, 'context') and 'request' in self.context:
             validated_data['created_by'] = self.context['request'].user
+        
+        logger.info(f"Final validated_data for borrower creation: {validated_data}")
         
         # Create the borrower instance
         borrower = super().create(validated_data)
@@ -280,6 +376,11 @@ class BorrowerSerializer(serializers.ModelSerializer):
             if address_parts:
                 borrower.residential_address = ', '.join(address_parts)
                 borrower.save()
+                logger.info(f"Updated residential_address: {borrower.residential_address}")
+            else:
+                logger.info("No address parts found to combine")
+        else:
+            logger.info("No address_data provided")
         
         # Handle nested employment data
         if employment_data:
@@ -292,7 +393,9 @@ class BorrowerSerializer(serializers.ModelSerializer):
             if employment_data.get('years_employed') is not None:
                 borrower.employment_duration = employment_data.get('years_employed')
             borrower.save()
+            logger.info(f"Updated employment data: employer={borrower.employer_name}, title={borrower.job_title}")
         
+        logger.info(f"Final borrower created: ID={borrower.id}, residential_address={borrower.residential_address}, mailing_address={borrower.mailing_address}")
         return borrower
     
     def update(self, instance, validated_data):
@@ -405,7 +508,6 @@ class GuarantorSerializer(serializers.ModelSerializer):
     """
     Serializer for guarantor with null/blank handling for minimal data creation
     """
-    address = AddressSerializer(required=False)
     employment_info = EmploymentInfoSerializer(required=False)
     financial_info = FinancialInfoSerializer(required=False)
     assets = AssetSerializer(many=True, required=False)
@@ -605,7 +707,8 @@ class CompanyBorrowerSerializer(serializers.ModelSerializer):
         model = Borrower
         fields = [
             'id', 'company_name', 'company_abn', 'company_acn', 'industry_type',
-            'annual_company_income', 'is_company',
+            'contact_number', 'annual_company_income', 'is_company',
+            'is_trustee', 'is_smsf_trustee', 'trustee_name',
             'registered_address_unit', 'registered_address_street_no', 'registered_address_street_name',
             'registered_address_suburb', 'registered_address_state', 'registered_address_postcode',
             'directors', 'address', 'assets', 'liabilities'

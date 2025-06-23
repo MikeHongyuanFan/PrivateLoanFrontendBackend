@@ -938,7 +938,17 @@
             
             // Transform structured address data for borrowers
             if (applicationData.borrowers && applicationData.borrowers.length > 0) {
-                applicationData.borrowers.forEach(borrower => {
+                applicationData.borrowers.forEach((borrower, index) => {
+                    console.log(`=== BORROWER ${index} ADDRESS DEBUG ===`);
+                    console.log('Original borrower data:', {
+                        address_street: borrower.address_street,
+                        address_city: borrower.address_city,
+                        address_state: borrower.address_state,
+                        address_postal_code: borrower.address_postal_code,
+                        address_country: borrower.address_country,
+                        mailing_address: borrower.mailing_address
+                    });
+                    
                     // Create structured address object for API
                     if (borrower.address_street || borrower.address_city || borrower.address_state || borrower.address_postal_code || borrower.address_country) {
                         borrower.address = {
@@ -948,6 +958,9 @@
                             postal_code: borrower.address_postal_code || '',
                             country: borrower.address_country || ''
                         };
+                        console.log('Created nested address object:', borrower.address);
+                    } else {
+                        console.log('No address fields found, skipping nested address creation');
                     }
                     
                     // Clean up the individual address fields since we're sending them as nested object
@@ -956,6 +969,11 @@
                     delete borrower.address_state;
                     delete borrower.address_postal_code;
                     delete borrower.address_country;
+                    
+                    console.log('Final borrower data:', {
+                        address: borrower.address,
+                        mailing_address: borrower.mailing_address
+                    });
                 });
             }
             
