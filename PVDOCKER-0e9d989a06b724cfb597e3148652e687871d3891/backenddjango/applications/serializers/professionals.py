@@ -38,7 +38,9 @@ class ValuerSerializer(serializers.ModelSerializer):
     
     def get_application_count(self, obj):
         """Get the number of applications using this valuer"""
-        return obj.applications.count()
+        if hasattr(obj, 'applications'):
+            return obj.applications.count()
+        return 0
     
     def create(self, validated_data):
         # Set the created_by field to the current user
@@ -74,7 +76,9 @@ class QuantitySurveyorSerializer(serializers.ModelSerializer):
     
     def get_application_count(self, obj):
         """Get the number of applications using this quantity surveyor"""
-        return obj.applications.count()
+        if hasattr(obj, 'applications'):
+            return obj.applications.count()
+        return 0
     
     def create(self, validated_data):
         # Set the created_by field to the current user

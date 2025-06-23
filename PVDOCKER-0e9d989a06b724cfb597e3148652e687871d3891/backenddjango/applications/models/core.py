@@ -349,16 +349,14 @@ class Application(BaseApplicationModel):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='valuer_applications',
-        help_text="Selected valuer for this application"
+        related_name='applications'
     )
     quantity_surveyor = models.ForeignKey(
         'applications.QuantitySurveyor',
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='qs_applications',
-        help_text="Selected quantity surveyor for this application"
+        related_name='applications'
     )
     
     # ============================================================================

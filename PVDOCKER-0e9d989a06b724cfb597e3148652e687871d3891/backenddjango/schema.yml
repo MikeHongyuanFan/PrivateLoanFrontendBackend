@@ -6036,11 +6036,9 @@ components:
         valuer:
           type: integer
           nullable: true
-          description: Selected valuer for this application
         quantity_surveyor:
           type: integer
           nullable: true
-          description: Selected quantity surveyor for this application
         borrowers:
           type: array
           items:
@@ -6316,11 +6314,9 @@ components:
         valuer:
           type: integer
           nullable: true
-          description: Selected valuer for this application
         quantity_surveyor:
           type: integer
           nullable: true
-          description: Selected quantity surveyor for this application
         borrowers:
           type: array
           items:

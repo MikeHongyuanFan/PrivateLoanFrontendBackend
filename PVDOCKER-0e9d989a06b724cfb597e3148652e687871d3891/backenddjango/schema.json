@@ -10005,13 +10005,11 @@
                     },
                     "valuer": {
                         "type": "integer",
-                        "nullable": true,
-                        "description": "Selected valuer for this application"
+                        "nullable": true
                     },
                     "quantity_surveyor": {
                         "type": "integer",
-                        "nullable": true,
-                        "description": "Selected quantity surveyor for this application"
+                        "nullable": true
                     },
                     "borrowers": {
                         "type": "array",
@@ -10313,13 +10311,11 @@
                     },
                     "valuer": {
                         "type": "integer",
-                        "nullable": true,
-                        "description": "Selected valuer for this application"
+                        "nullable": true
                     },
                     "quantity_surveyor": {
                         "type": "integer",
-                        "nullable": true,
-                        "description": "Selected quantity surveyor for this application"
+                        "nullable": true
                     },
                     "borrowers": {
                         "type": "array",
