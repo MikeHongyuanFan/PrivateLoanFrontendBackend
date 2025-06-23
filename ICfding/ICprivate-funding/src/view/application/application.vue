@@ -5,7 +5,7 @@
                 <div class="title_info">
                     <h1>{{ application.reference_number }}</h1>
                     <h2>Created at: {{ application.created_at?.split('T')[0] }}</h2>
-                    <p style="color: #2984DE">Application ID: {{ applicationId }}</p>
+                    <p style="color: #2984DE">Application ID: {{ validApplicationId }}</p>
                 </div>
                 <div class="buttons">
                     <button class="calculator" @click="showCalculator">
@@ -162,12 +162,14 @@
                 v-if="calculator"
                 @close="closeCalculator"
                 @minimize="minimize"
+                :id="validApplicationId"
             ></Calculator>
         </transition>
         <transition name="slide-right-popup">
             <Note
                 v-if="note"
-                :id="applicationId"
+                :id="validApplicationId"
+                :applicationId="validApplicationId"
                 @close="closeNote"
                 @minimize="minimize"
             ></Note>
@@ -175,8 +177,8 @@
         <transition name="slide-right-popup">
             <Fee
                 v-if="fee"
-                :id="applicationId"
-                :applicationId="applicationId"
+                :id="validApplicationId"
+                :applicationId="validApplicationId"
                 @close="closeFee"
                 @minimize="minimize"
             ></Fee>
@@ -207,6 +209,97 @@
 
     const application = ref({})
     const applicationId = route.params.applicationId
+
+    // Add immediate debugging when the component is created
+    console.log("=== COMPONENT CREATION DEBUG ===");
+    console.log("Component created at:", new Date().toISOString());
+    console.log("Route object at creation:", route);
+    console.log("Route params at creation:", route.params);
+    console.log("Route path at creation:", route.path);
+    console.log("Route fullPath at creation:", route.fullPath);
+    console.log("ApplicationId from route at creation:", applicationId);
+    console.log("ApplicationId type at creation:", typeof applicationId);
+    console.log("ApplicationId constructor at creation:", applicationId?.constructor?.name);
+
+    // Create a computed property that always extracts the ID from the route path
+    const validApplicationId = computed(() => {
+        console.log("=== COMPUTED APPLICATION ID DEBUG ===");
+        console.log("Computed property called at:", new Date().toISOString());
+        console.log("Route path:", route.path);
+        console.log("Route params:", route.params);
+        console.log("Route params keys:", Object.keys(route.params));
+        console.log("Route fullPath:", route.fullPath);
+        console.log("Route query:", route.query);
+        
+        // ALWAYS extract from path first, ignore route params if they're invalid
+        const pathParts = route.path.split('/');
+        const idFromPath = pathParts[pathParts.length - 1];
+        console.log("Path parts:", pathParts);
+        console.log("ID from path:", idFromPath);
+        
+        if (idFromPath && !isNaN(idFromPath)) {
+            console.log("✅ Using ID from path:", idFromPath);
+            return idFromPath;
+        }
+        
+        // Fallback to route params only if path extraction fails
+        let id = route.params.applicationId;
+        console.log("ID from route params:", id, "Type:", typeof id);
+        console.log("ID constructor:", id?.constructor?.name);
+        
+        // If route params is invalid, return null
+        if (!id || id === '[object PointerEvent]' || typeof id === 'object') {
+            console.log("❌ Route params invalid");
+            console.log("Invalid ID details:", {
+                value: id,
+                type: typeof id,
+                constructor: id?.constructor?.name,
+                isObject: typeof id === 'object',
+                isPointerEvent: id?.constructor?.name === 'PointerEvent'
+            });
+            console.error("❌ Could not extract valid ID from path or route params");
+            return null;
+        } else {
+            console.log("✅ Route params valid, using:", id);
+        }
+        
+        console.log("✅ Final valid application ID:", id);
+        return id;
+    });
+
+    // Add comprehensive debugging and validation for applicationId
+    console.log("=== ROUTE DEBUG ===");
+    console.log("Route object:", route);
+    console.log("Route params:", route.params);
+    console.log("Route path:", route.path);
+    console.log("Route fullPath:", route.fullPath);
+    console.log("Route query:", route.query);
+    console.log("ApplicationId from route:", applicationId, "Type:", typeof applicationId);
+    console.log("ApplicationId constructor:", applicationId?.constructor?.name);
+
+    // Check if applicationId is an event object
+    if (applicationId && typeof applicationId === 'object') {
+        console.error("❌ CRITICAL: applicationId is an object!");
+        console.error("Object keys:", Object.keys(applicationId));
+        console.error("Object constructor:", applicationId.constructor.name);
+        if (applicationId.constructor.name === 'PointerEvent') {
+            console.error("❌ This is a PointerEvent object!");
+        }
+    }
+
+    // Validate applicationId
+    if (!applicationId || applicationId === '[object PointerEvent]' || typeof applicationId === 'object') {
+        console.error("❌ Invalid applicationId detected:", applicationId);
+        // Try to get it from the current route path
+        const pathParts = route.path.split('/');
+        const idFromPath = pathParts[pathParts.length - 1];
+        console.log("Trying to get ID from path:", idFromPath);
+        if (idFromPath && !isNaN(idFromPath)) {
+            console.log("✅ Using ID from path:", idFromPath);
+            // We can't reassign const, so we'll handle this in the functions
+        }
+    }
+
     // Enhanced data access with computed properties for cascade data
     const cascadeMetadata = ref({})
     const financialSummary = ref({})
@@ -315,12 +408,22 @@
     })
 
     onMounted(() => {
+        console.log("=== ON MOUNTED DEBUG ===");
+        console.log("Route at mounted:", route);
+        console.log("Route params at mounted:", route.params);
+        console.log("Route path at mounted:", route.path);
+        console.log("validApplicationId.value at mounted:", validApplicationId.value);
         getApplicationWithCascade()
         getBd()
     })
 
     onActivated(() => {
         // Refresh data when the route becomes active (e.g., navigating from list view after edit)
+        console.log("=== ON ACTIVATED DEBUG ===");
+        console.log("Route at activated:", route);
+        console.log("Route params at activated:", route.params);
+        console.log("Route path at activated:", route.path);
+        console.log("validApplicationId.value at activated:", validApplicationId.value);
         console.log("Application detail view activated, refreshing data...");
         getApplicationWithCascade()
     })
@@ -371,7 +474,34 @@
     }
     
     const getApplicationWithCascade = async () => {
-        const [err, res] = await api.applicationWithCascade(applicationId)
+        // Handle invalid applicationId
+        let validId = validApplicationId.value;
+        console.log("=== GET APPLICATION WITH CASCADE DEBUG ===");
+        console.log("validApplicationId.value:", validId);
+        console.log("validApplicationId.value type:", typeof validId);
+        console.log("validApplicationId.value constructor:", validId?.constructor?.name);
+        
+        if (!validId || validId === '[object PointerEvent]' || typeof validId === 'object') {
+            console.log("Invalid applicationId, extracting from route path");
+            const pathParts = route.path.split('/');
+            const idFromPath = pathParts[pathParts.length - 1];
+            console.log("Trying to get ID from path:", idFromPath);
+            if (idFromPath && !isNaN(idFromPath)) {
+                validId = idFromPath;
+                console.log("Using ID from path:", validId);
+            } else {
+                console.error("Could not extract valid ID from route");
+                ElMessage.error({
+                    message: 'Invalid application ID',
+                    type: 'error',
+                });
+                return;
+            }
+        }
+        
+        console.log("Calling applicationWithCascade with ID:", validId);
+        console.log("ID type:", typeof validId);
+        const [err, res] = await api.applicationWithCascade(validId)
         if (!err) {
             console.log("Application cascade data received:", res);
             application.value = res
@@ -430,7 +560,34 @@
     }
     
     const getApplication = async () => {
-        const [err, res] = await api.application(applicationId)
+        // Handle invalid applicationId
+        let validId = validApplicationId.value;
+        console.log("=== GET APPLICATION DEBUG ===");
+        console.log("validApplicationId.value:", validId);
+        console.log("validApplicationId.value type:", typeof validId);
+        console.log("validApplicationId.value constructor:", validId?.constructor?.name);
+        
+        if (!validId || validId === '[object PointerEvent]' || typeof validId === 'object') {
+            console.log("Invalid applicationId, extracting from route path");
+            const pathParts = route.path.split('/');
+            const idFromPath = pathParts[pathParts.length - 1];
+            console.log("Trying to get ID from path:", idFromPath);
+            if (idFromPath && !isNaN(idFromPath)) {
+                validId = idFromPath;
+                console.log("Using ID from path:", validId);
+            } else {
+                console.error("Could not extract valid ID from route");
+                ElMessage.error({
+                    message: 'Invalid application ID',
+                    type: 'error',
+                });
+                return;
+            }
+        }
+        
+        console.log("Calling application with ID:", validId);
+        console.log("ID type:", typeof validId);
+        const [err, res] = await api.application(validId)
         if (!err) {
             console.log("Application data received:", res);
             application.value = res
@@ -445,12 +602,31 @@
         }
     }
     const generatePdf = async () => {
-        const [err, blob] = await api.generatePdf(applicationId)
+        // Handle invalid applicationId
+        let validId = validApplicationId.value;
+        if (!validId || validId === '[object PointerEvent]' || typeof validId === 'object') {
+            console.log("Invalid applicationId, extracting from route path");
+            const pathParts = route.path.split('/');
+            const idFromPath = pathParts[pathParts.length - 1];
+            if (idFromPath && !isNaN(idFromPath)) {
+                validId = idFromPath;
+                console.log("Using ID from path:", validId);
+            } else {
+                console.error("Could not extract valid ID from route");
+                ElMessage.error({
+                    message: 'Invalid application ID',
+                    type: 'error',
+                });
+                return;
+            }
+        }
+        
+        const [err, blob] = await api.generatePdf(validId)
         if (!err) {
             const url = window.URL.createObjectURL(blob)
             const link = document.createElement('a')
             link.href = url
-            link.download = `application_${applicationId}.pdf`
+            link.download = `application_${validId}.pdf`
             document.body.appendChild(link)
             link.click()
             link.remove()
@@ -475,10 +651,29 @@
         }
     }
     const assignBd = async () => {
+        // Handle invalid applicationId
+        let validId = validApplicationId.value;
+        if (!validId || validId === '[object PointerEvent]' || typeof validId === 'object') {
+            console.log("Invalid applicationId, extracting from route path");
+            const pathParts = route.path.split('/');
+            const idFromPath = pathParts[pathParts.length - 1];
+            if (idFromPath && !isNaN(idFromPath)) {
+                validId = idFromPath;
+                console.log("Using ID from path:", validId);
+            } else {
+                console.error("Could not extract valid ID from route");
+                ElMessage.error({
+                    message: 'Invalid application ID',
+                    type: 'error',
+                });
+                return;
+            }
+        }
+        
         const data = {
             bd_id: bdm.value
         }
-        const [err, res] = await api.assignBd(applicationId, data)
+        const [err, res] = await api.assignBd(validId, data)
         if (!err) {
             console.log(res);
         } else {
@@ -512,7 +707,7 @@
         const data = {
             stage: stages.value[i + 1].value
         }
-        const [err, res] = await api.updateStage(applicationId, data)
+        const [err, res] = await api.updateStage(validApplicationId.value, data)
         if (!err) {
             console.log(res)
             getApplication()
@@ -525,7 +720,7 @@
         const data = {
             stage: stages.value[i - 1].value
         }
-        const [err, res] = await api.updateStage(applicationId, data)
+        const [err, res] = await api.updateStage(validApplicationId.value, data)
         if (!err) {
             console.log(res)
             getApplication()

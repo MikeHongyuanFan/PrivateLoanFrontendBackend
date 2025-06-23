@@ -241,7 +241,36 @@ const handleApplicationSaved = (savedData) => {
 };
 
 const handleApplicationClick = (id) => {
-    router.push(`/application/${id}`);
+    console.log("=== APPLICATION CLICK DEBUG ===");
+    console.log("Application clicked with ID:", id, "Type:", typeof id);
+    console.log("ID value:", JSON.stringify(id));
+    console.log("Is ID a number?", typeof id === 'number');
+    console.log("Is ID a string?", typeof id === 'string');
+    console.log("Is ID an object?", typeof id === 'object');
+    
+    // Validate that we received a proper ID
+    if (!id || typeof id !== 'number' && typeof id !== 'string') {
+        console.error("❌ Invalid application ID received:", id);
+        console.error("ID type:", typeof id);
+        console.error("ID constructor:", id?.constructor?.name);
+        return;
+    }
+    
+    // Convert to string if it's a number
+    const applicationId = String(id);
+    console.log("✅ Valid application ID:", applicationId);
+    console.log("Navigating to application:", applicationId);
+    
+    try {
+        console.log("Attempting router.push to:", `/application/${applicationId}`);
+        router.push(`/application/${applicationId}`);
+        console.log("✅ Router navigation successful");
+    } catch (error) {
+        console.error("❌ Navigation error:", error);
+        // Fallback: try using window.location
+        console.log("Attempting fallback navigation");
+        window.location.href = `/application/${applicationId}`;
+    }
 };
 </script>
 

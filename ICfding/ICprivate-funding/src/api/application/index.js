@@ -15,7 +15,25 @@ export function addApplications(params) {
     });
 }
 export function application(params) {
+    console.log("=== API APPLICATION FUNCTION DEBUG ===");
     console.log("API call: application() with params:", params);
+    console.log("Params type:", typeof params);
+    console.log("Params value:", params);
+    console.log("Params constructor:", params?.constructor?.name);
+    
+    // Validate the params parameter
+    if (!params || typeof params === 'object' && params.constructor?.name === 'PointerEvent') {
+        console.error("❌ Invalid params passed to application function:", params);
+        console.error("Params details:", {
+            value: params,
+            type: typeof params,
+            constructor: params?.constructor?.name,
+            isPointerEvent: params?.constructor?.name === 'PointerEvent'
+        });
+        return Promise.resolve([{ detail: 'Invalid application ID' }, null]);
+    }
+    
+    console.log("✅ Valid params, making API request for:", params);
     return sendRequest({
         url: `/api/applications/applications/${params}/`,
         method: "get",
@@ -302,7 +320,28 @@ export function activateQuantitySurveyor(id) {
  * @returns {Promise} - Promise that resolves to [error, data]
  */
 export function applicationWithCascade(id) {
+    console.log("=== API FUNCTION DEBUG ===");
     console.log("API call: applicationWithCascade() with id:", id);
+    console.log("ID type:", typeof id);
+    console.log("ID value:", id);
+    console.log("ID constructor:", id?.constructor?.name);
+    console.log("Is ID a number?", typeof id === 'number');
+    console.log("Is ID a string?", typeof id === 'string');
+    console.log("Is ID an object?", typeof id === 'object');
+    
+    // Validate the ID parameter
+    if (!id || typeof id === 'object') {
+        console.error("❌ Invalid ID passed to API function:", id);
+        console.error("ID details:", {
+            value: id,
+            type: typeof id,
+            constructor: id?.constructor?.name,
+            isPointerEvent: id?.constructor?.name === 'PointerEvent'
+        });
+        return Promise.resolve([{ detail: 'Invalid application ID' }, null]);
+    }
+    
+    console.log("✅ Valid ID, making API request for:", id);
     return sendRequest({
         url: `/api/applications/${id}/retrieve-cascade/`,
         method: "get",
