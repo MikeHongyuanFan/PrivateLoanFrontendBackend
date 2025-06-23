@@ -1,6 +1,8 @@
 import django_filters
 from django.db.models import Q
 from .models import Document, Note, Fee, Repayment, NoteComment
+from functools import reduce
+import operator
 
 
 class DocumentFilter(django_filters.FilterSet):
@@ -44,15 +46,38 @@ class DocumentFilter(django_filters.FilterSet):
         """
         Search by borrower name or address
         """
-        return queryset.filter(
-            Q(borrower__first_name__icontains=value) |
-            Q(borrower__last_name__icontains=value) |
-            Q(borrower__email__icontains=value) |
-            Q(borrower__address__street__icontains=value) |
-            Q(borrower__address__city__icontains=value) |
-            Q(borrower__address__state__icontains=value) |
-            Q(borrower__address__postal_code__icontains=value)
-        )
+        # Split search terms
+        terms = value.split()
+        
+        # Create a list to store all conditions
+        conditions = []
+        
+        for term in terms:
+            term_conditions = [
+                Q(borrower__first_name__icontains=term),
+                Q(borrower__last_name__icontains=term),
+                Q(borrower__email__icontains=term),
+                Q(borrower__residential_address__icontains=term),
+                Q(borrower__mailing_address__icontains=term)
+            ]
+            
+            # Add company address fields for company borrowers
+            term_conditions.extend([
+                Q(borrower__registered_address_street_no__icontains=term),
+                Q(borrower__registered_address_street_name__icontains=term),
+                Q(borrower__registered_address_suburb__icontains=term),
+                Q(borrower__registered_address_state__icontains=term),
+                Q(borrower__registered_address_postcode__icontains=term),
+                Q(borrower__company_address__icontains=term)
+            ])
+            
+            # Combine all conditions for this term with OR
+            conditions.append(reduce(operator.or_, term_conditions))
+        
+        # Combine all term conditions with AND
+        if conditions:
+            return queryset.filter(reduce(operator.and_, conditions))
+        return queryset
 
 
 class NoteFilter(django_filters.FilterSet):

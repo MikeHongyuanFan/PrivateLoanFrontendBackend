@@ -36,8 +36,14 @@ class DocumentViewSet(viewsets.ModelViewSet):
         'application__reference_number',
         'borrower__first_name', 'borrower__last_name',
         'borrower__email',
-        'borrower__address__street', 'borrower__address__city',
-        'borrower__address__state', 'borrower__address__postal_code'
+        'borrower__residential_address',
+        'borrower__mailing_address',
+        'borrower__registered_address_street_no',
+        'borrower__registered_address_street_name',
+        'borrower__registered_address_suburb',
+        'borrower__registered_address_state',
+        'borrower__registered_address_postcode',
+        'borrower__company_address'
     ]
     ordering_fields = ['created_at', 'updated_at', 'title']
     parser_classes = [MultiPartParser, FormParser]
@@ -91,13 +97,16 @@ class DocumentViewSet(viewsets.ModelViewSet):
         app_search = self.request.query_params.get('application_search', '')
         borrower_search = self.request.query_params.get('borrower_search', '')
         
+        # Create filter instance
+        document_filter = self.filterset_class()
+        
         # Apply search filters if provided
         if search_query:
-            queryset = self.filterset_class.search_filter(None, queryset, None, search_query)
+            queryset = document_filter.search_filter(queryset, 'search', search_query)
         if app_search:
-            queryset = self.filterset_class.application_search_filter(None, queryset, None, app_search)
+            queryset = document_filter.application_search_filter(queryset, 'application_search', app_search)
         if borrower_search:
-            queryset = self.filterset_class.borrower_search_filter(None, queryset, None, borrower_search)
+            queryset = document_filter.borrower_search_filter(queryset, 'borrower_search', borrower_search)
         
         return queryset.distinct()
     
