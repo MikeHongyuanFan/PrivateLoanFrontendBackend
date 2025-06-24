@@ -15,7 +15,6 @@ from django.db.models import Q
 from datetime import timedelta
 import logging
 
-from ..models import ActiveLoan, Application
 from django.contrib.auth import get_user_model
 from users.services import create_notification
 from users.models import User
@@ -32,6 +31,9 @@ def send_active_loan_payment_reminders():
     This task checks for active loans with interest payments due in the next 7 days
     and sends notifications to relevant staff.
     """
+    # Import models inside the task to avoid circular imports
+    from ..models import ActiveLoan
+    
     today = timezone.now().date()
     reminder_threshold = today + timedelta(days=7)
     
@@ -86,6 +88,9 @@ def send_active_loan_expiry_warnings():
     This task checks for active loans expiring in the next 30 days
     and sends notifications to relevant staff.
     """
+    # Import models inside the task to avoid circular imports
+    from ..models import ActiveLoan
+    
     today = timezone.now().date()
     warning_threshold = today + timedelta(days=30)
     
@@ -133,6 +138,9 @@ def send_critical_expiry_alerts():
     This task checks for active loans expiring in the next 7 days
     and sends urgent notifications to relevant staff.
     """
+    # Import models inside the task to avoid circular imports
+    from ..models import ActiveLoan
+    
     today = timezone.now().date()
     critical_threshold = today + timedelta(days=7)
     
@@ -183,6 +191,9 @@ def send_immediate_active_loan_alert(loan_id, alert_type="manual", message=None,
         message: Optional custom message
         user_id: Specific user to notify (optional, defaults to all admins)
     """
+    # Import models inside the task to avoid circular imports
+    from ..models import ActiveLoan
+    
     try:
         loan = ActiveLoan.objects.get(id=loan_id)
         

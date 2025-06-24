@@ -11,8 +11,6 @@ from django.core.mail import send_mail
 from django.conf import settings
 from datetime import timedelta
 
-from ..models import Application
-from documents.models import Note, Repayment
 from users.services import create_notification
 
 
@@ -22,6 +20,9 @@ def check_stagnant_applications():
     Check for applications that haven't had their stage updated in X days
     and notify the BD
     """
+    # Import models inside the task to avoid circular imports
+    from ..models import Application
+    
     # Define the threshold for stagnant applications (e.g., 14 days)
     threshold_days = 14
     threshold_date = timezone.now() - timedelta(days=threshold_days)
@@ -67,6 +68,9 @@ def check_stale_applications():
     Check for applications that haven't changed stage in X days
     and notify the BD
     """
+    # Import models inside the task to avoid circular imports
+    from ..models import Application
+    
     # Define the threshold for stale applications (e.g., 14 days)
     threshold_days = 14
     threshold_date = timezone.now() - timedelta(days=threshold_days)
@@ -106,6 +110,9 @@ def check_note_reminders():
     """
     Check for notes with remind_date today and send notifications
     """
+    # Import models inside the task to avoid circular imports
+    from documents.models import Note
+    
     today = timezone.now().date()
     
     # Find notes with remind_date today
@@ -150,6 +157,9 @@ def check_repayment_reminders():
     """
     Check for upcoming and overdue repayments and send notifications
     """
+    # Import models inside the task to avoid circular imports
+    from documents.models import Repayment
+    
     today = timezone.now().date()
     
     # Upcoming repayments (7 days before due date)
