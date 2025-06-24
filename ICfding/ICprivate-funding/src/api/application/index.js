@@ -427,6 +427,30 @@ export function applicationWithCascade(id) {
     });
 }
 
+/**
+ * Retrieves archived applications with pagination and filtering
+ * @param {Object} params - Query parameters for filtering and pagination
+ * @returns {Promise} - Promise that resolves to [error, data]
+ */
+export function archivedApplications(params) {
+    return sendRequest({
+        url: "/api/applications/applications/archived/",
+        method: "get",
+        params: params,
+    });
+}
+
+/**
+ * Retrieves statistics about archived applications
+ * @returns {Promise} - Promise that resolves to [error, data]
+ */
+export function archivedApplicationsStats() {
+    return sendRequest({
+        url: "/api/applications/applications/archive_stats/",
+        method: "get",
+    });
+}
+
 export const applicationApi = {
     applications,
     application,
@@ -455,4 +479,7 @@ export const applicationApi = {
     deactivateQuantitySurveyor,
     activateQuantitySurveyor,
     applicationWithCascade,
+    // Archived applications functions
+    archivedApplications,
+    archivedApplicationsStats,
 }

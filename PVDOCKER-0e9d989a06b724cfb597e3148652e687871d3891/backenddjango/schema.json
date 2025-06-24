@@ -674,7 +674,7 @@
         "/api/applications/{id}/stage/": {
             "put": {
                 "operationId": "applications_stage_update",
-                "description": "Update application stage with history tracking\n\nUpdates the stage of an application and maintains a history of changes.\nAlso creates notifications for relevant users.",
+                "description": "Update application stage with history tracking\n\nUpdates the stage of an application and maintains a history of changes.\nAlso creates notifications for relevant users.\n\nNote: This action can update stages of archived applications too,\nsince archived applications may need stage changes (e.g., closed -> discharged)",
                 "parameters": [
                     {
                         "in": "path",
@@ -1602,7 +1602,7 @@
         "/api/applications/applications/{id}/update_stage/": {
             "put": {
                 "operationId": "applications_applications_update_stage_update",
-                "description": "Update application stage with history tracking\n\nUpdates the stage of an application and maintains a history of changes.\nAlso creates notifications for relevant users.",
+                "description": "Update application stage with history tracking\n\nUpdates the stage of an application and maintains a history of changes.\nAlso creates notifications for relevant users.\n\nNote: This action can update stages of archived applications too,\nsince archived applications may need stage changes (e.g., closed -> discharged)",
                 "parameters": [
                     {
                         "in": "path",
@@ -1695,6 +1695,64 @@
                         }
                     }
                 },
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApplicationList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/applications/applications/archive_stats/": {
+            "get": {
+                "operationId": "applications_applications_archive_stats_retrieve",
+                "description": "Get statistics about archived applications",
+                "tags": [
+                    "applications"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApplicationList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/applications/applications/archived/": {
+            "get": {
+                "operationId": "applications_applications_archived_retrieve",
+                "description": "Get all archived applications",
+                "tags": [
+                    "applications"
+                ],
                 "security": [
                     {
                         "jwtAuth": []
@@ -11114,6 +11172,10 @@
                         "additionalProperties": {},
                         "description": "Get solvency issues summary",
                         "readOnly": true
+                    },
+                    "is_archived": {
+                        "type": "boolean",
+                        "description": "Whether this application is archived (automatically set when stage is 'closed')"
                     }
                 },
                 "required": [
@@ -11198,6 +11260,10 @@
                                 "$ref": "#/components/schemas/NullEnum"
                             }
                         ]
+                    },
+                    "is_archived": {
+                        "type": "boolean",
+                        "description": "Whether this application is archived (automatically set when stage is 'closed')"
                     }
                 }
             },
@@ -15838,6 +15904,10 @@
                                 "$ref": "#/components/schemas/NullEnum"
                             }
                         ]
+                    },
+                    "is_archived": {
+                        "type": "boolean",
+                        "description": "Whether this application is archived (automatically set when stage is 'closed')"
                     }
                 }
             },

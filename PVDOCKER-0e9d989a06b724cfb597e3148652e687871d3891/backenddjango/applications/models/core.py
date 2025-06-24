@@ -122,6 +122,10 @@ class Application(BaseApplicationModel):
         default=list,
         help_text="History of stage changes with timestamps and users"
     )
+    is_archived = models.BooleanField(
+        default=False,
+        help_text="Whether this application is archived (automatically set when stage is 'closed')"
+    )
     application_type = models.CharField(
         max_length=30,
         choices=APPLICATION_TYPE_CHOICES,
@@ -490,6 +494,7 @@ class Application(BaseApplicationModel):
             models.Index(fields=['bd']),
             models.Index(fields=['created_at']),
             models.Index(fields=['estimated_settlement_date']),
+            models.Index(fields=['is_archived']),
         ]
     
     def __str__(self):
@@ -516,6 +521,10 @@ class Application(BaseApplicationModel):
                     })
             except Application.DoesNotExist:
                 pass
+        
+        # Auto-archive when stage is 'closed' (case-insensitive)
+        if self.stage and self.stage.lower() == 'closed':
+            self.is_archived = True
         
         super().save(*args, **kwargs)
     

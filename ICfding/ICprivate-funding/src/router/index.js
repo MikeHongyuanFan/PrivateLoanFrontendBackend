@@ -89,6 +89,18 @@ export const constantRoutes = [
         },
       },
       {
+        path: '/application/archived',
+        component: () => import('@/view/application/ArchivedApplications.vue'),
+        meta: {
+          title: 'Archived Applications',
+          keepAlive: true,
+          breadcrumb: [
+            { label: 'Application', path: '/application' },
+            { label: 'Archived Applications' },
+          ],
+        },
+      },
+      {
         path: '/application/:applicationId',
         component: () => import('@/view/application/application.vue'),
         meta: {

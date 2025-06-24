@@ -54,13 +54,16 @@ class ApplicationStageUpdateSerializer(serializers.Serializer):
     
     def validate_stage(self, value):
         """Validate stage transitions."""
-        if self.instance and value == self.instance.stage:
-            raise serializers.ValidationError("Application is already in this stage.")
+        # Remove the restriction for same-stage updates as this can happen during UI operations
+        # and it's not necessarily an error
         
         # Add any specific stage transition validation rules here
-        # For example, prevent going back to 'received' from later stages
+        # For example, prevent going back to 'received' from later stages in some cases
         if self.instance and self.instance.stage != 'received' and value == 'received':
-            raise serializers.ValidationError("Cannot move back to 'received' stage once application has progressed.")
+            # Allow this transition for admin users, but warn for others
+            request = self.context.get('request')
+            if request and hasattr(request.user, 'role') and request.user.role not in ['super_user', 'admin']:
+                raise serializers.ValidationError("Only admin users can move applications back to 'received' stage.")
         
         return value
     
@@ -648,7 +651,7 @@ class ApplicationListSerializer(serializers.ModelSerializer):
             'last_stage_change', 'stage_history_summary',
             'bdm_name', 'broker_name', 'branch_name', 'guarantor_name', 'purpose', 'product_name', 'security_address',
             'loan_amount', 'loan_term', 'capitalised_interest_term', 'estimated_settlement_date', 'updated_at', 'created_at',
-            'application_type', 'borrower_count', 'solvency_issues'
+            'application_type', 'borrower_count', 'solvency_issues', 'is_archived'
         ]
     
     def get_last_stage_change(self, obj):

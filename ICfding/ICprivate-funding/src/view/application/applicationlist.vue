@@ -6,6 +6,16 @@
                     <h1>Search</h1>
                     <el-input v-model="selected.search" style="width: 180px" placeholder="Search..." />
                 </div>
+                <div class="filter">
+                    <h1>Include Archived</h1>
+                    <el-switch 
+                        v-model="includeArchived" 
+                        active-text="Yes" 
+                        inactive-text="No"
+                        @change="handleArchivedToggle"
+                        style="width: 180px" 
+                    />
+                </div>
                 <!-- <div class="filter">
                     <h1>Location</h1>
                     <el-select v-model="selectedLocation" placeholder="Select Location" style="width: 180px">
@@ -135,6 +145,7 @@ const selected = ref({
     search: "",
     page: 1
 })
+const includeArchived = ref(false)
 const selectedLocation = ref("")
 const selectedincome = ref("")
 const dateRange = ref("")
@@ -163,6 +174,7 @@ const toApplication = () => {
 }
 const handleClear = () => {
     selected.value = ({page: 1})
+    includeArchived.value = false
     getApplications()
 }
 const addApplication = () => {
@@ -182,7 +194,13 @@ const minimize = () => {
 }
 
 const getApplications = async () => {
-    const [err, res] = await api.applications(selected.value)
+    // Add include_archived parameter to the request
+    const params = {
+        ...selected.value,
+        include_archived: includeArchived.value
+    }
+    
+    const [err, res] = await api.applications(params)
     if (!err) {
         console.log(res);
         paginationInfo.value.total = res.count
@@ -194,6 +212,11 @@ const getApplications = async () => {
     } else {
         console.log(err)
     }
+}
+
+const handleArchivedToggle = () => {
+    // Refresh the application list when archived toggle changes
+    getApplications()
 }
 
 const handleChange = (currantPage) => {

@@ -367,17 +367,50 @@ This document outlines the detailed implementation plan for the 18 new requireme
 ### **Requirement 17: Auto-archive Closed Applications**
 > *"All apps with the status of "Closed" are automatically archived and removed from the dashboard. However, we still need to be able to search for it."*
 
-#### Backend Changes:
-- **File**: `PVDOCKER-0e9d989a06b724cfb597e3148652e687871d3891/backenddjango/applications/models.py`
-  - Add `is_archived` field to Application model
-  - Create automatic archiving trigger when stage = 'closed'
-- **Views**: Modify application list views to exclude archived by default
-- **Search**: Ensure archived applications are searchable
+---
 
-#### Frontend Changes:
-- **Application List**: Add "Include Archived" toggle
-- **Search**: Include archived applications in search results with visual indicators
-- **Dashboard**: Exclude archived applications from main dashboard
+### ✅ Cursor Prompt (Safe Additive Implementation)
+
+```markdown
+### Task: Add Auto-Archive Feature for Closed Applications
+
+---
+
+#### Backend Tasks (Non-intrusive)
+
+1. Add a new boolean field `is_archived` (default: false) to the application model. Do not modify existing logic.
+2. In the application save or update logic, add a new check:
+   - If `stage` is `"Closed"` (case-insensitive), set `is_archived = true`.
+3. Without touching the main query logic, add an optional filter:
+   - If query param `include_archived=true` is passed, include archived records.
+   - By default, return only non-archived applications.
+4. Keep search functionality unchanged, but allow search across all records (archived and active).
+5. Keep the existing API stable. Only append logic.
+
+---
+
+#### Frontend Tasks (Minimal Invasive UI Addition)
+
+1. Add a toggle/switch labeled “Include Archived” to the application list page.
+   - When on, fetch applications with `include_archived=true`.
+2. Add a visual indicator (e.g. tag “Archived”) for archived applications in the list view.
+3. In dashboard view:
+   - Add a count display of archived applications.
+   - Add a new button labeled “View Archived” which routes to the list view with archived toggle enabled(please create a list view that shows all the archived applications, please do not use the application Original list page).
+
+---
+
+### Constraints
+
+- ✅ Do not remove or rewrite any core logic.
+- ✅ Only add new fields, new conditions, or optional toggles.
+- ✅ Ensure all added logic is non-breaking and backward-compatible.
+
+---
+
+
+```
+
 
 #### Implementation Priority: **HIGH** ⚡
 #### Estimated Effort: **2 days**

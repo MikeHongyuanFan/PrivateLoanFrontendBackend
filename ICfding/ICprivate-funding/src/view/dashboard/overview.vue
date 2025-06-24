@@ -11,6 +11,7 @@ const loadingData = ref(false)
 const dashboard = ref({})
 const repayment = ref({})
 const volume = ref({})
+const archivedStats = ref({})
 const applicationPopup = ref(false)
 const borrowerPopup = ref(false)
 
@@ -18,6 +19,7 @@ onActivated(() => {
   getApplicationStatus()
   getApplicationVolume()
   getRepaymentCompliance()
+  getArchivedStats()
 })
 
 const toPage = (page) => {
@@ -51,6 +53,16 @@ async function getRepaymentCompliance() {
   repayment.value = res
 }
 
+async function getArchivedStats() {
+  const [err, res] = await api.archivedApplicationsStats()
+  if (!err) {
+    console.log('🚀 ~ getArchivedStats ~ archivedStats:', res)
+    archivedStats.value = res
+  } else {
+    console.error('Error fetching archived stats:', err)
+  }
+}
+
 const toAddApplication = () => {
   applicationPopup.value = true
 }
@@ -68,6 +80,10 @@ const toDocument = () => {
 }
 const toAddNote = () => {
 
+}
+
+const viewArchived = () => {
+  router.push('/application/archived')
 }
 </script>
 
@@ -97,6 +113,15 @@ const toAddNote = () => {
         <div class="num">${{ repayment.total_amount_due }}</div>
         <p>On-Time Payment Rate</p>
         <button @click="toPage('repayment')">View Repayment</button>
+      </div>
+    </div>
+    <!-- New row for archived applications -->
+    <div class="archived-section">
+      <div class="card archived-card">
+        <h1>Archived Applications</h1>
+        <div class="num">{{ archivedStats.total_archived || 0 }}</div>
+        <p>Applications automatically archived when closed</p>
+        <button @click="viewArchived">View Archived</button>
       </div>
     </div>
     <div class="boxs">
@@ -238,6 +263,35 @@ p {
 
 .card button:hover {
   background: #1f63a9;
+}
+
+.archived-section {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.archived-card {
+  width: 25%;
+  background: #f8f9fa;
+  border-color: #dee2e6;
+}
+
+.archived-card h1 {
+  color: #6c757d;
+}
+
+.archived-card .num {
+  color: #495057;
+}
+
+.archived-card button {
+  background: #6c757d;
+  border-color: #6c757d;
+}
+
+.archived-card button:hover {
+  background: #5a6268;
 }
 
 .boxs {

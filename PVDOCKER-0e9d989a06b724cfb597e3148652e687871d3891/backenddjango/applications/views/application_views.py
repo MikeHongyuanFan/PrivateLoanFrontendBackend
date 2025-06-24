@@ -30,6 +30,12 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         user = self.request.user
         queryset = Application.objects.all()
         
+        # Apply archive filtering - by default, exclude archived applications
+        # Unless specifically requested with include_archived=true
+        include_archived = self.request.query_params.get('include_archived', 'false').lower() == 'true'
+        if not include_archived:
+            queryset = queryset.filter(is_archived=False)
+        
         # Super user and accounts can see all applications
         if hasattr(user, 'role') and user.role in ['super_user', 'accounts']:
             pass  # No filtering needed
@@ -116,8 +122,39 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         
         Updates the stage of an application and maintains a history of changes.
         Also creates notifications for relevant users.
+        
+        Note: This action can update stages of archived applications too,
+        since archived applications may need stage changes (e.g., closed -> discharged)
         """
-        application = self.get_object()
+        # Get the application without archive filtering for stage updates
+        try:
+            # Apply user permission filtering but not archive filtering
+            user = self.request.user
+            queryset = Application.objects.all()
+            
+            # Apply user-based filtering (same as get_queryset but without archive filter)
+            if hasattr(user, 'role') and user.role in ['super_user', 'accounts']:
+                pass  # No filtering needed
+            elif user.role == 'admin':
+                pass  # No filtering needed
+            elif user.role == 'broker':
+                queryset = queryset.filter(broker__user=user)
+            elif user.role == 'bd':
+                if hasattr(user, 'bdm_profile'):
+                    queryset = queryset.filter(bd=user.bdm_profile)
+                else:
+                    queryset = queryset.none()
+            elif user.role == 'client':
+                if hasattr(user, 'borrower_profile'):
+                    queryset = queryset.filter(borrowers=user.borrower_profile)
+                else:
+                    queryset = queryset.none()
+            else:
+                queryset = queryset.none()
+            
+            application = queryset.get(pk=pk)
+        except Application.DoesNotExist:
+            return Response({"error": "Application not found"}, status=status.HTTP_404_NOT_FOUND)
         
         from ..serializers import ApplicationStageUpdateSerializer
         serializer = ApplicationStageUpdateSerializer(
@@ -525,6 +562,83 @@ class ApplicationViewSet(viewsets.ModelViewSet):
         serializer = ApplicationListSerializer(filtered_queryset, many=True, context={'request': request})
         return Response(serializer.data)
 
+    @action(detail=False, methods=['get'])
+    def archived(self, request):
+        """
+        Get all archived applications
+        """
+        queryset = self.get_queryset()
+        
+        # Force inclusion of archived applications and filter to archived only
+        queryset = Application.objects.all().filter(is_archived=True)
+        
+        # Apply user permissions
+        user = request.user
+        if hasattr(user, 'role') and user.role in ['super_user', 'accounts']:
+            pass  # No filtering needed
+        elif user.role == 'admin':
+            pass  # No filtering needed
+        elif user.role == 'broker':
+            queryset = queryset.filter(broker__user=user)
+        elif user.role == 'bd':
+            if hasattr(user, 'bdm_profile'):
+                queryset = queryset.filter(bd=user.bdm_profile)
+            else:
+                return Response({"results": [], "count": 0})
+        elif user.role == 'client':
+            if hasattr(user, 'borrower_profile'):
+                queryset = queryset.filter(borrowers=user.borrower_profile)
+            else:
+                return Response({"results": [], "count": 0})
+        else:
+            return Response({"results": [], "count": 0})
+        
+        # Apply pagination
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            from ..serializers import ApplicationListSerializer
+            serializer = ApplicationListSerializer(page, many=True, context={'request': request})
+            return self.get_paginated_response(serializer.data)
+        
+        from ..serializers import ApplicationListSerializer
+        serializer = ApplicationListSerializer(queryset, many=True, context={'request': request})
+        return Response({"results": serializer.data, "count": queryset.count()})
+
+    @action(detail=False, methods=['get'])
+    def archive_stats(self, request):
+        """
+        Get statistics about archived applications
+        """
+        user = request.user
+        archived_queryset = Application.objects.filter(is_archived=True)
+        
+        # Apply user permissions
+        if hasattr(user, 'role') and user.role in ['super_user', 'accounts']:
+            pass  # No filtering needed
+        elif user.role == 'admin':
+            pass  # No filtering needed
+        elif user.role == 'broker':
+            archived_queryset = archived_queryset.filter(broker__user=user)
+        elif user.role == 'bd':
+            if hasattr(user, 'bdm_profile'):
+                archived_queryset = archived_queryset.filter(bd=user.bdm_profile)
+            else:
+                archived_queryset = archived_queryset.none()
+        elif user.role == 'client':
+            if hasattr(user, 'borrower_profile'):
+                archived_queryset = archived_queryset.filter(borrowers=user.borrower_profile)
+            else:
+                archived_queryset = archived_queryset.none()
+        else:
+            archived_queryset = archived_queryset.none()
+        
+        total_archived = archived_queryset.count()
+        
+        return Response({
+            "total_archived": total_archived,
+            "message": f"Found {total_archived} archived applications"
+        })
+
     @action(detail=True, methods=['patch'])
     def partial_update_with_cascade(self, request, pk=None):
         """
@@ -691,3 +805,73 @@ class ApplicationViewSet(viewsets.ModelViewSet):
                 {"error": f"Failed to retrieve application with cascade: {str(e)}"}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+    def get_object(self):
+        """
+        Override get_object to handle archived applications for certain actions.
+        
+        For actions that need to work with archived applications (like retrieve, update, stage updates),
+        we should include archived applications in the queryset.
+        """
+        # Actions that should include archived applications
+        include_archived_actions = [
+            'retrieve', 'update', 'partial_update', 'destroy',
+            'update_stage', 'signature', 'borrowers', 'sign', 'extend_loan',
+            'funding_calculation', 'assign_bd', 'partial_update_with_cascade',
+            'retrieve_with_cascade'
+        ]
+        
+        if self.action in include_archived_actions:
+            # For these actions, use queryset without archive filtering
+            user = self.request.user
+            queryset = Application.objects.all()
+            
+            # Apply user-based filtering (same as get_queryset but without archive filter)
+            if hasattr(user, 'role') and user.role in ['super_user', 'accounts']:
+                pass  # No filtering needed
+            elif user.role == 'admin':
+                pass  # No filtering needed
+            elif user.role == 'broker':
+                queryset = queryset.filter(broker__user=user)
+            elif user.role == 'bd':
+                if hasattr(user, 'bdm_profile'):
+                    queryset = queryset.filter(bd=user.bdm_profile)
+                else:
+                    queryset = queryset.none()
+            elif user.role == 'client':
+                if hasattr(user, 'borrower_profile'):
+                    queryset = queryset.filter(borrowers=user.borrower_profile)
+                else:
+                    queryset = queryset.none()
+            else:
+                queryset = queryset.none()
+            
+            # Apply optimizations based on action
+            if self.action in ['retrieve', 'retrieve_with_cascade']:
+                queryset = queryset.select_related(
+                    'bd', 'broker', 'branch'
+                ).prefetch_related(
+                    'borrowers',
+                    'guarantors',
+                    'guarantors__assets',
+                    'guarantors__liabilities',
+                    'security_properties',
+                    'loan_requirements',
+                    'app_documents',
+                    'app_fees',
+                    'app_repayments'
+                )
+            
+            lookup_url_kwarg = self.lookup_url_kwarg or self.lookup_field
+            filter_kwargs = {self.lookup_field: self.kwargs[lookup_url_kwarg]}
+            
+            try:
+                obj = queryset.get(**filter_kwargs)
+                self.check_object_permissions(self.request, obj)
+                return obj
+            except Application.DoesNotExist:
+                from rest_framework.exceptions import NotFound
+                raise NotFound("Application not found")
+        else:
+            # For list and other actions, use the normal get_object which uses get_queryset
+            return super().get_object()

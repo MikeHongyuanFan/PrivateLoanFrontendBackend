@@ -3,7 +3,7 @@
     import { CircleCheck, View, Upload, InfoFilled } from '@element-plus/icons-vue'
     import { useRouter } from 'vue-router'
     import { api } from '@/api'
-    import { ElMessageBox } from 'element-plus'
+    import { ElMessageBox, ElMessage } from 'element-plus'
 
     const router = useRouter()
 
@@ -28,95 +28,35 @@
     const handleEdit = (row) => {
         emit('edit', row.id)
     }
-    const handleDelete = (row) => {
-        ElMessageBox.confirm('Confirm to delete data?')
-            .then(async () => {
-                const [err, res] = await api.deleteApplication(row.id)
-                if (!err) {
-                    console.log(res)
-                    emit('getData')
-                } else {
-                    console.log(err)
+    const handleDelete = async (row) => {
+        try {
+            await ElMessageBox.confirm(
+                'Are you sure you want to delete this application?',
+                'Warning',
+                {
+                    confirmButtonText: 'OK',
+                    cancelButtonText: 'Cancel',
+                    type: 'warning',
                 }
-            })
-            .catch(() => {
-                // catch error
-            })
-        // borrowers.value = borrowers.value.filter(item => item !== row)
-    }
-
-    const handleRowClick = (row) => {
-        console.log("=== ROW CLICK DEBUG ===");
-        console.log("Row click triggered with row:", row);
-        console.log("Row ID:", row?.id);
-        console.log("Row ID type:", typeof row?.id);
-        console.log("Row ID value:", row?.id);
-        console.log("Full row object:", row);
-        console.log("Row object keys:", Object.keys(row || {}));
-        console.log("Row constructor:", row?.constructor?.name);
-        
-        // Check if row itself is an event object
-        if (row && typeof row === 'object' && row.constructor?.name === 'PointerEvent') {
-            console.error("❌ CRITICAL: Row object is a PointerEvent!");
-            console.error("This means the event object is being passed as the row parameter");
-            return;
-        }
-        
-        // Ensure we have a valid row ID
-        if (!row || !row.id) {
-            console.error("Invalid row or missing row ID:", row);
-            return;
-        }
-        
-        // Check if row.id is an event object
-        if (row.id && typeof row.id === 'object' && row.id.constructor?.name === 'PointerEvent') {
-            console.error("❌ CRITICAL: row.id is a PointerEvent object!");
-            console.error("This means the event object is being passed as the ID");
-            return;
-        }
-        
-        console.log("✅ Navigating directly to application:", row.id);
-        console.log("Row ID type:", typeof row.id);
-        console.log("Row ID value:", row.id);
-        
-        // Use router.push directly instead of emitting event
-        try {
-            const targetPath = `/application/${row.id}`;
-            console.log("Router.push target path:", targetPath);
-            console.log("Router.push with row.id:", row.id, "Type:", typeof row.id);
-            console.log("Router object:", router);
-            console.log("Router.push method:", router.push);
-            console.log("About to call router.push with:", targetPath);
-            
-            // Try using window.location.href instead of router.push
-            console.log("Using window.location.href instead of router.push");
-            const hashPath = `#${targetPath}`;
-            console.log("Setting window.location.href to:", hashPath);
-            window.location.href = hashPath;
-            console.log("✅ Direct navigation successful");
+            )
+            const [err, res] = await api.deleteApplication(row.id)
+            if (!err) {
+                ElMessage.success('Application deleted successfully')
+                emit('refresh')
+            } else {
+                ElMessage.error('Failed to delete application')
+            }
         } catch (error) {
-            console.error("❌ Direct navigation failed:", error);
-            // Fallback: emit the event as before
-            console.log("Falling back to event emission");
-            emit('click', row.id);
+            if (error !== 'cancel') {
+                ElMessage.error('Failed to delete application')
+            }
         }
     }
 
-    const handleReferenceClick = (event, row) => {
-        console.log("Reference link clicked:", row.id);
-        // Prevent the row click event from firing when clicking the reference link
-        event.stopPropagation();
-        
-        try {
-            console.log("Using window.location.href for reference click");
-            const hashPath = `#/application/${row.id}`;
-            console.log("Setting window.location.href to:", hashPath);
-            window.location.href = hashPath;
-        } catch (error) {
-            console.error("Window location navigation failed, using fallback:", error);
-            // Fallback: use window.location
-            window.location.href = `#/application/${row.id}`;
-        }
+    const formatStageChange = (change) => {
+        if (!change) return ''
+        const timestamp = new Date(change.timestamp).toLocaleString()
+        return `Changed from ${change.from_stage} to ${change.to_stage}\nBy: ${change.user}\nAt: ${timestamp}\n${change.notes ? `Notes: ${change.notes}` : ''}`
     }
 
     const getStageTagType = (stage) => {
@@ -143,12 +83,6 @@
         }
         return stageTypes[stage] || 'info'
     }
-
-    const formatStageChange = (change) => {
-        if (!change) return ''
-        const timestamp = new Date(change.timestamp).toLocaleString()
-        return `Changed from ${change.from_stage} to ${change.to_stage}\nBy: ${change.user}\nAt: ${timestamp}\n${change.notes ? `Notes: ${change.notes}` : ''}`
-    }
 </script>
 
 <template>
@@ -156,27 +90,23 @@
         <el-table-column type="selection" width="50" align="center" fixed />
         <el-table-column prop="reference_number" label="Reference Number" width="150">
             <template #default="scope">
-                <router-link 
-                    :to="`/application/${scope.row.id}`" 
-                    class="reference-link"
-                    @click="handleReferenceClick($event, scope.row)"
-                >
-                    {{ scope.row.reference_number }}
-                </router-link>
+                <span>{{ scope.row.reference_number }}</span>
             </template>
         </el-table-column>
         <el-table-column prop="borrower_name" label="Borrower" width="150">
             <template #default="scope">
-                <span style="cursor: pointer; color: #2984DE;" @click="handleRowClick(scope.row)">
-                    {{ scope.row.borrower_name }}
-                </span>
+                <span>{{ scope.row.borrower_name }}</span>
             </template>
         </el-table-column>
         <el-table-column prop="stage" label="Status" width="150">
             <template #default="scope">
-                <div class="stage-info" @click="handleRowClick(scope.row)" style="cursor: pointer;">
+                <div class="stage-info">
                     <el-tag :type="getStageTagType(scope.row.stage)" size="small">
                         {{ scope.row.stage_display || scope.row.stage }}
+                    </el-tag>
+                    <!-- Archived indicator -->
+                    <el-tag v-if="scope.row.is_archived" type="warning" size="small" style="margin-left: 5px;">
+                        Archived
                     </el-tag>
                     <el-tooltip
                         v-if="scope.row.last_stage_change"
@@ -191,60 +121,58 @@
         </el-table-column>
         <el-table-column prop="broker_name" label="Broker" width="120">
             <template #default="scope">
-                <span @click="handleRowClick(scope.row)" style="cursor: pointer;">{{ scope.row.broker_name }}</span>
+                <span>{{ scope.row.broker_name }}</span>
             </template>
         </el-table-column>
         <el-table-column prop="bdm_name" label="BDM" width="100">
             <template #default="scope">
-                <span @click="handleRowClick(scope.row)" style="cursor: pointer;">{{ scope.row.bdm_name }}</span>
+                <span>{{ scope.row.bdm_name }}</span>
             </template>
         </el-table-column>
         <el-table-column prop="branch_name" label="Branch/Subsidiary" width="120">
             <template #default="scope">
-                <span @click="handleRowClick(scope.row)" style="cursor: pointer;">{{ scope.row.branch_name }}</span>
+                <span>{{ scope.row.branch_name }}</span>
             </template>
         </el-table-column>
         <el-table-column prop="guarantor_name" label="Guarantor" width="120">
             <template #default="scope">
-                <span @click="handleRowClick(scope.row)" style="cursor: pointer;">{{ scope.row.guarantor_name }}</span>
+                <span>{{ scope.row.guarantor_name }}</span>
             </template>
         </el-table-column>
         <el-table-column prop="purpose" label="Case Purpose" width="150">
             <template #default="scope">
-                <span @click="handleRowClick(scope.row)" style="cursor: pointer;">{{ scope.row.purpose }}</span>
+                <span>{{ scope.row.purpose }}</span>
             </template>
         </el-table-column>
         <el-table-column prop="product_name" label="Product">
             <template #default="scope">
-                <span @click="handleRowClick(scope.row)" style="cursor: pointer;">{{ scope.row.product_name }}</span>
+                <span>{{ scope.row.product_name }}</span>
             </template>
         </el-table-column>
         <el-table-column prop="security_address" label="Security Address" width="200">
             <template #default="scope">
-                <span @click="handleRowClick(scope.row)" style="cursor: pointer;">{{ scope.row.security_address }}</span>
+                <span>{{ scope.row.security_address }}</span>
             </template>
         </el-table-column>
         <el-table-column prop="loan_amount" label="Loan Amount" width="150">
             <template #default="scope">
-                <span @click="handleRowClick(scope.row)" style="cursor: pointer;">
-                    <el-statistic class="number" :value="Number(scope.row.approvedAmount)" v-if="scope.row.approvedAmount"
-                        :precision="2" :formatter="(value) => `$ ${value.toFixed(2)}`" />
-                </span>
+                <el-statistic class="number" :value="Number(scope.row.approvedAmount)" v-if="scope.row.approvedAmount"
+                    :precision="2" :formatter="(value) => `$ ${value.toFixed(2)}`" />
             </template>
         </el-table-column>
         <el-table-column prop="estimated_settlement_date" label="Settlement Date" width="150">
             <template #default="scope">
-                <span @click="handleRowClick(scope.row)" style="cursor: pointer;">{{ scope.row.estimated_settlement_date }}</span>
+                <span>{{ scope.row.estimated_settlement_date }}</span>
             </template>
         </el-table-column>
         <el-table-column prop="update" label="Updated Date" width="150">
             <template #default="scope">
-                <span @click="handleRowClick(scope.row)" style="cursor: pointer;">{{ scope.row.update }}</span>
+                <span>{{ scope.row.update }}</span>
             </template>
         </el-table-column>
         <el-table-column prop="create" label="Create Date" width="150">
             <template #default="scope">
-                <span @click="handleRowClick(scope.row)" style="cursor: pointer;">{{ scope.row.create }}</span>
+                <span>{{ scope.row.create }}</span>
             </template>
         </el-table-column>
         <el-table-column label="Action" align="center" width="80" fixed="right">
@@ -292,6 +220,19 @@
             font-size: 12px;
         }
     }
+}
+
+.stage-info {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+
+.history-icon {
+    margin-left: 5px;
+    cursor: pointer;
+    color: #666;
 }
 .actions {
     width: 100%;

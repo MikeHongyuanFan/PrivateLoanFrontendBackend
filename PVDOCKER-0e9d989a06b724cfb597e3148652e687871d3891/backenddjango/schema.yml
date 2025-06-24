@@ -452,6 +452,9 @@ paths:
 
         Updates the stage of an application and maintains a history of changes.
         Also creates notifications for relevant users.
+
+        Note: This action can update stages of archived applications too,
+        since archived applications may need stage changes (e.g., closed -> discharged)
       parameters:
       - in: path
         name: id
@@ -1037,6 +1040,9 @@ paths:
 
         Updates the stage of an application and maintains a history of changes.
         Also creates notifications for relevant users.
+
+        Note: This action can update stages of archived applications too,
+        since archived applications may need stage changes (e.g., closed -> discharged)
       parameters:
       - in: path
         name: id
@@ -1091,6 +1097,38 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/ApplicationListRequest'
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationList'
+          description: ''
+  /api/applications/applications/archive_stats/:
+    get:
+      operationId: applications_applications_archive_stats_retrieve
+      description: Get statistics about archived applications
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationList'
+          description: ''
+  /api/applications/applications/archived/:
+    get:
+      operationId: applications_applications_archived_retrieve
+      description: Get all archived applications
+      tags:
+      - applications
       security:
       - jwtAuth: []
       - Bearer: []
@@ -7020,6 +7058,10 @@ components:
           additionalProperties: {}
           description: Get solvency issues summary
           readOnly: true
+        is_archived:
+          type: boolean
+          description: Whether this application is archived (automatically set when
+            stage is 'closed')
       required:
       - bdm_name
       - borrower_count
@@ -7112,6 +7154,10 @@ components:
           - $ref: '#/components/schemas/ApplicationTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        is_archived:
+          type: boolean
+          description: Whether this application is archived (automatically set when
+            stage is 'closed')
     ApplicationStatusReport:
       type: object
       description: Serializer for application status report data
@@ -10658,6 +10704,10 @@ components:
           - $ref: '#/components/schemas/ApplicationTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        is_archived:
+          type: boolean
+          description: Whether this application is archived (automatically set when
+            stage is 'closed')
     PatchedAssetRequest:
       type: object
       description: Unified serializer for all assets (borrower, guarantor, company)
