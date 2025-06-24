@@ -245,13 +245,24 @@ class NotificationPreferenceView(APIView):
         """
         Update notification preferences for the current user
         """
+        logger.info(f"Received notification preferences data: {request.data}")
+        logger.info(f"Data type: {type(request.data)}")
+        logger.info(f"Request user: {request.user.id} - {request.user.email}")
+        
         preferences = get_or_create_notification_preferences(request.user)
+        logger.info(f"Current preferences before update: {preferences.__dict__}")
+        
         serializer = NotificationPreferenceSerializer(preferences, data=request.data, partial=True)
         
         if serializer.is_valid():
-            serializer.save()
+            logger.info(f"Serializer is valid. Saving preferences...")
+            logger.info(f"Validated data: {serializer.validated_data}")
+            updated_preferences = serializer.save()
+            logger.info(f"Preferences saved successfully. Updated preferences: {updated_preferences.__dict__}")
             return Response(serializer.data)
         
+        logger.error(f"Serializer errors: {serializer.errors}")
+        logger.error(f"Serializer data: {serializer.data}")
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

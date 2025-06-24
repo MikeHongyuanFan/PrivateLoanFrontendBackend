@@ -582,6 +582,48 @@ class ApplicationStageManagementTest(BaseApplicationTestCase, ApplicationTestMix
         response = self.client.put(url, data, format='json')
         
         self.assertResponseError(response, 400)
+    
+    def test_application_archiving_logic(self):
+        """Test that applications are properly archived/unarchived based on stage changes."""
+        # Start with an application in 'settled' stage (not archived)
+        self.application.stage = 'settled'
+        self.application.is_archived = False
+        self.application.save()
+        
+        # Verify it's not archived initially
+        self.assertFalse(self.application.is_archived)
+        
+        # Move to 'closed' stage - should be archived
+        url = self.get_application_url(self.application.id, 'stage')
+        data = {'stage': 'closed', 'notes': 'Application closed'}
+        
+        response = self.client.put(url, data, format='json')
+        self.assertResponseSuccess(response)
+        
+        # Verify application is now archived
+        self.application.refresh_from_db()
+        self.assertTrue(self.application.is_archived)
+        self.assertEqual(self.application.stage, 'closed')
+        
+        # Move back to 'settled' stage - should be unarchived
+        data = {'stage': 'settled', 'notes': 'Application reopened'}
+        response = self.client.put(url, data, format='json')
+        self.assertResponseSuccess(response)
+        
+        # Verify application is now unarchived
+        self.application.refresh_from_db()
+        self.assertFalse(self.application.is_archived)
+        self.assertEqual(self.application.stage, 'settled')
+        
+        # Move to 'discharged' stage - should remain unarchived (not 'closed')
+        data = {'stage': 'discharged', 'notes': 'Application discharged'}
+        response = self.client.put(url, data, format='json')
+        self.assertResponseSuccess(response)
+        
+        # Verify application remains unarchived
+        self.application.refresh_from_db()
+        self.assertFalse(self.application.is_archived)
+        self.assertEqual(self.application.stage, 'discharged')
 
 
 class ApplicationBorrowerManagementTest(BaseApplicationTestCase, ApplicationTestMixin):

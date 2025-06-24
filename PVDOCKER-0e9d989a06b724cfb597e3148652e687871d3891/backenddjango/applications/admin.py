@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Application, SecurityProperty, LoanRequirement, Document, Fee, Repayment, FundingCalculationHistory, Valuer, QuantitySurveyor
+from .models import Application, SecurityProperty, LoanRequirement, Document, Fee, Repayment, FundingCalculationHistory, Valuer, QuantitySurveyor, ActiveLoan, ActiveLoanRepayment
 
 
 class SecurityPropertyInline(admin.TabularInline):
@@ -197,3 +197,74 @@ class QuantitySurveyorAdmin(admin.ModelAdmin):
         if not change:  # If creating a new object
             obj.created_by = request.user
         super().save_model(request, obj, form, change)
+
+
+class ActiveLoanRepaymentInline(admin.TabularInline):
+    model = ActiveLoanRepayment
+    extra = 0
+    readonly_fields = ('is_late', 'created_at')
+
+
+@admin.register(ActiveLoan)
+class ActiveLoanAdmin(admin.ModelAdmin):
+    list_display = ('application', 'settlement_date', 'loan_expiry_date', 'interest_payments_required', 'is_active', 'days_until_expiry')
+    list_filter = ('is_active', 'interest_payments_required', 'interest_payment_frequency', 'settlement_date', 'loan_expiry_date')
+    search_fields = ('application__reference_number', 'application__borrowers__first_name', 'application__borrowers__last_name')
+    readonly_fields = ('created_at', 'updated_at', 'days_until_expiry', 'days_until_next_payment', 'next_interest_payment_date')
+    date_hierarchy = 'settlement_date'
+    
+    fieldsets = (
+        ('Application Details', {
+            'fields': ('application',)
+        }),
+        ('Loan Information', {
+            'fields': ('settlement_date', 'capitalised_interest_months', 'loan_expiry_date', 'is_active')
+        }),
+        ('Interest Payment Details', {
+            'fields': ('interest_payments_required', 'interest_payment_frequency', 'interest_payment_due_dates')
+        }),
+        ('Computed Fields', {
+            'fields': ('days_until_expiry', 'days_until_next_payment', 'next_interest_payment_date')
+        }),
+        ('Metadata', {
+            'fields': ('created_at', 'updated_at')
+        }),
+    )
+    
+    inlines = [ActiveLoanRepaymentInline]
+    
+    def days_until_expiry(self, obj):
+        days = obj.days_until_expiry
+        if days is None:
+            return 'N/A'
+        elif days < 0:
+            return f'{abs(days)} days overdue'
+        elif days == 0:
+            return 'Due today'
+        else:
+            return f'{days} days remaining'
+    days_until_expiry.short_description = 'Days Until Expiry'
+
+
+@admin.register(ActiveLoanRepayment)
+class ActiveLoanRepaymentAdmin(admin.ModelAdmin):
+    list_display = ('active_loan', 'repayment_type', 'amount', 'payment_date', 'due_date', 'is_late', 'created_at')
+    list_filter = ('repayment_type', 'is_late', 'payment_date', 'due_date')
+    search_fields = ('active_loan__application__reference_number', 'reference_number', 'notes')
+    readonly_fields = ('is_late', 'created_at', 'updated_at')
+    date_hierarchy = 'payment_date'
+    
+    fieldsets = (
+        ('Loan Information', {
+            'fields': ('active_loan',)
+        }),
+        ('Repayment Details', {
+            'fields': ('repayment_type', 'amount', 'payment_date', 'due_date', 'reference_number')
+        }),
+        ('Status', {
+            'fields': ('is_late', 'notes')
+        }),
+        ('Metadata', {
+            'fields': ('created_at', 'updated_at')
+        }),
+    )

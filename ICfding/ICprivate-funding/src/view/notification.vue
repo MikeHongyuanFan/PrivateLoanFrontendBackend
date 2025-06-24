@@ -5,26 +5,48 @@
       v-model="showPreferences"
       title="Notification Preferences"
       direction="rtl"
-      size="400px"
+      size="500px"
     >
       <el-form v-loading="loadingPreferences" :model="preferences" label-position="top">
+        <el-form-item label="In-App Notifications">
+          <div class="preference-group">
+            <el-checkbox v-model="preferences.application_status_in_app">Application Status Changes</el-checkbox>
+            <el-checkbox v-model="preferences.repayment_upcoming_in_app">Upcoming Repayments</el-checkbox>
+            <el-checkbox v-model="preferences.repayment_overdue_in_app">Overdue Repayments</el-checkbox>
+            <el-checkbox v-model="preferences.note_reminder_in_app">Note Reminders</el-checkbox>
+            <el-checkbox v-model="preferences.document_uploaded_in_app">Document Uploads</el-checkbox>
+            <el-checkbox v-model="preferences.signature_required_in_app">Signature Required</el-checkbox>
+            <el-checkbox v-model="preferences.system_in_app">System Notifications</el-checkbox>
+            <el-checkbox v-model="preferences.active_loan_payment_in_app">Loan Payment Alerts</el-checkbox>
+            <el-checkbox v-model="preferences.active_loan_expiry_in_app">Loan Expiry Warnings</el-checkbox>
+            <el-checkbox v-model="preferences.active_loan_critical_in_app">Critical Loan Alerts</el-checkbox>
+            <el-checkbox v-model="preferences.active_loan_manual_in_app">Manual Loan Alerts</el-checkbox>
+          </div>
+        </el-form-item>
+        
         <el-form-item label="Email Notifications">
-          <el-switch v-model="preferences.email_enabled" />
+          <div class="preference-group">
+            <el-checkbox v-model="preferences.application_status_email">Application Status Changes</el-checkbox>
+            <el-checkbox v-model="preferences.repayment_upcoming_email">Upcoming Repayments</el-checkbox>
+            <el-checkbox v-model="preferences.repayment_overdue_email">Overdue Repayments</el-checkbox>
+            <el-checkbox v-model="preferences.note_reminder_email">Note Reminders</el-checkbox>
+            <el-checkbox v-model="preferences.document_uploaded_email">Document Uploads</el-checkbox>
+            <el-checkbox v-model="preferences.signature_required_email">Signature Required</el-checkbox>
+            <el-checkbox v-model="preferences.system_email">System Notifications</el-checkbox>
+            <el-checkbox v-model="preferences.active_loan_payment_email">Loan Payment Alerts</el-checkbox>
+            <el-checkbox v-model="preferences.active_loan_expiry_email">Loan Expiry Warnings</el-checkbox>
+            <el-checkbox v-model="preferences.active_loan_critical_email">Critical Loan Alerts</el-checkbox>
+            <el-checkbox v-model="preferences.active_loan_manual_email">Manual Loan Alerts</el-checkbox>
+          </div>
         </el-form-item>
-        <el-form-item label="Push Notifications">
-          <el-switch v-model="preferences.push_enabled" />
+        
+        <el-form-item label="Email Digest">
+          <div class="preference-group">
+            <el-checkbox v-model="preferences.daily_digest">Daily Digest</el-checkbox>
+            <el-checkbox v-model="preferences.weekly_digest">Weekly Digest</el-checkbox>
+          </div>
         </el-form-item>
-        <el-form-item label="Notification Types">
-          <el-checkbox-group v-model="preferences.notification_types">
-            <el-checkbox label="application_status">Application Status Changes</el-checkbox>
-            <el-checkbox label="repayment_upcoming">Upcoming Repayments</el-checkbox>
-            <el-checkbox label="repayment_overdue">Overdue Repayments</el-checkbox>
-            <el-checkbox label="note_reminder">Note Reminders</el-checkbox>
-            <el-checkbox label="document_uploaded">Document Uploads</el-checkbox>
-            <el-checkbox label="signature_required">Signature Required</el-checkbox>
-            <el-checkbox label="system">System Notifications</el-checkbox>
-          </el-checkbox-group>
-        </el-form-item>
+        
         <el-button type="primary" @click="savePreferences" :loading="savingPreferences">
           Save Preferences
         </el-button>
@@ -41,12 +63,15 @@
         </div>
       </div>
       <div class="actions">
-        <el-button @click="showPreferences = true" type="text">
+        <el-button @click="showPreferences = true" link>
           <el-icon><Setting /></el-icon>
           Preferences
         </el-button>
         <el-button @click="markAllAsRead" type="primary" plain :loading="markingAllAsRead">
           Mark All as Read
+        </el-button>
+        <el-button @click="clearAllNotifications" type="danger" plain>
+          Clear All
         </el-button>
       </div>
     </div>
@@ -75,13 +100,19 @@
             </div>
           </template>
         </el-table-column>
-        <el-table-column prop="message" label="Message" />
+        <el-table-column prop="message" label="Message">
+          <template #default="scope">
+            <div class="notification-message">
+              {{ scope.row.message || scope.row.title || 'No message available' }}
+            </div>
+          </template>
+        </el-table-column>
         <el-table-column width="100">
           <template #default="scope">
             <el-button
               v-if="!scope.row.is_read"
               @click="markAsRead(scope.row.id)"
-              type="text"
+              link
               :loading="markingRead === scope.row.id"
             >
               Mark as Read
@@ -124,7 +155,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Setting, Bell, Calendar, Document, Warning } from '@element-plus/icons-vue'
 import { notificationApi } from '@/api/notifications'
@@ -151,9 +182,35 @@ const notificationTable = ref(null)
 
 // Preferences state
 const preferences = ref({
-  email_enabled: false,
-  push_enabled: false,
-  notification_types: []
+  // In-app preferences
+  application_status_in_app: true,
+  repayment_upcoming_in_app: true,
+  repayment_overdue_in_app: true,
+  note_reminder_in_app: true,
+  document_uploaded_in_app: true,
+  signature_required_in_app: true,
+  system_in_app: true,
+  active_loan_payment_in_app: true,
+  active_loan_expiry_in_app: true,
+  active_loan_critical_in_app: true,
+  active_loan_manual_in_app: true,
+  
+  // Email preferences
+  application_status_email: true,
+  repayment_upcoming_email: true,
+  repayment_overdue_email: true,
+  note_reminder_email: true,
+  document_uploaded_email: false,
+  signature_required_email: true,
+  system_email: false,
+  active_loan_payment_email: true,
+  active_loan_expiry_email: true,
+  active_loan_critical_email: true,
+  active_loan_manual_email: true,
+  
+  // Digest preferences
+  daily_digest: false,
+  weekly_digest: false
 })
 
 // Computed
@@ -172,11 +229,33 @@ const loadNotifications = async () => {
     if (showUnreadOnly.value) {
       params.is_read = false
     }
+    console.log('Loading notifications with params:', params)
     const response = await notificationApi.getDetailedNotifications(params)
-    notifications.value = response.results
-    totalNotifications.value = response.count
+    console.log('Notifications response:', response)
+    
+    // Handle the [null, data] response format from sendRequest
+    const [error, data] = response
+    if (error) {
+      console.error('Error in notification response:', error)
+      ElMessage.error('Failed to load notifications')
+      return
+    }
+    
+    console.log('Notifications data:', data)
+    console.log('Total count:', data?.count)
+    
+    notifications.value = data?.results || []
+    totalNotifications.value = data?.count || 0
+    
+    // Debug: Log the structure of the first notification
+    if (data?.results && data.results.length > 0) {
+      console.log('First notification object:', data.results[0])
+      console.log('Available fields:', Object.keys(data.results[0]))
+    }
+    
     await updateUnreadCount()
   } catch (error) {
+    console.error('Error loading notifications:', error)
     ElMessage.error('Failed to load notifications')
   } finally {
     loading.value = false
@@ -187,7 +266,16 @@ const loadPreferencesData = async () => {
   try {
     loadingPreferences.value = true
     const response = await notificationApi.getNotificationPreferences()
-    preferences.value = response
+    
+    // Handle the [null, data] response format from sendRequest
+    const [error, data] = response
+    if (error) {
+      console.error('Error loading preferences:', error)
+      ElMessage.error('Failed to load notification preferences')
+      return
+    }
+    
+    preferences.value = data
   } catch (error) {
     ElMessage.error('Failed to load notification preferences')
   } finally {
@@ -198,10 +286,32 @@ const loadPreferencesData = async () => {
 const savePreferences = async () => {
   try {
     savingPreferences.value = true
-    await notificationApi.updateNotificationPreferences(preferences.value)
+    
+    // Ensure preferences object is properly structured
+    const preferencesToSave = { ...preferences.value }
+    
+    // Remove any undefined or null values
+    Object.keys(preferencesToSave).forEach(key => {
+      if (preferencesToSave[key] === undefined || preferencesToSave[key] === null) {
+        delete preferencesToSave[key]
+      }
+    })
+    
+    console.log('Saving preferences data:', preferencesToSave)
+    const response = await notificationApi.updateNotificationPreferences(preferencesToSave)
+    
+    // Handle the [null, data] response format from sendRequest
+    const [error, data] = response
+    if (error) {
+      console.error('Error saving preferences:', error)
+      ElMessage.error('Failed to save preferences')
+      return
+    }
+    
     ElMessage.success('Preferences saved successfully')
     showPreferences.value = false
   } catch (error) {
+    console.error('Error saving preferences:', error)
     ElMessage.error('Failed to save preferences')
   } finally {
     savingPreferences.value = false
@@ -211,7 +321,15 @@ const savePreferences = async () => {
 const updateUnreadCount = async () => {
   try {
     const response = await notificationApi.getUnreadCount()
-    unreadCount.value = response.count
+    
+    // Handle the [null, data] response format from sendRequest
+    const [error, data] = response
+    if (error) {
+      console.error('Error fetching unread count:', error)
+      return
+    }
+    
+    unreadCount.value = data?.unread_count || 0
   } catch (error) {
     console.error('Failed to fetch unread count:', error)
   }
@@ -305,7 +423,11 @@ const getNotificationTypeLabel = (type) => {
     note_reminder: 'Reminder',
     document_uploaded: 'Document Upload',
     signature_required: 'Signature Required',
-    system: 'System Notification'
+    system: 'System Notification',
+    active_loan_payment: 'Loan Payment Alert',
+    active_loan_expiry: 'Loan Expiry Warning',
+    active_loan_critical: 'Critical Loan Alert',
+    active_loan_manual: 'Loan Alert'
   }
   return labels[type] || type
 }
@@ -318,9 +440,24 @@ const getNotificationIcon = (type) => {
     note_reminder: Bell,
     document_uploaded: Document,
     signature_required: Document,
-    system: Bell
+    system: Bell,
+    active_loan_payment: Calendar,
+    active_loan_expiry: Warning,
+    active_loan_critical: Warning,
+    active_loan_manual: Bell
   }
   return icons[type] || Bell
+}
+
+const clearAllNotifications = async () => {
+  try {
+    await notificationApi.markAllAsRead()
+    ElMessage.success('All notifications marked as read')
+    await loadNotifications()
+  } catch (error) {
+    console.error('Error clearing notifications:', error)
+    ElMessage.error('Failed to clear notifications')
+  }
 }
 
 // Lifecycle
@@ -476,5 +613,30 @@ onMounted(async () => {
   display: flex;
   flex-direction: column;
   gap: 12px;
+}
+
+.preference-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.preference-group .el-checkbox {
+  margin-right: 0;
+  margin-bottom: 8px;
+}
+
+:deep(.el-checkbox__label) {
+  font-size: 14px;
+  color: #384144;
+}
+
+:deep(.el-checkbox__input.is-checked .el-checkbox__inner) {
+  background-color: #1F63A9;
+  border-color: #1F63A9;
+}
+
+:deep(.el-checkbox__input.is-checked + .el-checkbox__label) {
+  color: #1F63A9;
 }
 </style>

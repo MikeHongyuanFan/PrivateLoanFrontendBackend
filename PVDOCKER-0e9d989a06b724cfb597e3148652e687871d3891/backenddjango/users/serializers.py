@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import User, Notification, NotificationPreference, EmailLog
 from django.contrib.auth.password_validation import validate_password
+import logging
 
 
 class UserLoginSerializer(serializers.Serializer):
@@ -129,7 +130,7 @@ class NotificationListSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Notification
-        fields = ['id', 'title', 'notification_type', 'notification_type_display', 'is_read', 'created_at']
+        fields = ['id', 'title', 'message', 'notification_type', 'notification_type_display', 'is_read', 'created_at']
 
 
 class NotificationPreferenceSerializer(serializers.ModelSerializer):
@@ -141,7 +142,12 @@ class NotificationPreferenceSerializer(serializers.ModelSerializer):
         exclude = ['user', 'created_at', 'updated_at']
         
     def update(self, instance, validated_data):
+        logger = logging.getLogger(__name__)
+        
+        logger.info(f"Updating notification preferences with data: {validated_data}")
+        
         for attr, value in validated_data.items():
+            logger.info(f"Setting {attr} = {value}")
             setattr(instance, attr, value)
         instance.save()
         return instance

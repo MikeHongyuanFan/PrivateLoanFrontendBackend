@@ -4,12 +4,15 @@ from .views.application_views import ApplicationViewSet
 from .views.valuer_qs_views import ValuerViewSet, QuantitySurveyorViewSet
 from .views.pdf_generation import GenerateFilledFormView
 from .views.funding_calculator_views import ManualFundingCalculationView
+from .views.active_loan_views import ActiveLoanViewSet, ActiveLoanRepaymentViewSet, get_active_loan_by_application
 
 # Create a router for ViewSets
 router = DefaultRouter()
 router.register(r'applications', ApplicationViewSet, basename='application')
 router.register(r'valuers', ValuerViewSet, basename='valuer')
 router.register(r'quantity-surveyors', QuantitySurveyorViewSet, basename='quantity-surveyor')
+router.register(r'active-loans', ActiveLoanViewSet, basename='active-loan')
+router.register(r'active-loan-repayments', ActiveLoanRepaymentViewSet, basename='active-loan-repayment')
 
 urlpatterns = [
     # Include router URLs
@@ -62,4 +65,7 @@ urlpatterns = [
     
     # Application retrieve with cascade
     path('<int:pk>/retrieve-cascade/', ApplicationViewSet.as_view({'get': 'retrieve_with_cascade'}), name='application-retrieve-cascade'),
+    
+    # Active loan endpoints - using ViewSet action instead of function-based view
+    # The URL will be: /api/applications/active-loans/application/{application_id}/
 ]

@@ -484,6 +484,615 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApplicationList'
           description: ''
+  /api/applications/active-loan-repayments/:
+    get:
+      operationId: applications_active_loan_repayments_list
+      description: |-
+        ViewSet for managing active loan repayments.
+
+        Provides CRUD operations for repayments with filtering
+        and reporting capabilities.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedActiveLoanRepaymentList'
+          description: ''
+    post:
+      operationId: applications_active_loan_repayments_create
+      description: |-
+        ViewSet for managing active loan repayments.
+
+        Provides CRUD operations for repayments with filtering
+        and reporting capabilities.
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRepaymentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRepaymentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRepaymentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveLoanRepayment'
+          description: ''
+  /api/applications/active-loan-repayments/{id}/:
+    get:
+      operationId: applications_active_loan_repayments_retrieve
+      description: |-
+        ViewSet for managing active loan repayments.
+
+        Provides CRUD operations for repayments with filtering
+        and reporting capabilities.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Active Loan Repayment.
+        required: true
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveLoanRepayment'
+          description: ''
+    put:
+      operationId: applications_active_loan_repayments_update
+      description: |-
+        ViewSet for managing active loan repayments.
+
+        Provides CRUD operations for repayments with filtering
+        and reporting capabilities.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Active Loan Repayment.
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRepaymentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRepaymentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRepaymentRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveLoanRepayment'
+          description: ''
+    patch:
+      operationId: applications_active_loan_repayments_partial_update
+      description: |-
+        ViewSet for managing active loan repayments.
+
+        Provides CRUD operations for repayments with filtering
+        and reporting capabilities.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Active Loan Repayment.
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedActiveLoanRepaymentRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedActiveLoanRepaymentRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedActiveLoanRepaymentRequest'
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveLoanRepayment'
+          description: ''
+    delete:
+      operationId: applications_active_loan_repayments_destroy
+      description: |-
+        ViewSet for managing active loan repayments.
+
+        Provides CRUD operations for repayments with filtering
+        and reporting capabilities.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Active Loan Repayment.
+        required: true
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '204':
+          description: No response body
+  /api/applications/active-loans/:
+    get:
+      operationId: applications_active_loans_list
+      description: |-
+        ViewSet for managing active loans.
+
+        Provides CRUD operations for active loans with specialized
+        endpoints for alerts, repayments, and status updates.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedActiveLoanSummaryList'
+          description: ''
+    post:
+      operationId: applications_active_loans_create
+      description: Create a new active loan from a settled application.
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveLoanCreate'
+          description: ''
+  /api/applications/active-loans/{id}/:
+    get:
+      operationId: applications_active_loans_retrieve
+      description: |-
+        ViewSet for managing active loans.
+
+        Provides CRUD operations for active loans with specialized
+        endpoints for alerts, repayments, and status updates.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Active Loan.
+        required: true
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveLoan'
+          description: ''
+    put:
+      operationId: applications_active_loans_update
+      description: |-
+        ViewSet for managing active loans.
+
+        Provides CRUD operations for active loans with specialized
+        endpoints for alerts, repayments, and status updates.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Active Loan.
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveLoan'
+          description: ''
+    patch:
+      operationId: applications_active_loans_partial_update
+      description: |-
+        ViewSet for managing active loans.
+
+        Provides CRUD operations for active loans with specialized
+        endpoints for alerts, repayments, and status updates.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Active Loan.
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedActiveLoanRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedActiveLoanRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedActiveLoanRequest'
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveLoan'
+          description: ''
+    delete:
+      operationId: applications_active_loans_destroy
+      description: |-
+        ViewSet for managing active loans.
+
+        Provides CRUD operations for active loans with specialized
+        endpoints for alerts, repayments, and status updates.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Active Loan.
+        required: true
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '204':
+          description: No response body
+  /api/applications/active-loans/{id}/deactivate/:
+    post:
+      operationId: applications_active_loans_deactivate_create
+      description: Deactivate an active loan.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Active Loan.
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveLoan'
+          description: ''
+  /api/applications/active-loans/{id}/reactivate/:
+    post:
+      operationId: applications_active_loans_reactivate_create
+      description: Reactivate an inactive loan.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Active Loan.
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveLoan'
+          description: ''
+  /api/applications/active-loans/{id}/repayments/:
+    get:
+      operationId: applications_active_loans_repayments_retrieve
+      description: Manage repayments for an active loan.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Active Loan.
+        required: true
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveLoan'
+          description: ''
+    post:
+      operationId: applications_active_loans_repayments_create
+      description: Manage repayments for an active loan.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Active Loan.
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveLoan'
+          description: ''
+  /api/applications/active-loans/{id}/send_alert/:
+    post:
+      operationId: applications_active_loans_send_alert_create
+      description: |-
+        Send an immediate alert for this active loan.
+
+        Expected payload:
+        {
+            "alert_type": "payment|expiry|manual",
+            "message": "Custom message (optional)",
+            "user_id": "Specific user ID (optional)"
+        }
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this Active Loan.
+        required: true
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ActiveLoanRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveLoan'
+          description: ''
+  /api/applications/active-loans/alerts/:
+    get:
+      operationId: applications_active_loans_alerts_retrieve
+      description: Get loans requiring alerts (expiry and payment reminders).
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveLoan'
+          description: ''
+  /api/applications/active-loans/application/{application_id}/:
+    get:
+      operationId: applications_active_loans_application_retrieve
+      description: Get active loan data for a specific application.
+      parameters:
+      - in: path
+        name: application_id
+        schema:
+          type: integer
+          description: Application that has been settled and become an active loan
+        required: true
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveLoan'
+          description: ''
+  /api/applications/active-loans/dashboard/:
+    get:
+      operationId: applications_active_loans_dashboard_retrieve
+      description: Get dashboard statistics for active loans.
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ActiveLoan'
+          description: ''
   /api/applications/applications/:
     get:
       operationId: applications_applications_list
@@ -5417,21 +6026,31 @@ paths:
         schema:
           type: string
           enum:
+          - active_loan_critical
+          - active_loan_expiry
+          - active_loan_manual
+          - active_loan_payment
           - application_status
           - document_uploaded
           - note_reminder
           - repayment_overdue
           - repayment_upcoming
           - signature_required
+          - stage_change
           - system
         description: |-
           * `application_status` - Application Status Change
+          * `stage_change` - Stage Change
           * `repayment_upcoming` - Repayment Upcoming
           * `repayment_overdue` - Repayment Overdue
           * `note_reminder` - Note Reminder
           * `document_uploaded` - Document Uploaded
           * `signature_required` - Signature Required
           * `system` - System Notification
+          * `active_loan_payment` - Active Loan Payment Alert
+          * `active_loan_expiry` - Active Loan Expiry Alert
+          * `active_loan_critical` - Active Loan Critical Alert
+          * `active_loan_manual` - Active Loan Manual Alert
       - name: ordering
         required: false
         in: query
@@ -5470,21 +6089,31 @@ paths:
         schema:
           type: string
           enum:
+          - active_loan_critical
+          - active_loan_expiry
+          - active_loan_manual
+          - active_loan_payment
           - application_status
           - document_uploaded
           - note_reminder
           - repayment_overdue
           - repayment_upcoming
           - signature_required
+          - stage_change
           - system
         description: |-
           * `application_status` - Application Status Change
+          * `stage_change` - Stage Change
           * `repayment_upcoming` - Repayment Upcoming
           * `repayment_overdue` - Repayment Overdue
           * `note_reminder` - Note Reminder
           * `document_uploaded` - Document Uploaded
           * `signature_required` - Signature Required
           * `system` - System Notification
+          * `active_loan_payment` - Active Loan Payment Alert
+          * `active_loan_expiry` - Active Loan Expiry Alert
+          * `active_loan_critical` - Active Loan Critical Alert
+          * `active_loan_manual` - Active Loan Manual Alert
       - name: ordering
         required: false
         in: query
@@ -5905,6 +6534,435 @@ paths:
           description: ''
 components:
   schemas:
+    ActiveLoan:
+      type: object
+      description: |-
+        Serializer for ActiveLoan model.
+
+        Handles active loan data including repayment schedules,
+        interest payment tracking, and expiry management.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        application:
+          type: integer
+          description: Application that has been settled and become an active loan
+        application_reference:
+          type: string
+          readOnly: true
+        application_stage:
+          type: string
+          readOnly: true
+        settlement_date:
+          type: string
+          format: date
+          description: Date when the loan was settled
+        capitalised_interest_months:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Number of months for capitalised interest
+        interest_payments_required:
+          type: boolean
+          description: Whether interest payments are required during the loan term
+        interest_payment_frequency:
+          nullable: true
+          description: |-
+            Frequency of interest payments (if required)
+
+            * `monthly` - Monthly
+            * `quarterly` - Quarterly
+            * `semi_annually` - Semi-Annually
+            * `annually` - Annually
+          oneOf:
+          - $ref: '#/components/schemas/InterestPaymentFrequencyEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        interest_payment_due_dates:
+          type: object
+          additionalProperties: {}
+          description: List of dates when interest payments are due
+        loan_expiry_date:
+          type: string
+          format: date
+          description: Date when the loan expires
+        is_active:
+          type: boolean
+          description: Whether this loan is currently active
+        days_until_expiry:
+          type: string
+          readOnly: true
+        days_until_next_payment:
+          type: string
+          readOnly: true
+        next_interest_payment_date:
+          type: string
+          readOnly: true
+        expiry_alert_level:
+          type: string
+          readOnly: true
+        payment_alert_level:
+          type: string
+          readOnly: true
+        total_payments_made:
+          type: string
+          readOnly: true
+        upcoming_payments:
+          type: string
+          readOnly: true
+        repayments:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActiveLoanRepayment'
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: When this record was created
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: When this record was last updated
+      required:
+      - application
+      - application_reference
+      - application_stage
+      - created_at
+      - days_until_expiry
+      - days_until_next_payment
+      - expiry_alert_level
+      - id
+      - loan_expiry_date
+      - next_interest_payment_date
+      - payment_alert_level
+      - repayments
+      - settlement_date
+      - total_payments_made
+      - upcoming_payments
+      - updated_at
+    ActiveLoanCreate:
+      type: object
+      description: |-
+        Serializer for creating new ActiveLoan instances.
+
+        Includes additional validation and automatic field population
+        for new active loans.
+      properties:
+        application:
+          type: integer
+        settlement_date:
+          type: string
+          format: date
+          description: Date when the loan was settled
+        capitalised_interest_months:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Number of months for capitalised interest
+        interest_payments_required:
+          type: boolean
+          description: Whether interest payments are required during the loan term
+        interest_payment_frequency:
+          nullable: true
+          description: |-
+            Frequency of interest payments (if required)
+
+            * `monthly` - Monthly
+            * `quarterly` - Quarterly
+            * `semi_annually` - Semi-Annually
+            * `annually` - Annually
+          oneOf:
+          - $ref: '#/components/schemas/InterestPaymentFrequencyEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        interest_payment_due_dates:
+          type: object
+          additionalProperties: {}
+          description: List of dates when interest payments are due
+        loan_expiry_date:
+          type: string
+          format: date
+          description: Date when the loan expires
+      required:
+      - application
+      - loan_expiry_date
+      - settlement_date
+    ActiveLoanCreateRequest:
+      type: object
+      description: |-
+        Serializer for creating new ActiveLoan instances.
+
+        Includes additional validation and automatic field population
+        for new active loans.
+      properties:
+        application:
+          type: integer
+        settlement_date:
+          type: string
+          format: date
+          description: Date when the loan was settled
+        capitalised_interest_months:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Number of months for capitalised interest
+        interest_payments_required:
+          type: boolean
+          description: Whether interest payments are required during the loan term
+        interest_payment_frequency:
+          nullable: true
+          description: |-
+            Frequency of interest payments (if required)
+
+            * `monthly` - Monthly
+            * `quarterly` - Quarterly
+            * `semi_annually` - Semi-Annually
+            * `annually` - Annually
+          oneOf:
+          - $ref: '#/components/schemas/InterestPaymentFrequencyEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        interest_payment_due_dates:
+          type: object
+          additionalProperties: {}
+          description: List of dates when interest payments are due
+        loan_expiry_date:
+          type: string
+          format: date
+          description: Date when the loan expires
+      required:
+      - application
+      - loan_expiry_date
+      - settlement_date
+    ActiveLoanRepayment:
+      type: object
+      description: |-
+        Serializer for ActiveLoanRepayment model.
+
+        Handles serialization of repayment data including validation
+        and automatic calculation of late payment status.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        repayment_type:
+          allOf:
+          - $ref: '#/components/schemas/RepaymentTypeEnum'
+          description: |-
+            Type of repayment
+
+            * `interest` - Interest Payment
+            * `principal` - Principal Payment
+            * `principal_interest` - Principal + Interest
+            * `penalty` - Penalty Payment
+            * `early_settlement` - Early Settlement
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          description: Repayment amount
+        payment_date:
+          type: string
+          format: date
+          description: Date the payment was made
+        due_date:
+          type: string
+          format: date
+          nullable: true
+          description: Original due date for this payment
+        reference_number:
+          type: string
+          nullable: true
+          description: Bank reference or transaction number
+          maxLength: 100
+        notes:
+          type: string
+          nullable: true
+          description: Additional notes about this repayment
+        is_late:
+          type: boolean
+          readOnly: true
+          description: Whether this payment was made after the due date
+        days_late:
+          type: string
+          readOnly: true
+        is_upcoming:
+          type: string
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: When this record was created
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+          description: When this record was last updated
+      required:
+      - amount
+      - created_at
+      - days_late
+      - id
+      - is_late
+      - is_upcoming
+      - payment_date
+      - repayment_type
+      - updated_at
+    ActiveLoanRepaymentRequest:
+      type: object
+      description: |-
+        Serializer for ActiveLoanRepayment model.
+
+        Handles serialization of repayment data including validation
+        and automatic calculation of late payment status.
+      properties:
+        repayment_type:
+          allOf:
+          - $ref: '#/components/schemas/RepaymentTypeEnum'
+          description: |-
+            Type of repayment
+
+            * `interest` - Interest Payment
+            * `principal` - Principal Payment
+            * `principal_interest` - Principal + Interest
+            * `penalty` - Penalty Payment
+            * `early_settlement` - Early Settlement
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          description: Repayment amount
+        payment_date:
+          type: string
+          format: date
+          description: Date the payment was made
+        due_date:
+          type: string
+          format: date
+          nullable: true
+          description: Original due date for this payment
+        reference_number:
+          type: string
+          nullable: true
+          description: Bank reference or transaction number
+          maxLength: 100
+        notes:
+          type: string
+          nullable: true
+          description: Additional notes about this repayment
+      required:
+      - amount
+      - payment_date
+      - repayment_type
+    ActiveLoanRequest:
+      type: object
+      description: |-
+        Serializer for ActiveLoan model.
+
+        Handles active loan data including repayment schedules,
+        interest payment tracking, and expiry management.
+      properties:
+        application:
+          type: integer
+          description: Application that has been settled and become an active loan
+        settlement_date:
+          type: string
+          format: date
+          description: Date when the loan was settled
+        capitalised_interest_months:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Number of months for capitalised interest
+        interest_payments_required:
+          type: boolean
+          description: Whether interest payments are required during the loan term
+        interest_payment_frequency:
+          nullable: true
+          description: |-
+            Frequency of interest payments (if required)
+
+            * `monthly` - Monthly
+            * `quarterly` - Quarterly
+            * `semi_annually` - Semi-Annually
+            * `annually` - Annually
+          oneOf:
+          - $ref: '#/components/schemas/InterestPaymentFrequencyEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        interest_payment_due_dates:
+          type: object
+          additionalProperties: {}
+          description: List of dates when interest payments are due
+        loan_expiry_date:
+          type: string
+          format: date
+          description: Date when the loan expires
+        is_active:
+          type: boolean
+          description: Whether this loan is currently active
+      required:
+      - application
+      - loan_expiry_date
+      - settlement_date
+    ActiveLoanSummary:
+      type: object
+      description: |-
+        Lightweight serializer for active loan summaries and listings.
+
+        Used for dashboard views and lists where full detail is not needed.
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        application_reference:
+          type: string
+          readOnly: true
+        borrower_name:
+          type: string
+          readOnly: true
+        loan_amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          readOnly: true
+        settlement_date:
+          type: string
+          format: date
+          description: Date when the loan was settled
+        loan_expiry_date:
+          type: string
+          format: date
+          description: Date when the loan expires
+        days_until_expiry:
+          type: string
+          readOnly: true
+        days_until_next_payment:
+          type: string
+          readOnly: true
+        interest_payments_required:
+          type: boolean
+          description: Whether interest payments are required during the loan term
+        alert_status:
+          type: string
+          readOnly: true
+        is_active:
+          type: boolean
+          description: Whether this loan is currently active
+      required:
+      - alert_status
+      - application_reference
+      - borrower_name
+      - days_until_expiry
+      - days_until_next_payment
+      - id
+      - loan_amount
+      - loan_expiry_date
+      - settlement_date
     Address:
       type: object
       description: Serializer for address information with optional fields for minimal
@@ -9571,6 +10629,18 @@ components:
         * `healthcare` - Healthcare
         * `arts` - Arts and Recreation
         * `other` - Other
+    InterestPaymentFrequencyEnum:
+      enum:
+      - monthly
+      - quarterly
+      - semi_annually
+      - annually
+      type: string
+      description: |-
+        * `monthly` - Monthly
+        * `quarterly` - Quarterly
+        * `semi_annually` - Semi-Annually
+        * `annually` - Annually
     Ledger:
       type: object
       description: Serializer for ledger entries with null/blank handling for minimal
@@ -10075,6 +11145,8 @@ components:
         title:
           type: string
           maxLength: 255
+        message:
+          type: string
         notification_type:
           $ref: '#/components/schemas/NotificationTypeEnum'
         notification_type_display:
@@ -10089,6 +11161,7 @@ components:
       required:
       - created_at
       - id
+      - message
       - notification_type
       - notification_type_display
       - title
@@ -10100,6 +11173,8 @@ components:
           type: integer
           readOnly: true
         application_status_in_app:
+          type: boolean
+        stage_change_in_app:
           type: boolean
         repayment_upcoming_in_app:
           type: boolean
@@ -10113,7 +11188,17 @@ components:
           type: boolean
         system_in_app:
           type: boolean
+        active_loan_payment_in_app:
+          type: boolean
+        active_loan_expiry_in_app:
+          type: boolean
+        active_loan_critical_in_app:
+          type: boolean
+        active_loan_manual_in_app:
+          type: boolean
         application_status_email:
+          type: boolean
+        stage_change_email:
           type: boolean
         repayment_upcoming_email:
           type: boolean
@@ -10126,6 +11211,14 @@ components:
         signature_required_email:
           type: boolean
         system_email:
+          type: boolean
+        active_loan_payment_email:
+          type: boolean
+        active_loan_expiry_email:
+          type: boolean
+        active_loan_critical_email:
+          type: boolean
+        active_loan_manual_email:
           type: boolean
         daily_digest:
           type: boolean
@@ -10139,6 +11232,8 @@ components:
       properties:
         application_status_in_app:
           type: boolean
+        stage_change_in_app:
+          type: boolean
         repayment_upcoming_in_app:
           type: boolean
         repayment_overdue_in_app:
@@ -10151,7 +11246,17 @@ components:
           type: boolean
         system_in_app:
           type: boolean
+        active_loan_payment_in_app:
+          type: boolean
+        active_loan_expiry_in_app:
+          type: boolean
+        active_loan_critical_in_app:
+          type: boolean
+        active_loan_manual_in_app:
+          type: boolean
         application_status_email:
+          type: boolean
+        stage_change_email:
           type: boolean
         repayment_upcoming_email:
           type: boolean
@@ -10164,6 +11269,14 @@ components:
         signature_required_email:
           type: boolean
         system_email:
+          type: boolean
+        active_loan_payment_email:
+          type: boolean
+        active_loan_expiry_email:
+          type: boolean
+        active_loan_critical_email:
+          type: boolean
+        active_loan_manual_email:
           type: boolean
         daily_digest:
           type: boolean
@@ -10207,21 +11320,31 @@ components:
     NotificationTypeEnum:
       enum:
       - application_status
+      - stage_change
       - repayment_upcoming
       - repayment_overdue
       - note_reminder
       - document_uploaded
       - signature_required
       - system
+      - active_loan_payment
+      - active_loan_expiry
+      - active_loan_critical
+      - active_loan_manual
       type: string
       description: |-
         * `application_status` - Application Status Change
+        * `stage_change` - Stage Change
         * `repayment_upcoming` - Repayment Upcoming
         * `repayment_overdue` - Repayment Overdue
         * `note_reminder` - Note Reminder
         * `document_uploaded` - Document Uploaded
         * `signature_required` - Signature Required
         * `system` - System Notification
+        * `active_loan_payment` - Active Loan Payment Alert
+        * `active_loan_expiry` - Active Loan Expiry Alert
+        * `active_loan_critical` - Active Loan Critical Alert
+        * `active_loan_manual` - Active Loan Manual Alert
     NullEnum:
       enum:
       - null
@@ -10241,6 +11364,46 @@ components:
       description: |-
         * `pdf` - pdf
         * `docx` - docx
+    PaginatedActiveLoanRepaymentList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActiveLoanRepayment'
+    PaginatedActiveLoanSummaryList:
+      type: object
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ActiveLoanSummary'
     PaginatedApplicationListList:
       type: object
       properties:
@@ -10628,6 +11791,95 @@ components:
           minLength: 1
       required:
       - email
+    PatchedActiveLoanRepaymentRequest:
+      type: object
+      description: |-
+        Serializer for ActiveLoanRepayment model.
+
+        Handles serialization of repayment data including validation
+        and automatic calculation of late payment status.
+      properties:
+        repayment_type:
+          allOf:
+          - $ref: '#/components/schemas/RepaymentTypeEnum'
+          description: |-
+            Type of repayment
+
+            * `interest` - Interest Payment
+            * `principal` - Principal Payment
+            * `principal_interest` - Principal + Interest
+            * `penalty` - Penalty Payment
+            * `early_settlement` - Early Settlement
+        amount:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          description: Repayment amount
+        payment_date:
+          type: string
+          format: date
+          description: Date the payment was made
+        due_date:
+          type: string
+          format: date
+          nullable: true
+          description: Original due date for this payment
+        reference_number:
+          type: string
+          nullable: true
+          description: Bank reference or transaction number
+          maxLength: 100
+        notes:
+          type: string
+          nullable: true
+          description: Additional notes about this repayment
+    PatchedActiveLoanRequest:
+      type: object
+      description: |-
+        Serializer for ActiveLoan model.
+
+        Handles active loan data including repayment schedules,
+        interest payment tracking, and expiry management.
+      properties:
+        application:
+          type: integer
+          description: Application that has been settled and become an active loan
+        settlement_date:
+          type: string
+          format: date
+          description: Date when the loan was settled
+        capitalised_interest_months:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          description: Number of months for capitalised interest
+        interest_payments_required:
+          type: boolean
+          description: Whether interest payments are required during the loan term
+        interest_payment_frequency:
+          nullable: true
+          description: |-
+            Frequency of interest payments (if required)
+
+            * `monthly` - Monthly
+            * `quarterly` - Quarterly
+            * `semi_annually` - Semi-Annually
+            * `annually` - Annually
+          oneOf:
+          - $ref: '#/components/schemas/InterestPaymentFrequencyEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        interest_payment_due_dates:
+          type: object
+          additionalProperties: {}
+          description: List of dates when interest payments are due
+        loan_expiry_date:
+          type: string
+          format: date
+          description: Date when the loan expires
+        is_active:
+          type: boolean
+          description: Whether this loan is currently active
     PatchedApplicationListRequest:
       type: object
       description: Serializer for listing applications with summary information
@@ -11934,6 +13186,20 @@ components:
         application:
           type: integer
           nullable: true
+    RepaymentTypeEnum:
+      enum:
+      - interest
+      - principal
+      - principal_interest
+      - penalty
+      - early_settlement
+      type: string
+      description: |-
+        * `interest` - Interest Payment
+        * `principal` - Principal Payment
+        * `principal_interest` - Principal + Interest
+        * `penalty` - Penalty Payment
+        * `early_settlement` - Early Settlement
     ResidencyStatusEnum:
       enum:
       - citizen

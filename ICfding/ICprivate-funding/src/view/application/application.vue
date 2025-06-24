@@ -122,6 +122,11 @@
                     </el-timeline>
                 </div>
             </div>
+            
+            <!-- Add Active Loan Details section when stage is settled -->
+            <div v-if="application.stage === 'settled'" class="active-loan-section">
+                <ActiveLoanDetails :detail="application" />
+            </div>
         </div>
         <div class="tabs">
             <div class="tabs_header">
@@ -203,6 +208,7 @@
     import Calculator from '@/components/popup/calculator.vue';
     import Note from '@/components/popup/note.vue';
     import Fee from '@/components/popup/fee.vue';
+    import ActiveLoanDetails from '@/components/application/activeloandetails.vue';
     import { SuccessFilled, ArrowRight } from '@element-plus/icons-vue';
 
     const route = useRoute()
@@ -710,9 +716,11 @@
         const [err, res] = await api.updateStage(validApplicationId.value, data)
         if (!err) {
             console.log(res)
+            ElMessage.success(`Application moved to ${stages.value[i + 1].name} stage successfully`)
             getApplication()
         } else {
             console.log(err)
+            ElMessage.error('Failed to update stage')
         }
     }
     const prevStage = async () => {
@@ -723,9 +731,11 @@
         const [err, res] = await api.updateStage(validApplicationId.value, data)
         if (!err) {
             console.log(res)
+            ElMessage.success(`Application moved to ${stages.value[i - 1].name} stage successfully`)
             getApplication()
         } else {
             console.log(err)
+            ElMessage.error('Failed to update stage')
         }
     }
     const selectInfo = (index) => {
@@ -1150,5 +1160,13 @@
         font-size: 0.9rem;
         margin: 0;
         white-space: pre-wrap;
+    }
+
+    .active-loan-section {
+        margin-top: 20px;
+        padding: 20px;
+        border-radius: 6px;
+        background: #FFF;
+        border: 1px solid #E8EBEE;
     }
 </style>

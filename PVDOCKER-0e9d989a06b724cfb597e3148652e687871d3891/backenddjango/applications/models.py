@@ -58,7 +58,9 @@ from .models.documents import (
 from .models.financial import (
     Fee,
     Repayment,
-    FundingCalculationHistory
+    FundingCalculationHistory,
+    ActiveLoan,
+    ActiveLoanRepayment
 )
 
 # Maintain the original __all__ list for explicit exports
@@ -84,6 +86,8 @@ __all__ = [
     'Fee',
     'Repayment',
     'FundingCalculationHistory',
+    'ActiveLoan',
+    'ActiveLoanRepayment',
     
     # Base models (available but typically not imported directly)
     'TimestampedModel',

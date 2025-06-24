@@ -281,4 +281,224 @@ class FundingCalculationHistory(BaseApplicationModel):
         try:
             return self.calculation_result.get('funds_available', 0)
         except (AttributeError, TypeError):
-            return 0 
+            return 0
+
+
+class ActiveLoan(TimestampedModel):
+    """
+    Model for managing active loans that have been settled.
+    
+    This model tracks active loans and manages repayment schedules,
+    interest payment tracking, and expiry alerts.
+    """
+    
+    INTEREST_PAYMENT_FREQUENCY_CHOICES = [
+        ('monthly', 'Monthly'),
+        ('quarterly', 'Quarterly'),
+        ('semi_annually', 'Semi-Annually'),
+        ('annually', 'Annually'),
+    ]
+    
+    # ============================================================================
+    # RELATIONSHIPS
+    # ============================================================================
+    
+    application = models.OneToOneField(
+        'applications.Application',
+        on_delete=models.CASCADE,
+        related_name='active_loan',
+        help_text="Application that has been settled and become an active loan"
+    )
+    
+    # ============================================================================
+    # LOAN DETAILS
+    # ============================================================================
+    
+    settlement_date = models.DateField(
+        help_text="Date when the loan was settled"
+    )
+    capitalised_interest_months = models.PositiveIntegerField(
+        default=0,
+        help_text="Number of months for capitalised interest"
+    )
+    interest_payments_required = models.BooleanField(
+        default=False,
+        help_text="Whether interest payments are required during the loan term"
+    )
+    interest_payment_frequency = models.CharField(
+        max_length=20,
+        choices=INTEREST_PAYMENT_FREQUENCY_CHOICES,
+        null=True,
+        blank=True,
+        help_text="Frequency of interest payments (if required)"
+    )
+    interest_payment_due_dates = JSONField(
+        default=list,
+        help_text="List of dates when interest payments are due"
+    )
+    loan_expiry_date = models.DateField(
+        help_text="Date when the loan expires"
+    )
+    is_active = models.BooleanField(
+        default=True,
+        help_text="Whether this loan is currently active"
+    )
+    
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = "Active Loan"
+        verbose_name_plural = "Active Loans"
+        indexes = [
+            models.Index(fields=['application']),
+            models.Index(fields=['settlement_date']),
+            models.Index(fields=['loan_expiry_date']),
+            models.Index(fields=['is_active']),
+        ]
+    
+    def __str__(self):
+        return f"Active Loan - {self.application.reference_number}"
+    
+    def save(self, *args, **kwargs):
+        """
+        Override save to ensure the application stage is 'settled'.
+        """
+        if self.application and self.application.stage != 'settled':
+            self.application.stage = 'settled'
+            self.application.save()
+        super().save(*args, **kwargs)
+    
+    @property
+    def days_until_expiry(self):
+        """Calculate days until loan expiry."""
+        from django.utils import timezone
+        if self.loan_expiry_date:
+            delta = self.loan_expiry_date - timezone.now().date()
+            return delta.days
+        return None
+    
+    @property
+    def next_interest_payment_date(self):
+        """Get the next interest payment due date."""
+        from django.utils import timezone
+        from datetime import datetime
+        today = timezone.now().date()
+        
+        for date_str in self.interest_payment_due_dates:
+            try:
+                due_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                if due_date >= today:
+                    return due_date
+            except (ValueError, TypeError):
+                continue
+        return None
+    
+    @property
+    def days_until_next_payment(self):
+        """Calculate days until next interest payment."""
+        next_payment = self.next_interest_payment_date
+        if next_payment:
+            from django.utils import timezone
+            delta = next_payment - timezone.now().date()
+            return delta.days
+        return None
+
+    def get_next_payment_amount(self):
+        """Get the amount for the next interest payment."""
+        if not self.interest_payments_required:
+            return 0
+        
+        # For now, return a default amount based on loan amount
+        # In a real implementation, this would calculate based on interest rate and frequency
+        if hasattr(self.application, 'loan_amount') and self.application.loan_amount:
+            # Simple calculation: 1% of loan amount per month
+            return float(self.application.loan_amount) * 0.01
+        return 0
+
+
+class ActiveLoanRepayment(TimestampedModel):
+    """
+    Model for tracking repayments against active loans.
+    
+    This model specifically tracks repayments for active loans,
+    including interest payments and principal reductions.
+    """
+    
+    REPAYMENT_TYPE_CHOICES = [
+        ('interest', 'Interest Payment'),
+        ('principal', 'Principal Payment'),
+        ('principal_interest', 'Principal + Interest'),
+        ('penalty', 'Penalty Payment'),
+        ('early_settlement', 'Early Settlement'),
+    ]
+    
+    # ============================================================================
+    # RELATIONSHIPS
+    # ============================================================================
+    
+    active_loan = models.ForeignKey(
+        ActiveLoan,
+        on_delete=models.CASCADE,
+        related_name='repayments',
+        help_text="Active loan this repayment is for"
+    )
+    
+    # ============================================================================
+    # REPAYMENT DETAILS
+    # ============================================================================
+    
+    repayment_type = models.CharField(
+        max_length=20,
+        choices=REPAYMENT_TYPE_CHOICES,
+        help_text="Type of repayment"
+    )
+    amount = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        validators=[MinValueValidator(0)],
+        help_text="Repayment amount"
+    )
+    payment_date = models.DateField(
+        help_text="Date the payment was made"
+    )
+    due_date = models.DateField(
+        null=True,
+        blank=True,
+        help_text="Original due date for this payment"
+    )
+    reference_number = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        help_text="Bank reference or transaction number"
+    )
+    notes = models.TextField(
+        null=True,
+        blank=True,
+        help_text="Additional notes about this repayment"
+    )
+    is_late = models.BooleanField(
+        default=False,
+        help_text="Whether this payment was made after the due date"
+    )
+    
+    class Meta:
+        ordering = ['-payment_date']
+        verbose_name = "Active Loan Repayment"
+        verbose_name_plural = "Active Loan Repayments"
+        indexes = [
+            models.Index(fields=['active_loan']),
+            models.Index(fields=['payment_date']),
+            models.Index(fields=['due_date']),
+            models.Index(fields=['repayment_type']),
+        ]
+    
+    def __str__(self):
+        return f"${self.amount} - {self.payment_date} ({self.active_loan.application.reference_number})"
+    
+    def save(self, *args, **kwargs):
+        """
+        Override save to automatically determine if payment is late.
+        """
+        if self.due_date and self.payment_date > self.due_date:
+            self.is_late = True
+        super().save(*args, **kwargs) 

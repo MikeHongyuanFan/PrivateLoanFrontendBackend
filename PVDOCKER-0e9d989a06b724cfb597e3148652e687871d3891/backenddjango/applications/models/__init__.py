@@ -18,7 +18,7 @@ from .contacts import Valuer, QuantitySurveyor
 from .properties import SecurityProperty
 from .requirements import LoanRequirement
 from .documents import Document
-from .financial import Fee, Repayment, FundingCalculationHistory
+from .financial import Fee, Repayment, FundingCalculationHistory, ActiveLoan, ActiveLoanRepayment
 
 # Maintain backward compatibility - export all models at package level
 __all__ = [
@@ -47,4 +47,6 @@ __all__ = [
     'Fee',
     'Repayment',
     'FundingCalculationHistory',
+    'ActiveLoan',
+    'ActiveLoanRepayment',
 ] 

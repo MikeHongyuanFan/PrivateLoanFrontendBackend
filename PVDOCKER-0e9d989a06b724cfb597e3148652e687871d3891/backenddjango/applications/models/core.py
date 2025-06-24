@@ -507,11 +507,14 @@ class Application(BaseApplicationModel):
         if not self.reference_number:
             self.reference_number = generate_reference_number()
         
-        # Track stage changes
+        # Track stage changes and handle archiving
         if self.pk:
             try:
                 old_instance = Application.objects.get(pk=self.pk)
                 if old_instance.stage != self.stage:
+                    print(f"DEBUG: Stage change detected - from '{old_instance.stage}' to '{self.stage}'")
+                    print(f"DEBUG: Old archived status: {old_instance.is_archived}, New archived status: {self.is_archived}")
+                    
                     self.stage_history.append({
                         'from_stage': old_instance.stage,
                         'to_stage': self.stage,
@@ -519,13 +522,30 @@ class Application(BaseApplicationModel):
                         'user': self.assigned_bd.username if self.assigned_bd else 'System',
                         'notes': ''
                     })
+                    
+                    # Handle archiving logic based on stage changes
+                    if self.stage and self.stage.lower() == 'closed':
+                        # Archive when stage is 'closed'
+                        print(f"DEBUG: Archiving application - stage is 'closed'")
+                        self.is_archived = True
+                    elif self.stage and self.stage.lower() != 'closed':
+                        # Unarchive when moving to any stage other than 'closed'
+                        # This ensures applications are unarchived regardless of their previous state
+                        print(f"DEBUG: Unarchiving application - moving to non-closed stage '{self.stage}'")
+                        self.is_archived = False
+                    else:
+                        print(f"DEBUG: No archiving change needed - old stage: '{old_instance.stage}', new stage: '{self.stage}'")
             except Application.DoesNotExist:
+                print("DEBUG: Application does not exist yet (new instance)")
                 pass
+        else:
+            # For new applications, set archive status based on initial stage
+            if self.stage and self.stage.lower() == 'closed':
+                self.is_archived = True
+            else:
+                self.is_archived = False
         
-        # Auto-archive when stage is 'closed' (case-insensitive)
-        if self.stage and self.stage.lower() == 'closed':
-            self.is_archived = True
-        
+        print(f"DEBUG: Final archived status before save: {self.is_archived}")
         super().save(*args, **kwargs)
     
     # ============================================================================

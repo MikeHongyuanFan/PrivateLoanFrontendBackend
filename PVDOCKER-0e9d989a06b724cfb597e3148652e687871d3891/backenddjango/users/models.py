@@ -59,12 +59,18 @@ class Notification(models.Model):
     """
     NOTIFICATION_TYPE_CHOICES = [
         ('application_status', 'Application Status Change'),
+        ('stage_change', 'Stage Change'),
         ('repayment_upcoming', 'Repayment Upcoming'),
         ('repayment_overdue', 'Repayment Overdue'),
         ('note_reminder', 'Note Reminder'),
         ('document_uploaded', 'Document Uploaded'),
         ('signature_required', 'Signature Required'),
         ('system', 'System Notification'),
+        # Active Loan notification types
+        ('active_loan_payment', 'Active Loan Payment Alert'),
+        ('active_loan_expiry', 'Active Loan Expiry Alert'),
+        ('active_loan_critical', 'Active Loan Critical Alert'),
+        ('active_loan_manual', 'Active Loan Manual Alert'),
     ]
     
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='notifications')
@@ -130,6 +136,7 @@ class NotificationPreference(models.Model):
     
     # In-app notification preferences
     application_status_in_app = models.BooleanField(default=True)
+    stage_change_in_app = models.BooleanField(default=True)
     repayment_upcoming_in_app = models.BooleanField(default=True)
     repayment_overdue_in_app = models.BooleanField(default=True)
     note_reminder_in_app = models.BooleanField(default=True)
@@ -137,14 +144,27 @@ class NotificationPreference(models.Model):
     signature_required_in_app = models.BooleanField(default=True)
     system_in_app = models.BooleanField(default=True)
     
+    # Active loan notification preferences
+    active_loan_payment_in_app = models.BooleanField(default=True)
+    active_loan_expiry_in_app = models.BooleanField(default=True)
+    active_loan_critical_in_app = models.BooleanField(default=True)
+    active_loan_manual_in_app = models.BooleanField(default=True)
+    
     # Email notification preferences
     application_status_email = models.BooleanField(default=True)
+    stage_change_email = models.BooleanField(default=True)
     repayment_upcoming_email = models.BooleanField(default=True)
     repayment_overdue_email = models.BooleanField(default=True)
     note_reminder_email = models.BooleanField(default=True)
     document_uploaded_email = models.BooleanField(default=False)
     signature_required_email = models.BooleanField(default=True)
     system_email = models.BooleanField(default=False)
+    
+    # Active loan email preferences
+    active_loan_payment_email = models.BooleanField(default=True)
+    active_loan_expiry_email = models.BooleanField(default=True)
+    active_loan_critical_email = models.BooleanField(default=True)
+    active_loan_manual_email = models.BooleanField(default=True)
     
     # Email digest preferences
     daily_digest = models.BooleanField(default=False)
@@ -162,12 +182,17 @@ class NotificationPreference(models.Model):
         """
         preference_map = {
             'application_status': self.application_status_in_app,
+            'stage_change': self.stage_change_in_app,
             'repayment_upcoming': self.repayment_upcoming_in_app,
             'repayment_overdue': self.repayment_overdue_in_app,
             'note_reminder': self.note_reminder_in_app,
             'document_uploaded': self.document_uploaded_in_app,
             'signature_required': self.signature_required_in_app,
             'system': self.system_in_app,
+            'active_loan_payment': self.active_loan_payment_in_app,
+            'active_loan_expiry': self.active_loan_expiry_in_app,
+            'active_loan_critical': self.active_loan_critical_in_app,
+            'active_loan_manual': self.active_loan_manual_in_app,
         }
         return preference_map.get(notification_type, True)
     
@@ -177,11 +202,16 @@ class NotificationPreference(models.Model):
         """
         preference_map = {
             'application_status': self.application_status_email,
+            'stage_change': self.stage_change_email,
             'repayment_upcoming': self.repayment_upcoming_email,
             'repayment_overdue': self.repayment_overdue_email,
             'note_reminder': self.note_reminder_email,
             'document_uploaded': self.document_uploaded_email,
             'signature_required': self.signature_required_email,
             'system': self.system_email,
+            'active_loan_payment': self.active_loan_payment_email,
+            'active_loan_expiry': self.active_loan_expiry_email,
+            'active_loan_critical': self.active_loan_critical_email,
+            'active_loan_manual': self.active_loan_manual_email,
         }
         return preference_map.get(notification_type, False)

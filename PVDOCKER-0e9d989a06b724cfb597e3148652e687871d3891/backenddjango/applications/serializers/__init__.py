@@ -59,6 +59,14 @@ from .utils import (
     SolvencyEnquiriesSerializer
 )
 
+# Active loan serializers
+from .active_loans import (
+    ActiveLoanSerializer,
+    ActiveLoanCreateSerializer,
+    ActiveLoanSummarySerializer,
+    ActiveLoanRepaymentSerializer
+)
+
 # For backward compatibility - keep all the old imports working
 __all__ = [
     # Application
@@ -106,4 +114,10 @@ __all__ = [
     
     # Utils
     'SolvencyEnquiriesSerializer',
+    
+    # Active Loans
+    'ActiveLoanSerializer',
+    'ActiveLoanCreateSerializer',
+    'ActiveLoanSummarySerializer',
+    'ActiveLoanRepaymentSerializer',
 ] 

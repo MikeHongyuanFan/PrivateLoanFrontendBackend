@@ -7,6 +7,8 @@ import { guarantorApi } from "./guarantor";
 import { productsApi } from "./products";
 import { documentsApi } from "./documents";
 import { feesApi } from "./fees";
+import { activeLoansApi } from "./activeloans";
+import { notificationApi } from "./notifications";
 
 export const api = {
   ...userApi,
@@ -18,4 +20,6 @@ export const api = {
   ...productsApi,
   ...documentsApi,
   ...feesApi,
+  ...activeLoansApi,
+  ...notificationApi,
 };

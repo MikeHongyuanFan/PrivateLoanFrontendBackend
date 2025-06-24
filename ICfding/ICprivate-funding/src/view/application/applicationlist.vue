@@ -4,7 +4,7 @@
             <div class="left">
                 <div class="filter">
                     <h1>Search</h1>
-                    <el-input v-model="selected.search" style="width: 180px" placeholder="Search..." />
+                    <el-input v-model="selected.search" style="width: 180px" placeholder="Search applications..." />
                 </div>
                 <div class="filter">
                     <h1>Include Archived</h1>
@@ -34,8 +34,12 @@
                         format="DD MMM" value-format="YYYY-MM-DD" :prefix-icon="Calendar" clearable
                         style="width: 180px;" />
                 </div> -->
-                <Search @click="toApplication"></Search>
+                <Search @click="searchApplications"></Search>
                 <Clear @click="handleClear"></Clear>
+                <el-button @click="getApplications" type="primary" plain>
+                    <el-icon><Refresh /></el-icon>
+                    Refresh
+                </el-button>
             </div>
             <Create :action="action" @click="addApplication"></Create>            
         </div>
@@ -101,6 +105,7 @@ import Search from '@/components/buttons/search.vue';
 import Clear from '@/components/buttons/clear.vue';
 import Create from '@/components/buttons/create.vue';
 import DeleteButton from '@/components/buttons/delete.vue';
+import { Refresh } from '@element-plus/icons-vue';
 
 import { Pagination } from '@/components'
 import { ApplicationTable } from './components'
@@ -162,7 +167,16 @@ const isSelected = ref(false)
 const router = useRouter();
 
 onActivated(() => {
-    getApplications()
+    // Check if we should refresh due to returning from detail view
+    if (route.query.refresh === 'true') {
+        console.log('Refreshing application list due to return from detail view');
+        getApplications();
+        // Remove the refresh parameter from the URL
+        router.replace({ query: { ...route.query, refresh: undefined } });
+    } else {
+        getApplications();
+    }
+    
     if (route.query.search) {
         selected.value.search = route.query.search
         getApplications()
@@ -286,15 +300,24 @@ const handleApplicationClick = (id) => {
     
     try {
         console.log("Attempting router.push to:", `/application/${applicationId}`);
-        router.push(`/application/${applicationId}`);
+        // Add a query parameter to indicate that the list should be refreshed when returning
+        router.push({
+            path: `/application/${applicationId}`,
+            query: { refresh: 'true' }
+        });
         console.log("✅ Router navigation successful");
     } catch (error) {
         console.error("❌ Navigation error:", error);
         // Fallback: try using window.location
         console.log("Attempting fallback navigation");
-        window.location.href = `/application/${applicationId}`;
+        window.location.href = `/application/${applicationId}?refresh=true`;
     }
 };
+
+const searchApplications = () => {
+    selected.value.page = 1;
+    getApplications();
+}
 </script>
 
 <style lang="scss" scoped>
