@@ -1098,6 +1098,109 @@ paths:
       operationId: applications_applications_list
       description: ViewSet for viewing and editing Application instances.
       parameters:
+      - in: query
+        name: application_type
+        schema:
+          type: string
+          nullable: true
+          enum:
+          - acquisition
+          - caveat
+          - equity_release
+          - other
+          - refinance
+          - refinance_equity_release
+          - second_mortgage
+        description: |-
+          Type of loan application
+
+          * `acquisition` - Acquisition
+          * `refinance` - Refinance
+          * `equity_release` - Equity Release
+          * `refinance_equity_release` - Refinance & Equity Release
+          * `second_mortgage` - 2nd Mortgage
+          * `caveat` - Caveat
+          * `other` - Other
+      - in: query
+        name: bd
+        schema:
+          type: integer
+      - in: query
+        name: bd_id
+        schema:
+          type: integer
+          nullable: true
+        description: Business Development Manager for this application
+      - in: query
+        name: borrower_name
+        schema:
+          type: string
+      - in: query
+        name: branch
+        schema:
+          type: integer
+      - in: query
+        name: branch_id
+        schema:
+          type: integer
+          nullable: true
+        description: Branch associated with this application
+      - in: query
+        name: broker
+        schema:
+          type: integer
+      - in: query
+        name: created_after
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: created_before
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: estimated_settlement_date_after
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: estimated_settlement_date_before
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: guarantor_name
+        schema:
+          type: string
+      - in: query
+        name: has_solvency_issues
+        schema:
+          type: boolean
+      - in: query
+        name: is_signed
+        schema:
+          type: boolean
+      - in: query
+        name: loan_purpose
+        schema:
+          type: string
+      - in: query
+        name: max_interest_rate
+        schema:
+          type: number
+      - in: query
+        name: max_loan_amount
+        schema:
+          type: number
+      - in: query
+        name: min_interest_rate
+        schema:
+          type: number
+      - in: query
+        name: min_loan_amount
+        schema:
+          type: number
       - name: ordering
         required: false
         in: query
@@ -1110,12 +1213,86 @@ paths:
         description: A page number within the paginated result set.
         schema:
           type: integer
+      - in: query
+        name: purpose
+        schema:
+          type: string
+      - in: query
+        name: reference_number
+        schema:
+          type: string
+      - in: query
+        name: repayment_frequency
+        schema:
+          type: string
+          enum:
+          - annually
+          - fortnightly
+          - monthly
+          - quarterly
+          - weekly
+        description: |-
+          How often repayments are made
+
+          * `weekly` - Weekly
+          * `fortnightly` - Fortnightly
+          * `monthly` - Monthly
+          * `quarterly` - Quarterly
+          * `annually` - Annually
       - name: search
         required: false
         in: query
         description: A search term.
         schema:
           type: string
+      - in: query
+        name: security_address
+        schema:
+          type: string
+      - in: query
+        name: stage
+        schema:
+          type: string
+          enum:
+          - application_submitted
+          - closed
+          - commitment_fee_received
+          - discharged
+          - formal_approval
+          - funding_table_issued
+          - indicative_letter_issued
+          - indicative_letter_signed
+          - loan_docs_instructed
+          - loan_docs_issued
+          - loan_docs_signed
+          - more_info_required
+          - received
+          - sent_to_lender
+          - settled
+          - settlement_conditions
+          - valuation_ordered
+          - valuation_received
+        description: |-
+          Current stage of the application
+
+          * `received` - Received
+          * `sent_to_lender` - Sent to Lender/Investor
+          * `funding_table_issued` - Funding Table Issued
+          * `indicative_letter_issued` - Indicative Letter Issued
+          * `indicative_letter_signed` - Indicative Letter Signed
+          * `commitment_fee_received` - Commitment Fee Received
+          * `application_submitted` - Application Submitted
+          * `valuation_ordered` - Valuation Ordered
+          * `valuation_received` - Valuation Received
+          * `more_info_required` - More Information Required
+          * `formal_approval` - Formal Approval
+          * `loan_docs_instructed` - Loan Documents Instructed
+          * `loan_docs_issued` - Loan Documents Issued
+          * `loan_docs_signed` - Loan Documents Signed
+          * `settlement_conditions` - Settlement Conditions
+          * `settled` - Settled
+          * `closed` - Closed
+          * `discharged` - Discharged
       tags:
       - applications
       security:

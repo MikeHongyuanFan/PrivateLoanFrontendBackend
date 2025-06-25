@@ -6,6 +6,18 @@ with HTTP allowed and no HTTPS enforcement for development/testing.
 
 from .settings import *
 
+# Override database configuration - Use PostgreSQL
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'crm_db'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'postgres'),
+        'HOST': os.environ.get('DB_HOST', 'db'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
+    }
+}
+
 # Security settings - Disable HTTPS enforcement
 DEBUG = False
 ALLOWED_HOSTS = ['*']

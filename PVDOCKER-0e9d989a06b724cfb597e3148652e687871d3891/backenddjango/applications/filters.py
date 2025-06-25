@@ -44,29 +44,42 @@ class ApplicationFilter(FilterSet):
     
     def search_filter(self, queryset, name, value):
         """
-        Search across multiple fields
+        Search across multiple fields including reference number, borrower names, 
+        borrower addresses, security address, and application details
         """
         return queryset.filter(
             Q(reference_number__icontains=value) |
             Q(purpose__icontains=value) |
             Q(loan_purpose__icontains=value) |
+            # Borrower name and contact fields
             Q(borrowers__first_name__icontains=value) |
             Q(borrowers__last_name__icontains=value) |
             Q(borrowers__email__icontains=value) |
             Q(borrowers__company_name__icontains=value) |
+            # Borrower address fields
+            Q(borrowers__residential_address__icontains=value) |
+            Q(borrowers__mailing_address__icontains=value) |
+            # Guarantor fields
             Q(guarantors__first_name__icontains=value) |
             Q(guarantors__last_name__icontains=value) |
-            Q(security_address__icontains=value)
+            # Security property address
+            Q(security_address__icontains=value) |
+            Q(security_properties__address_street_name__icontains=value) |
+            Q(security_properties__address_suburb__icontains=value) |
+            Q(security_properties__address_state__icontains=value) |
+            Q(security_properties__address_postcode__icontains=value)
         ).distinct()
     
     def borrower_name_filter(self, queryset, name, value):
         """
-        Filter by borrower name (first name, last name, or company name)
+        Filter by borrower name (first name, last name, company name) and address
         """
         return queryset.filter(
             Q(borrowers__first_name__icontains=value) |
             Q(borrowers__last_name__icontains=value) |
-            Q(borrowers__company_name__icontains=value)
+            Q(borrowers__company_name__icontains=value) |
+            Q(borrowers__residential_address__icontains=value) |
+            Q(borrowers__mailing_address__icontains=value)
         ).distinct()
     
     def guarantor_name_filter(self, queryset, name, value):
@@ -109,10 +122,10 @@ class ApplicationFilter(FilterSet):
         """
         return queryset.filter(
             Q(security_address__icontains=value) |
-            Q(securityproperty_set__address_street_name__icontains=value) |
-            Q(securityproperty_set__address_suburb__icontains=value) |
-            Q(securityproperty_set__address_state__icontains=value) |
-            Q(securityproperty_set__address_postcode__icontains=value)
+            Q(security_properties__address_street_name__icontains=value) |
+            Q(security_properties__address_suburb__icontains=value) |
+            Q(security_properties__address_state__icontains=value) |
+            Q(security_properties__address_postcode__icontains=value)
         ).distinct()
 
 # Alias for backward compatibility - some views might reference this name

@@ -391,6 +391,126 @@ class TestApplicationViewSet:
         assert len(response.data['results']) == 1
         assert response.data['results'][0]['reference_number'] == 'SEARCH-TEST-002'
     
+    def test_enhanced_search_functionality(self, admin_user):
+        """Test enhanced search functionality including reference numbers, borrower names, and addresses."""
+        from borrowers.models import Borrower
+        
+        # Create borrowers with different names and addresses
+        borrower1 = Borrower.objects.create(
+            first_name="John",
+            last_name="Smith",
+            residential_address="123 Main Street, Sydney NSW 2000",
+            mailing_address="PO Box 123, Sydney NSW 2000",
+            created_by=admin_user
+        )
+        
+        borrower2 = Borrower.objects.create(
+            first_name="Jane",
+            last_name="Doe",
+            residential_address="456 Oak Avenue, Melbourne VIC 3000",
+            mailing_address="789 Pine Road, Melbourne VIC 3000",
+            created_by=admin_user
+        )
+        
+        # Create applications with different reference numbers and associate with borrowers
+        app1 = Application.objects.create(
+            reference_number="APP-REF-001",
+            stage="inquiry",
+            loan_amount=500000,
+            loan_term=360,
+            interest_rate=4.5,
+            purpose="Home purchase",
+            application_type="residential",
+            created_by=admin_user
+        )
+        app1.borrowers.add(borrower1)
+        
+        app2 = Application.objects.create(
+            reference_number="APP-REF-002",
+            stage="inquiry",
+            loan_amount=600000,
+            loan_term=360,
+            interest_rate=4.5,
+            purpose="Investment property",
+            application_type="residential",
+            created_by=admin_user
+        )
+        app2.borrowers.add(borrower2)
+        
+        client = APIClient()
+        client.force_authenticate(user=admin_user)
+        
+        # Test 1: Search by reference number
+        url = reverse('application-list') + '?search=APP-REF-001'
+        response = client.get(url)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data['results']) == 1
+        assert response.data['results'][0]['reference_number'] == 'APP-REF-001'
+        
+        # Test 2: Search by borrower first name
+        url = reverse('application-list') + '?search=John'
+        response = client.get(url)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data['results']) == 1
+        assert response.data['results'][0]['reference_number'] == 'APP-REF-001'
+        
+        # Test 3: Search by borrower last name
+        url = reverse('application-list') + '?search=Smith'
+        response = client.get(url)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data['results']) == 1
+        assert response.data['results'][0]['reference_number'] == 'APP-REF-001'
+        
+        # Test 4: Search by borrower address (residential)
+        url = reverse('application-list') + '?search=Main Street'
+        response = client.get(url)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data['results']) == 1
+        assert response.data['results'][0]['reference_number'] == 'APP-REF-001'
+        
+        # Test 5: Search by borrower address (mailing)
+        url = reverse('application-list') + '?search=PO Box 123'
+        response = client.get(url)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data['results']) == 1
+        assert response.data['results'][0]['reference_number'] == 'APP-REF-001'
+        
+        # Test 6: Search by city name in address
+        url = reverse('application-list') + '?search=Sydney'
+        response = client.get(url)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data['results']) == 1
+        assert response.data['results'][0]['reference_number'] == 'APP-REF-001'
+        
+        # Test 7: Search by another borrower's name
+        url = reverse('application-list') + '?search=Jane'
+        response = client.get(url)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data['results']) == 1
+        assert response.data['results'][0]['reference_number'] == 'APP-REF-002'
+        
+        # Test 8: Search by another borrower's address
+        url = reverse('application-list') + '?search=Melbourne'
+        response = client.get(url)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data['results']) == 1
+        assert response.data['results'][0]['reference_number'] == 'APP-REF-002'
+        
+        # Test 9: Search that should return no results
+        url = reverse('application-list') + '?search=NonExistentName'
+        response = client.get(url)
+        
+        assert response.status_code == status.HTTP_200_OK
+        assert len(response.data['results']) == 0
+    
     def test_ordering_applications(self, admin_user):
         """Test ordering applications."""
         # Create applications with different loan amounts

@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db.models import Prefetch
 from ..models import Application
+from ..filters import ApplicationFilter
 from users.permissions import IsAdminOrBrokerOrBD
 
 class ApplicationViewSet(viewsets.ModelViewSet):
@@ -11,6 +12,7 @@ class ApplicationViewSet(viewsets.ModelViewSet):
     ViewSet for viewing and editing Application instances.
     """
     queryset = Application.objects.all()
+    filterset_class = ApplicationFilter
     
     def get_permissions(self):
         """

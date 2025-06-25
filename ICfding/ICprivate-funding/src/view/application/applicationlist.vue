@@ -3,8 +3,17 @@
         <div class="filters">
             <div class="left">
                 <div class="filter">
+                    <h1>Search by</h1>
+                    <el-select v-model="searchType" style="width: 180px" placeholder="Select condition">
+                        <el-option label="All Fields" value="all" />
+                        <el-option label="Reference Number" value="reference_number" />
+                        <el-option label="Borrower Name" value="borrower_name" />
+                        <el-option label="Address" value="security_address" />
+                    </el-select>
+                </div>
+                <div class="filter">
                     <h1>Search</h1>
-                    <el-input v-model="selected.search" style="width: 180px" placeholder="Search applications..." />
+                    <el-input v-model="searchValue" style="width: 180px" :placeholder="searchPlaceholder" />
                 </div>
                 <div class="filter">
                     <h1>Include Archived</h1>
@@ -166,6 +175,21 @@ const isSelected = ref(false)
 
 const router = useRouter();
 
+const searchType = ref('all')
+const searchValue = ref('')
+const searchPlaceholder = computed(() => {
+    switch (searchType.value) {
+        case 'reference_number':
+            return 'Enter reference number...';
+        case 'borrower_name':
+            return 'Enter borrower name...';
+        case 'security_address':
+            return 'Enter address...';
+        default:
+            return 'Search applications...';
+    }
+})
+
 onActivated(() => {
     // Check if we should refresh due to returning from detail view
     if (route.query.refresh === 'true') {
@@ -187,8 +211,10 @@ const toApplication = () => {
     getApplications()
 }
 const handleClear = () => {
-    selected.value = ({page: 1})
+    selected.value = { page: 1 }
     includeArchived.value = false
+    searchType.value = 'all'
+    searchValue.value = ''
     getApplications()
 }
 const addApplication = () => {
@@ -315,6 +341,21 @@ const handleApplicationClick = (id) => {
 };
 
 const searchApplications = () => {
+    // Clear all search fields
+    selected.value.reference_number = undefined
+    selected.value.borrower_name = undefined
+    selected.value.security_address = undefined
+    selected.value.search = undefined
+
+    if (searchType.value === 'reference_number') {
+        selected.value.reference_number = searchValue.value
+    } else if (searchType.value === 'borrower_name') {
+        selected.value.borrower_name = searchValue.value
+    } else if (searchType.value === 'security_address') {
+        selected.value.security_address = searchValue.value
+    } else {
+        selected.value.search = searchValue.value
+    }
     selected.value.page = 1;
     getApplications();
 }
