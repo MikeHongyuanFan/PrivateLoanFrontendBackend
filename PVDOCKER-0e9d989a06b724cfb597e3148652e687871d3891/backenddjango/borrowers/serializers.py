@@ -16,7 +16,7 @@ class BorrowerListSerializer(serializers.ModelSerializer):
             'id', 'first_name', 'last_name', 'email', 
             'phone', 'created_at', 'application_count',
             'residential_address', 'mailing_address', 'address',
-            'related_brokers', 'is_company'
+            'related_brokers', 'is_company', 'company_name'
         ]
     
     def get_application_count(self, obj) -> int:

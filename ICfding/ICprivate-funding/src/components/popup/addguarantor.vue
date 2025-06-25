@@ -1,91 +1,94 @@
 <template>
   <div class="popup">
-    <div class="header">
+    <div class="popup_title">
       <h1>{{ action }}</h1>
-      <div class="buttons">
-        <el-button @click="$emit('minimize')">
-          <el-icon><Minus /></el-icon>
-        </el-button>
-        <el-button @click="$emit('close')">
-          <el-icon><Close /></el-icon>
-        </el-button>
+      <div class="close">
+        <el-icon :size="20" style="cursor: pointer; color: #7A858E;" @click="$emit('minimize')">
+          <Minus />
+        </el-icon>
+        <el-icon :size="20" style="cursor: pointer; color: #7A858E;" @click="$emit('close')">
+          <Close />
+        </el-icon>
       </div>
     </div>
-    <div class="content">
-      <el-form
-        ref="formRef"
-        :model="form"
-        :rules="rules"
-        label-position="top"
-        @submit.prevent="handleSubmit"
-      >
-        <!-- Basic Information -->
-        <div class="section">
-          <h2>Basic Information</h2>
-          <div class="fields">
-            <el-form-item label="First Name" prop="first_name" required>
+    <div class="popup_content">
+      <el-collapse v-model="activeNames" accordion style="--el-collapse-border-color: none;">
+        <el-collapse-item name="1">
+          <template #title>
+            <div class="title">
+              <el-icon style="font-size: 20px" :color="isBasicInfoValid ? '#2984DE' : '#E1E1E1'">
+                <SuccessFilled />
+              </el-icon>
+              <p :style="{ color: isBasicInfoValid ? '#2984DE' : '#272727' }">Basic Information</p>
+            </div>
+          </template>
+          <div class="form">
+            <div class="item">
+              <p>First Name</p>
               <el-input v-model="form.first_name" placeholder="Enter first name" />
-            </el-form-item>
-            
-            <el-form-item label="Last Name" prop="last_name" required>
+            </div>
+            <div class="item">
+              <p>Last Name</p>
               <el-input v-model="form.last_name" placeholder="Enter last name" />
-            </el-form-item>
-            
-            <el-form-item label="Date of Birth" prop="date_of_birth" required>
+            </div>
+            <div class="item">
+              <p>Date of Birth</p>
               <el-date-picker
                 v-model="form.date_of_birth"
                 type="date"
                 placeholder="Select date"
                 format="YYYY-MM-DD"
+                style="width: 100%"
               />
-            </el-form-item>
-
-            <el-form-item label="Email" prop="email" required>
+            </div>
+            <div class="item">
+              <p>Email</p>
               <el-input v-model="form.email" placeholder="Enter email address" />
-            </el-form-item>
-
-            <el-form-item label="Phone Number" prop="phone" required>
+            </div>
+            <div class="item">
+              <p>Phone Number</p>
               <el-input v-model="form.phone" placeholder="Enter phone number" />
-            </el-form-item>
-          </div>
-        </div>
-
-        <!-- Address Information -->
-        <div class="section">
-          <h2>Address Information</h2>
-          <div class="fields">
-            <el-form-item label="Street Address" prop="address" required>
+            </div>
+            <div class="item">
+              <p>Street Address</p>
               <el-input v-model="form.address" placeholder="Enter street address" />
-            </el-form-item>
-
-            <el-form-item label="City" prop="city" required>
+            </div>
+            <div class="item">
+              <p>City</p>
               <el-input v-model="form.city" placeholder="Enter city" />
-            </el-form-item>
-
-            <el-form-item label="State" prop="state" required>
+            </div>
+            <div class="item">
+              <p>State</p>
               <el-input v-model="form.state" placeholder="Enter state" />
-            </el-form-item>
-
-            <el-form-item label="Postal Code" prop="postal_code" required>
+            </div>
+            <div class="item">
+              <p>Postal Code</p>
               <el-input v-model="form.postal_code" placeholder="Enter postal code" />
-            </el-form-item>
+            </div>
           </div>
-        </div>
-
-        <!-- Employment Information -->
-        <div class="section">
-          <h2>Employment Information</h2>
-          <div class="fields">
-            <el-form-item label="Employment Type" prop="employment_type" required>
-              <el-select v-model="form.employment_type" placeholder="Select employment type">
+        </el-collapse-item>
+        
+        <el-collapse-item name="2">
+          <template #title>
+            <div class="title">
+              <el-icon style="font-size: 20px" :color="isEmploymentValid ? '#2984DE' : '#E1E1E1'">
+                <SuccessFilled />
+              </el-icon>
+              <p :style="{ color: isEmploymentValid ? '#2984DE' : '#272727' }">Employment Information</p>
+            </div>
+          </template>
+          <div class="form">
+            <div class="item">
+              <p>Employment Type</p>
+              <el-select v-model="form.employment_type" placeholder="Select employment type" style="width: 100%">
                 <el-option label="Full-time" value="full_time" />
                 <el-option label="Part-time" value="part_time" />
                 <el-option label="Casual" value="casual" />
                 <el-option label="Contract" value="contract" />
               </el-select>
-            </el-form-item>
-
-            <el-form-item label="Annual Income" prop="annual_income" required>
+            </div>
+            <div class="item">
+              <p>Annual Income</p>
               <el-input-number 
                 v-model="form.annual_income"
                 :min="0"
@@ -93,14 +96,15 @@
                 :step="1000"
                 :controls="false"
                 placeholder="Enter annual income"
+                style="width: 100%"
               />
-            </el-form-item>
-
-            <el-form-item label="Employer Name" prop="employer_name">
+            </div>
+            <div class="item">
+              <p>Employer Name</p>
               <el-input v-model="form.employer_name" placeholder="Enter employer name" />
-            </el-form-item>
-
-            <el-form-item label="Years with Employer" prop="years_with_employer">
+            </div>
+            <div class="item">
+              <p>Years with Employer</p>
               <el-input-number 
                 v-model="form.years_with_employer"
                 :min="0"
@@ -108,17 +112,25 @@
                 :step="0.5"
                 :controls="false"
                 placeholder="Enter years with employer"
+                style="width: 100%"
               />
-            </el-form-item>
+            </div>
           </div>
-        </div>
-
-        <!-- Relationship Information -->
-        <div class="section">
-          <h2>Relationship Information</h2>
-          <div class="fields">
-            <el-form-item label="Relationship to Borrower" prop="relationship" required>
-              <el-select v-model="form.relationship" placeholder="Select relationship">
+        </el-collapse-item>
+        
+        <el-collapse-item name="3">
+          <template #title>
+            <div class="title">
+              <el-icon style="font-size: 20px" :color="isRelationshipValid ? '#2984DE' : '#E1E1E1'">
+                <SuccessFilled />
+              </el-icon>
+              <p :style="{ color: isRelationshipValid ? '#2984DE' : '#272727' }">Relationship Information</p>
+            </div>
+          </template>
+          <div class="form">
+            <div class="item">
+              <p>Relationship to Borrower</p>
+              <el-select v-model="form.relationship" placeholder="Select relationship" style="width: 100%">
                 <el-option label="Spouse" value="spouse" />
                 <el-option label="Parent" value="parent" />
                 <el-option label="Child" value="child" />
@@ -126,22 +138,20 @@
                 <el-option label="Business Partner" value="business_partner" />
                 <el-option label="Other" value="other" />
               </el-select>
-            </el-form-item>
-
-            <el-form-item 
-              v-if="form.relationship === 'other'" 
-              label="Specify Relationship" 
-              prop="relationship_other"
-              required
-            >
+            </div>
+            <div class="item" v-if="form.relationship === 'other'">
+              <p>Specify Relationship</p>
               <el-input v-model="form.relationship_other" placeholder="Please specify relationship" />
-            </el-form-item>
-            
-            <el-form-item label="Related Borrower" prop="borrower_id">
+            </div>
+            <div class="item">
+              <p>Related Borrower</p>
               <el-select 
                 v-model="form.borrower_id" 
                 placeholder="Select related borrower"
                 filterable
+                clearable
+                :loading="loadingBorrowers"
+                style="width: 100%"
               >
                 <el-option 
                   v-for="borrower in borrowerOptions" 
@@ -150,13 +160,16 @@
                   :value="borrower.id" 
                 />
               </el-select>
-            </el-form-item>
-            
-            <el-form-item label="Related Application" prop="application_id">
+            </div>
+            <div class="item">
+              <p>Related Application</p>
               <el-select 
                 v-model="form.application_id" 
                 placeholder="Select related application"
                 filterable
+                clearable
+                :loading="loadingApplications"
+                style="width: 100%"
               >
                 <el-option 
                   v-for="application in applicationOptions" 
@@ -165,25 +178,26 @@
                   :value="application.id" 
                 />
               </el-select>
-            </el-form-item>
+            </div>
           </div>
-        </div>
-
-        <div class="actions">
-          <el-button type="primary" native-type="submit" :loading="loading">
-            {{ isEdit ? 'Update Guarantor' : 'Create Guarantor' }}
-          </el-button>
-          <el-button @click="$emit('close')">Cancel</el-button>
-        </div>
-      </el-form>
+        </el-collapse-item>
+      </el-collapse>
+    </div>
+    <div class="buttons">
+      <Cancel @click="$emit('close')" />
+      <Save @click="handleSubmit" />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { ElMessage } from 'element-plus';
+import { SuccessFilled, Minus, Close } from '@element-plus/icons-vue';
 import { api } from '@/api';
+import { mapGuarantorFormToApi, mapGuarantorApiToForm } from '@/utils/dataMappers';
+import Cancel from '../buttons/cancel.vue';
+import Save from '../buttons/save.vue';
 
 const props = defineProps({
   action: {
@@ -206,7 +220,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'minimize', 'refresh']);
 
-const formRef = ref(null);
+const activeNames = ref("1");
 const loading = ref(false);
 const loadingBorrowers = ref(false);
 const loadingApplications = ref(false);
@@ -232,27 +246,43 @@ const form = ref({
   relationship: '',
   relationship_other: '',
   guarantor_type: 'individual',
-  borrower_id: props.borrowerId || null,
-  application_id: props.applicationId || null,
+  borrower_id: null,
+  application_id: null,
   ...props.guarantorData
 });
 
-const rules = {
-  // All fields are now optional - only validate format when values are provided
-  email: [
-    { type: 'email', message: 'Please enter a valid email address', trigger: 'blur' }
-  ],
-  relationship_other: [{
-    validator: (rule, value, callback) => {
-      if (form.value.relationship === 'other' && !value) {
-        callback(new Error('Please specify relationship when "Other" is selected'));
-      } else {
-        callback();
-      }
-    },
-    trigger: 'blur'
-  }]
-};
+// Validation computed properties
+const isBasicInfoValid = computed(() => {
+  return form.value.first_name && form.value.last_name && form.value.date_of_birth && 
+         form.value.email && form.value.phone && form.value.address && 
+         form.value.city && form.value.state && form.value.postal_code;
+});
+
+const isEmploymentValid = computed(() => {
+  return form.value.employment_type && form.value.annual_income;
+});
+
+const isRelationshipValid = computed(() => {
+  return form.value.relationship && 
+         (form.value.relationship !== 'other' || form.value.relationship_other);
+});
+
+// Watch for prop changes and update form accordingly
+watch(() => props.borrowerId, (newVal) => {
+  console.log('borrowerId prop changed:', newVal);
+  if (newVal) {
+    form.value.borrower_id = parseInt(newVal);
+    console.log('Set form.borrower_id to:', form.value.borrower_id);
+  }
+}, { immediate: true });
+
+watch(() => props.applicationId, (newVal) => {
+  console.log('applicationId prop changed:', newVal);
+  if (newVal) {
+    form.value.application_id = parseInt(newVal);
+    console.log('Set form.application_id to:', form.value.application_id);
+  }
+}, { immediate: true });
 
 // Load all borrowers
 const loadAllBorrowers = async () => {
@@ -300,21 +330,47 @@ const loadAllApplications = async () => {
 const loadRelatedData = async () => {
   if (isEdit.value && props.guarantorData.id) {
     try {
-      // Load related borrowers
-      const [borrowerError, borrowerResponse] = await api.getGuarantorBorrowers(props.guarantorData.id);
-      if (!borrowerError && borrowerResponse.results && borrowerResponse.results.length > 0) {
-        const borrower = borrowerResponse.results[0];
-        form.value.borrower_id = borrower.id;
+      // Get the guarantor data and map it to form format
+      const [error, response] = await api.getGuarantor(props.guarantorData.id);
+      if (!error && response) {
+        console.log('Guarantor data received:', response);
+        const formData = mapGuarantorApiToForm(response);
+        form.value = { ...form.value, ...formData };
+        
+        // Ensure relationship fields are properly set from the API response
+        if (response.borrower) {
+          form.value.borrower_id = parseInt(response.borrower);
+        }
+        if (response.application) {
+          form.value.application_id = parseInt(response.application);
+        }
+      } else {
+        console.error('Error loading guarantor data:', error);
+        ElMessage.error('Failed to load guarantor data');
       }
       
-      // Load related applications
+      // Load related borrowers (for display purposes)
+      const [borrowerError, borrowerResponse] = await api.getGuarantorBorrowers(props.guarantorData.id);
+      if (!borrowerError && borrowerResponse && borrowerResponse.results && borrowerResponse.results.length > 0) {
+        const borrower = borrowerResponse.results[0];
+        // Only set if not already set from the main response
+        if (!form.value.borrower_id) {
+          form.value.borrower_id = borrower.id;
+        }
+      }
+      
+      // Load related applications (for display purposes)
       const [appError, appResponse] = await api.getGuarantorApplications(props.guarantorData.id);
-      if (!appError && appResponse.results && appResponse.results.length > 0) {
+      if (!appError && appResponse && appResponse.results && appResponse.results.length > 0) {
         const application = appResponse.results[0];
-        form.value.application_id = application.id;
+        // Only set if not already set from the main response
+        if (!form.value.application_id) {
+          form.value.application_id = application.id;
+        }
       }
     } catch (error) {
       console.error('Error loading related data:', error);
+      ElMessage.error('Failed to load guarantor data');
     }
   }
 };
@@ -331,87 +387,27 @@ onMounted(() => {
 });
 
 const handleSubmit = async () => {
-  if (!formRef.value) return;
-  
   try {
-    await formRef.value.validate();
     loading.value = true;
 
-    // Prepare form data
-    const formData = { ...form.value };
+    // Use the data mapper to map form data to API format
+    const formData = mapGuarantorFormToApi(form.value);
     
-    // Format date_of_birth to YYYY-MM-DD string format
-    if (formData.date_of_birth) {
-      const date = new Date(formData.date_of_birth);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      formData.date_of_birth = `${year}-${month}-${day}`;
-    }
-    
-    // Convert annual_income to string if it exists
-    if (formData.annual_income !== null && formData.annual_income !== undefined) {
-      formData.annual_income = formData.annual_income.toString();
-    }
-    
-    // Convert years_with_employer to string if it exists
-    if (formData.years_with_employer !== null && formData.years_with_employer !== undefined) {
-      formData.years_with_employer = formData.years_with_employer.toString();
-    }
-    
-    // Set guarantor_type if not already set
-    if (!formData.guarantor_type) {
-      formData.guarantor_type = 'individual';
-    }
-    
-    // Map address fields to API expected format
-    if (formData.address) {
-      formData.address_street_name = formData.address;
-      delete formData.address;
-    }
-    
-    if (formData.city) {
-      formData.address_suburb = formData.city;
-      delete formData.city;
-    }
-    
-    if (formData.state) {
-      formData.address_state = formData.state;
-      delete formData.state;
-    }
-    
-    if (formData.postal_code) {
-      formData.address_postcode = formData.postal_code;
-      delete formData.postal_code;
-    }
-    
-    if (formData.phone) {
-      formData.mobile = formData.phone;
-    }
-    
-    if (formData.relationship !== 'other') {
-      delete formData.relationship_other;
-    }
-
-    // Extract relationship data
-    const borrowerId = formData.borrower_id;
-    const applicationId = formData.application_id;
-    
-    // Add borrower and application IDs directly to the guarantor data
-    // The API will handle the relationships
-    formData.borrower = borrowerId;
-    formData.application = applicationId;
-    
-    delete formData.borrower_id;
-    delete formData.application_id;
-
-    // For debugging
+    // For debugging - log the relationship fields
+    console.log('Form relationship fields:', {
+      borrower_id: form.value.borrower_id,
+      application_id: form.value.application_id
+    });
+    console.log('API relationship fields:', {
+      borrower: formData.borrower,
+      application: formData.application
+    });
     console.log('Submitting guarantor data:', formData);
 
     // Make API call to create/update guarantor
     let guarantorId;
     if (isEdit.value) {
-      const [error, response] = await api.guarantorApi.updateGuarantor(props.guarantorData.id, formData);
+      const [error, response] = await api.updateGuarantor(props.guarantorData.id, formData);
       if (error) {
         console.error('API Error:', error);
         throw error;
@@ -423,7 +419,7 @@ const handleSubmit = async () => {
         type: 'success'
       });
     } else {
-      const [error, response] = await api.guarantorApi.createGuarantor(formData);
+      const [error, response] = await api.createGuarantor(formData);
       if (error) {
         console.error('API Error:', error);
         throw error;
@@ -440,9 +436,36 @@ const handleSubmit = async () => {
     emit('close');
   } catch (error) {
     console.error('Form submission error:', error);
+    
+    // Format error message for better user experience
+    let errorMessage = 'An error occurred. Please try again.';
+    
+    if (error && typeof error === 'object') {
+      // Handle API validation errors
+      const errorFields = Object.keys(error);
+      if (errorFields.length > 0) {
+        const fieldErrors = [];
+        
+        errorFields.forEach(field => {
+          if (Array.isArray(error[field])) {
+            fieldErrors.push(`${field.replace(/_/g, ' ')}: ${error[field].join(', ')}`);
+          } else {
+            fieldErrors.push(`${field.replace(/_/g, ' ')}: ${error[field]}`);
+          }
+        });
+        
+        errorMessage = `Please fix the following errors:\n${fieldErrors.join('\n')}`;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    }
+    
     ElMessage.error({
-      message: error.message || 'An error occurred. Please try again.',
-      type: 'error'
+      message: errorMessage,
+      type: 'error',
+      duration: 5000
     });
   } finally {
     loading.value = false;
@@ -455,69 +478,98 @@ const handleSubmit = async () => {
   position: fixed;
   top: 0;
   right: 0;
-  width: 600px;
-  height: 100vh;
-  background: #FFF;
-  box-shadow: -4px 0px 15px rgba(0, 0, 0, 0.1);
+  bottom: 0;
+  padding: 10px;
   display: flex;
   flex-direction: column;
-  z-index: 1000;
+  background: white;
+  border: none;
+  box-shadow: -8px -1px 9.3px 0px rgba(202, 202, 202, 0.16);
+  width: 40%;
+  height: 100vh;
+  overflow: hidden;
+  z-index: 1999;
 }
 
-.header {
-  padding: 20px;
+.popup_title {
+  width: 100%;
+  padding: 10px;
   display: flex;
+  flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid #EAEAEA;
+  border-bottom: 1.5px solid var(--Line, #E1E1E1);
 }
 
-.header h1 {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 600;
+h1 {
+  color: #384144;
+  font-feature-settings: 'liga' off, 'clig' off;
+  font-size: 1.1rem;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 12px;
 }
 
-.buttons {
+.close {
   display: flex;
-  gap: 10px;
-}
-
-.content {
-  flex: 1;
-  padding: 20px;
-  overflow-y: auto;
-}
-
-.section {
-  margin-bottom: 30px;
-}
-
-.section h2 {
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 20px;
-  color: #333;
-}
-
-.fields {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  flex-direction: row;
+  align-items: center;
   gap: 20px;
 }
 
-.actions {
-  margin-top: 30px;
+.popup_content {
+  width: 100%;
+  padding: 10px;
+}
+
+.title {
   display: flex;
-  justify-content: flex-end;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding-left: 5px;
+}
+
+.title p {
+  font-feature-settings: 'liga' off, 'clig' off;
+  font-size: 0.9rem;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 12px;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px 20px;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: start;
   gap: 10px;
 }
 
-:deep(.el-form-item__label) {
+.item p {
+  color: #384144;
+  font-feature-settings: 'liga' off, 'clig' off;
+  font-size: 0.75rem;
+  font-style: normal;
   font-weight: 500;
+  line-height: 12px;
+  margin: 0;
 }
 
-:deep(.el-input), :deep(.el-select), :deep(.el-date-picker) {
+.buttons {
   width: 100%;
+  padding: 10px;
+  margin-top: auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: end;
+  align-items: center;
+  border-top: 1.5px solid #E1E1E1;
+  gap: 10px;
 }
 </style>

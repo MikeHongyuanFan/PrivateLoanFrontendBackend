@@ -3283,10 +3283,54 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/borrowers/guarantors/{id}/applications/:
+    get:
+      operationId: borrowers_guarantors_applications_retrieve
+      description: Get applications associated with this guarantor
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - borrowers
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BorrowerGuarantor'
+          description: ''
+  /api/borrowers/guarantors/{id}/borrowers/:
+    get:
+      operationId: borrowers_guarantors_borrowers_retrieve
+      description: Get borrowers associated with this guarantor
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - borrowers
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BorrowerGuarantor'
+          description: ''
   /api/brokers/:
     get:
       operationId: brokers_list
-      description: API endpoint for managing brokers
+      description: Override list method to add debugging
       parameters:
       - in: query
         name: branch
@@ -3508,6 +3552,29 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/BrokerDetailRequest'
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrokerDetail'
+          description: ''
+  /api/brokers/{id}/related_borrowers/:
+    get:
+      operationId: brokers_related_borrowers_retrieve
+      description: Get all borrowers related to a broker through applications
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this broker.
+        required: true
+      tags:
+      - brokers
       security:
       - jwtAuth: []
       - Bearer: []
@@ -9274,6 +9341,10 @@ components:
           readOnly: true
         is_company:
           type: boolean
+        company_name:
+          type: string
+          nullable: true
+          maxLength: 255
       required:
       - address
       - application_count
@@ -9572,7 +9643,12 @@ components:
           type: string
           nullable: true
           maxLength: 20
+        branch_name:
+          type: string
+          readOnly: true
+          nullable: true
       required:
+      - branch_name
       - id
     CompanyBorrower:
       type: object

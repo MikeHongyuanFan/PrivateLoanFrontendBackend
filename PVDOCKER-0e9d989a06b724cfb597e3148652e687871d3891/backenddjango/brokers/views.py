@@ -150,6 +150,31 @@ class BrokerViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
     
     @action(detail=True, methods=['get'])
+    def related_borrowers(self, request, pk=None):
+        """
+        Get all borrowers related to a broker through applications
+        """
+        broker = self.get_object()
+        from borrowers.serializers import BorrowerListSerializer
+        
+        # Get unique borrowers from all applications this broker is associated with
+        borrower_ids = broker.broker_applications.values_list('borrowers__id', flat=True).distinct()
+        
+        # Filter out None values
+        borrower_ids = [bid for bid in borrower_ids if bid is not None]
+        
+        if not borrower_ids:
+            return Response([])
+            
+        # Get the borrower objects
+        from borrowers.models import Borrower
+        borrowers = Borrower.objects.filter(id__in=borrower_ids)
+        
+        # Serialize the borrowers
+        serializer = BorrowerListSerializer(borrowers, many=True)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['get'])
     def stats(self, request, pk=None):
         """
         Get statistics for a broker
@@ -245,6 +270,24 @@ class BrokerViewSet(viewsets.ModelViewSet):
                 {"error": f"Failed to unlock commission account: {str(e)}"},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+    def list(self, request, *args, **kwargs):
+        """Override list method to add debugging"""
+        queryset = self.filter_queryset(self.get_queryset())
+        
+        # Debug: Check if brokers have branches
+        for broker in queryset[:5]:  # Check first 5 brokers
+            print(f"DEBUG: Broker {broker.id} ({broker.name}) - branch: {broker.branch}")
+            if broker.branch:
+                print(f"DEBUG: Broker {broker.id} branch name: {broker.branch.name}")
+        
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
 
 
 class BDMViewSet(viewsets.ModelViewSet):

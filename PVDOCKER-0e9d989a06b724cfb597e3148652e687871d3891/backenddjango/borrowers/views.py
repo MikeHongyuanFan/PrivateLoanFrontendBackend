@@ -244,3 +244,51 @@ class GuarantorViewSet(viewsets.ModelViewSet):
             return queryset.none()
         
         return queryset.none()
+        
+    @action(detail=True, methods=['get'])
+    def borrowers(self, request, pk=None):
+        """
+        Get borrowers associated with this guarantor
+        """
+        from applications.serializers import BorrowerSerializer
+        
+        guarantor = self.get_object()
+        borrowers = []
+        
+        # Get borrowers directly associated with this guarantor
+        if guarantor.borrower:
+            borrowers.append(guarantor.borrower)
+        
+        # Get borrowers from applications associated with this guarantor
+        if guarantor.application:
+            borrowers.extend(list(guarantor.application.borrowers.all()))
+        
+        # Remove duplicates
+        borrowers = list(set(borrowers))
+        
+        serializer = BorrowerSerializer(borrowers, many=True)
+        return Response({'results': serializer.data})
+    
+    @action(detail=True, methods=['get'])
+    def applications(self, request, pk=None):
+        """
+        Get applications associated with this guarantor
+        """
+        from applications.serializers import ApplicationListSerializer
+        
+        guarantor = self.get_object()
+        applications = []
+        
+        # Get application directly associated with this guarantor
+        if guarantor.application:
+            applications.append(guarantor.application)
+        
+        # Get applications from borrowers associated with this guarantor
+        if guarantor.borrower:
+            applications.extend(list(guarantor.borrower.borrower_applications.all()))
+        
+        # Remove duplicates
+        applications = list(set(applications))
+        
+        serializer = ApplicationListSerializer(applications, many=True)
+        return Response({'results': serializer.data})

@@ -29,5 +29,9 @@ urlpatterns = [
         'delete': 'destroy'
     }), name='guarantor-asset-detail'),
     
+    # New endpoints for guarantor relationships
+    path('guarantors/<int:pk>/borrowers/', GuarantorViewSet.as_view({'get': 'borrowers'}), name='guarantor-borrowers'),
+    path('guarantors/<int:pk>/applications/', GuarantorViewSet.as_view({'get': 'applications'}), name='guarantor-applications'),
+    
     path('', include(router.urls)),
 ]

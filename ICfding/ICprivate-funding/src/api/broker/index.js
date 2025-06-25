@@ -116,6 +116,13 @@ export function brokerApplications(brokerId) {
   })
 }
 
+export function brokerRelatedBorrowers(brokerId) {
+  return sendRequest({
+    url: `/api/brokers/${brokerId}/related-borrowers/`,
+    method: 'get',
+  })
+}
+
 export function branchApplications(branchId) {
   return sendRequest({
     url: `/api/brokers/branches/${branchId}/applications/`,
@@ -184,6 +191,7 @@ export const brokerApi = {
   deleteBdms,
   putBdms,
   brokerApplications,
+  brokerRelatedBorrowers,
   branchApplications,
   bdmApplications,
   bdmBrokers,

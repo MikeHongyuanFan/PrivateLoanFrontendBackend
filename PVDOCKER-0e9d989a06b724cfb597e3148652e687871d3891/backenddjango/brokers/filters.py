@@ -30,7 +30,7 @@ class BrokerFilter(django_filters.FilterSet):
         Filter brokers with at least a certain number of applications
         """
         return queryset.annotate(
-            application_count=Count('applications')
+            application_count=Count('broker_applications')
         ).filter(application_count__gte=value)
 
 

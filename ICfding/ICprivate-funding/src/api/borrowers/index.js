@@ -1,4 +1,5 @@
 import sendRequest from '@/server/sendRequest'
+import { guarantorApi } from '../guarantor'
 
 //http://3.25.83.191/api/borrowers/borrowers/
 export function borrowers(params) {
@@ -104,4 +105,15 @@ export const borrowerApi = {
   getBorrowerAsset,
   updateBorrowerAsset,
   deleteBorrowerAsset,
+  // Add guarantor API functions
+  createGuarantor: guarantorApi.createGuarantor,
+  getGuarantors: guarantorApi.getGuarantors,
+  getGuarantor: guarantorApi.getGuarantor,
+  updateGuarantor: guarantorApi.updateGuarantor,
+  patchGuarantor: guarantorApi.patchGuarantor,
+  deleteGuarantor: guarantorApi.deleteGuarantor,
+  getGuarantorAssets: guarantorApi.getGuarantorAssets,
+  createGuarantorAsset: guarantorApi.createGuarantorAsset,
+  getGuarantorBorrowers: guarantorApi.getGuarantorBorrowers,
+  getGuarantorApplications: guarantorApi.getGuarantorApplications,
 }

@@ -3,7 +3,7 @@
         <div class="title">
             <h1>{{ borrowers.first_name }} {{ borrowers.last_name }}</h1>
             <h2>Date Created: {{ borrowers.created_at?.split('T')[0] }}</h2>
-            <p style="color: #2984DE">Broker ID: {{ borrowerId }}</p>
+            <p style="color: #2984DE">Borrower ID: {{ borrowerId }}</p>
         </div>
         <el-tabs v-model="activeName" class="tabs" >
             <el-tab-pane name="1">
@@ -13,78 +13,111 @@
                 <div class="tab">
                     <div class="info">
                         <p style="color: #7A858E">Contact Name</p>
-                        <p>{{ borrowers.first_name }} {{ borrowers.last_name }}</p>
+                        <p class="text">{{ borrowers.first_name }} {{ borrowers.last_name }}</p>
                     </div>
                     <div class="info">
                         <p style="color: #7A858E">Borrower Type</p>
-                        <p>{{ type }}</p>
+                        <p class="text">{{ type }}</p>
                     </div>
                     <div class="info">
                         <p style="color: #7A858E">Email</p>
-                        <p>{{ borrowers.email }}</p>
+                        <p class="text">{{ borrowers.email || '-' }}</p>
                     </div>
                     <div class="info">
                         <p style="color: #7A858E">Phone</p>
-                        <p>{{ borrowers.phone }}</p>
+                        <p class="text">{{ borrowers.phone || '-' }}</p>
                     </div>
                     <div class="info">
-                        <p style="color: #7A858E">Address</p>
-                        <p>{{ borrowers.registered_address_unit }}, {{ borrowers.registered_address_street_no }} {{ borrowers.registered_address_street_name }}</p>
+                        <p style="color: #7A858E">Date of Birth</p>
+                        <p class="text">{{ borrowers.date_of_birth || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Tax ID (TFN)</p>
+                        <p class="text">{{ borrowers.tax_id || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Marital Status</p>
+                        <p class="text">{{ formatMaritalStatus(borrowers.marital_status) }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Residency Status</p>
+                        <p class="text">{{ formatResidencyStatus(borrowers.residency_status) }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Referral Source</p>
+                        <p class="text">{{ borrowers.referral_source || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Tags</p>
+                        <p class="text">{{ borrowers.tags || '-' }}</p>
                     </div>
                 </div>
             </el-tab-pane>
             <el-tab-pane name="2">
                 <template #label>
-                    <div class="label">Financial Summary</div>
+                    <div class="label">Address Information</div>
                 </template>
                 <div class="tab">
+                    <div class="info">
+                        <p style="color: #7A858E">Residential Address</p>
+                        <p class="text">{{ borrowers.residential_address || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Mailing Address</p>
+                        <p class="text">{{ borrowers.mailing_address || '-' }}</p>
+                    </div>
+                </div>
+            </el-tab-pane>
+            <el-tab-pane name="3">
+                <template #label>
+                    <div class="label">Employment Information</div>
+                </template>
+                <div class="tab">
+                    <div class="info">
+                        <p style="color: #7A858E">Employment Type</p>
+                        <p class="text">{{ formatEmploymentType(borrowers.employment_type) }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Employer Name</p>
+                        <p class="text">{{ borrowers.employer_name || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Job Title</p>
+                        <p class="text">{{ borrowers.job_title || '-' }}</p>
+                    </div>
                     <div class="info">
                         <p style="color: #7A858E">Annual Income</p>
-                        <p>${{ borrowers.annual_income || '-' }}</p>
-                    </div>                    
-                    <div class="info">
-                        <p style="color: #7A858E">Bank BSB</p>
-                        <p>{{ borrowers.bank_bsb || '-' }}</p>
+                        <p class="text">{{ formatCurrency(borrowers.annual_income) }}</p>
                     </div>
                     <div class="info">
-                        <p style="color: #7A858E">Bank Account Number</p>
-                        <p>{{ borrowers.bank_account_number || '-' }}</p>
+                        <p style="color: #7A858E">Employment Duration</p>
+                        <p class="text">{{ borrowers.employment_duration ? `${borrowers.employment_duration} months` : '-' }}</p>
                     </div>
                     <div class="info">
-                        <p style="color: #7A858E">Bank Account Name</p>
-                        <p>{{ borrowers.bank_account_name || '-' }}</p>
+                        <p style="color: #7A858E">Employer Address</p>
+                        <p class="text">{{ borrowers.employer_address || '-' }}</p>
                     </div>
                 </div>
             </el-tab-pane>
-            <el-tab-pane name="3" v-if="borrowers.is_company === true">
+            <el-tab-pane name="4">
                 <template #label>
-                    <div class="label">Company Information</div>
+                    <div class="label">Financial Information</div>
                 </template>
                 <div class="tab">
                     <div class="info">
-                        <p style="color: #7A858E">Company Name</p>
-                        <p>${{ borrowers.company_name || '-' }}</p>
-                    </div>                    
-                    <div class="info">
-                        <p style="color: #7A858E">Company ABN</p>
-                        <p>{{ borrowers.company_abn || '-' }}</p>
+                        <p style="color: #7A858E">Other Income</p>
+                        <p class="text">{{ formatCurrency(borrowers.other_income) }}</p>
                     </div>
                     <div class="info">
-                        <p style="color: #7A858E">Company ACN</p>
-                        <p>{{ borrowers.company_acn || '-' }}</p>
+                        <p style="color: #7A858E">Monthly Expenses</p>
+                        <p class="text">{{ formatCurrency(borrowers.monthly_expenses) }}</p>
                     </div>
                     <div class="info">
-                        <p style="color: #7A858E">Company Address</p>
-                        <p>{{ borrowers.company_address || '-' }}</p>
+                        <p style="color: #7A858E">Credit Score</p>
+                        <p class="text">{{ borrowers.credit_score || '-' }}</p>
                     </div>
                 </div>
             </el-tab-pane>
-            <!-- <el-tab-pane name="4">
-                <template #label>
-                    <div class="label">Repayment History</div>
-                </template>
-                Repayment History
-            </el-tab-pane> -->
         </el-tabs>
     </div>
 </template>
@@ -97,25 +130,8 @@
     const route = useRoute()
 
     const borrowers = ref({})
-    const borrower = ref({
-        name: "Borrower Name",
-        date: "Date Create: 2025-12-23 10:13:42"
-    })
     const activeName = ref('1')
     const borrowerId = route.params.borrowerId
-    const overview = ref({
-        name: "Borrower One",
-        address: "address",
-        email: "borrower@gmail.com",
-        phone: "0456875426",
-        type: "Branch Name"
-    })
-    const summary = ref({
-        total: "Commonwealth Bank",
-        active: "Broker Name",
-        totalAmount: "$9,000,000.00",
-        outstanding: "$7,500,000.00"
-    })
 
     onMounted(() => {
         getBorrower()
@@ -130,6 +146,7 @@
             console.log(err)
         }
     }
+    
     const type = computed(() => {
         if (borrowers.value.is_company === true) {
             return 'Company'
@@ -137,6 +154,52 @@
             return 'Individual'
         }
     })
+
+    // Formatting functions
+    const formatMaritalStatus = (status) => {
+        if (!status) return '-';
+        const statusMap = {
+            'single': 'Single',
+            'married': 'Married',
+            'de_facto': 'De Facto',
+            'divorced': 'Divorced',
+            'widowed': 'Widowed'
+        };
+        return statusMap[status] || status;
+    }
+
+    const formatResidencyStatus = (status) => {
+        if (!status) return '-';
+        const statusMap = {
+            'citizen': 'Citizen',
+            'permanent_resident': 'Permanent Resident',
+            'temporary_resident': 'Temporary Resident',
+            'foreign_investor': 'Foreign Investor'
+        };
+        return statusMap[status] || status;
+    }
+
+    const formatEmploymentType = (type) => {
+        if (!type) return '-';
+        const typeMap = {
+            'full_time': 'Full Time',
+            'part_time': 'Part Time',
+            'casual': 'Casual',
+            'self_employed': 'Self Employed',
+            'contractor': 'Contractor',
+            'unemployed': 'Unemployed',
+            'retired': 'Retired'
+        };
+        return typeMap[type] || type;
+    }
+
+    const formatCurrency = (amount) => {
+        if (!amount || isNaN(amount)) return '-';
+        return new Intl.NumberFormat('en-AU', {
+            style: 'currency',
+            currency: 'AUD'
+        }).format(amount);
+    }
 </script>
 
 <style scoped>
@@ -173,7 +236,6 @@
         margin: 0;
     }
     p {
-        color: #000;
         font-feature-settings: 'liga' off, 'clig' off;
         font-size: 0.75rem;
         font-style: normal;
@@ -211,5 +273,13 @@
         flex-direction: column;
         align-items: start;
         gap: 10px;
+    }
+    .text {
+        font-family: Inter;
+        font-weight: 600;
+        font-size: 12px;
+        line-height: 100%;
+        letter-spacing: 0px;
+        color: #000000;
     }
 </style>

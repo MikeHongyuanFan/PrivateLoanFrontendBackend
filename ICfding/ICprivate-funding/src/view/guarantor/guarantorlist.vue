@@ -46,7 +46,21 @@
                 <el-table-column prop="id" label="Broker ID" sortable="" width="120" />
                 <el-table-column prop="first_name" label="First Name" width="100" />
                 <el-table-column prop="last_name" label="Last Name" width="100" />
-                <el-table-column prop="address" label="Address" min-width="150" />
+                <el-table-column prop="address" label="Address" min-width="150">
+                    <template #default="scope">
+                        <span v-if="scope.row.address_street_name || scope.row.address_suburb || scope.row.address_state">
+                            {{ [
+                                scope.row.address_street_no,
+                                scope.row.address_street_name,
+                                scope.row.address_suburb,
+                                scope.row.address_state,
+                                scope.row.address_postcode
+                            ].filter(Boolean).join(', ') }}
+                        </span>
+                        <span v-else-if="scope.row.address">{{ scope.row.address }}</span>
+                        <span v-else>-</span>
+                    </template>
+                </el-table-column>
                 <el-table-column prop="mobile" label="Phone" width="120" />
                 <el-table-column prop="guarantor_type" label="Guarantor Type" width="130" />
                 <el-table-column prop="email" label="Email Address" min-width="130" />
@@ -150,7 +164,7 @@
     const action = ref("Create Guarantor")
     const popupAction = ref("")
     const guarantors = ref([])
-    const pageSize = 2
+    const pageSize = 10
     const guarantorListTable = ref()
     const selectedItem = ref([])
     const selectAll = ref(false)

@@ -33,9 +33,16 @@
                 <el-table-column prop="name" label="Name" min-width="139" />
                 <el-table-column prop="company" label="Company" width="130" />
                 <el-table-column prop="phone" label="Phone" width="130" />
-                <el-table-column prop="application_count" label="Applications" min-width="120" />
                 <el-table-column prop="email" label="Email Address" min-width="225" />
-                <el-table-column prop="branch_name" label="Branch/Subsidiary" width="160" />
+                <el-table-column prop="branch_name" label="Branch/Subsidiary" width="160">
+                    <template #default="scope">
+                        <span v-if="scope.row.branch_name">{{ scope.row.branch_name }}</span>
+                        <span v-else>
+                            <span style="color: red;">DEBUG: No branch_name</span>
+                            <span style="color: blue;">Row data: {{ JSON.stringify(scope.row) }}</span>
+                        </span>
+                    </template>
+                </el-table-column>
                 <el-table-column label="Action" align="center" width="60" fixed="right">
                     <template #default="{ row }">
                         <el-popover placement="bottom" trigger="hover" width="160" popper-class="user-popover">
@@ -144,11 +151,17 @@ onActivated(() => {
 const getBrokers = async () => {
     const [err, res] = await api.brokers(selected.value)
     if (!err) {
-        console.log(res);
+        console.log('Broker API Response:', res);
+        console.log('Broker Results:', res.results);
+        if (res.results && res.results.length > 0) {
+            console.log('First Broker Data:', res.results[0]);
+            console.log('First Broker branch_name:', res.results[0].branch_name);
+            console.log('First Broker branch object:', res.results[0].branch);
+        }
         total.value = res?.count || 0
         brokers.value = res.results
     } else {
-        console.log(err)
+        console.log('Broker API Error:', err)
     }
 }
 const handleClear = () => {

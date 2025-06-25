@@ -37,9 +37,11 @@
                 </el-table-column>
                 <el-table-column prop="address" label="Address" width="250">
                     <template #default="scope">
-                        <span>{{ scope.row.address.street_no }} {{ scope.row.address.street_name }} {{
-                            scope.row.address.state }} {{ scope.row.address.suburb }} {{ scope.row.address.unit
-                            }}</span>
+                        <span v-if="scope.row.residential_address">{{ scope.row.residential_address }}</span>
+                        <span v-else-if="scope.row.address && scope.row.address.street">{{ 
+                            [scope.row.address.street, scope.row.address.city, scope.row.address.state, scope.row.address.postal_code].filter(Boolean).join(', ') 
+                        }}</span>
+                        <span v-else>-</span>
                     </template>
                 </el-table-column>
                 <el-table-column prop="phone" label="Phone" width="130" />

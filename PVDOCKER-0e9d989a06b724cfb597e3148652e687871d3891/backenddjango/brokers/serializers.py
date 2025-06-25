@@ -66,9 +66,11 @@ class BDMSerializer(serializers.ModelSerializer):
 
 class BrokerListSerializer(serializers.ModelSerializer):
     """Serializer for listing brokers with minimal information and null/blank handling"""
+    branch_name = serializers.CharField(source='branch.name', read_only=True, allow_null=True)
+    
     class Meta:
         model = Broker
-        fields = ['id', 'name', 'company', 'email', 'phone']
+        fields = ['id', 'name', 'company', 'email', 'phone', 'branch_name']
         extra_kwargs = {
             # Make most fields optional and allow null/blank values for minimal data creation
             'name': {'required': False, 'allow_null': True, 'allow_blank': True},

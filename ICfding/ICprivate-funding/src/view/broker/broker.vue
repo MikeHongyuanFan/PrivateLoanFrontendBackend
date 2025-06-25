@@ -161,7 +161,7 @@
                             </el-table-column>
                             <el-table-column label="Primary Borrower" min-width="150">
                                 <template #default="scope">
-                                    {{ getPrimaryBorrowerName(scope.row.borrowers) }}
+                                    {{ scope.row.borrower_name || '-' }}
                                 </template>
                             </el-table-column>
                         </el-table>
@@ -172,7 +172,49 @@
                 <template #label>
                     <div class="label">Borrowers</div>
                 </template>
-                Borrowers
+                <div class="borrowers-section">
+                    <div v-if="loadingBorrowers" class="loading">Loading borrowers...</div>
+                    <div v-else-if="!relatedBorrowers || relatedBorrowers.length === 0" class="no-data">
+                        <p>No borrowers found for this broker</p>
+                        <p v-if="endpointNotAvailable" style="color: #909399; font-size: 0.8rem; margin-top: 10px;">
+                            Note: Related borrowers feature requires server restart to be available.
+                        </p>
+                    </div>
+                    <div v-else>
+                        <div class="borrowers-header">
+                            <h3>Related Borrowers ({{ relatedBorrowers.length }})</h3>
+                            <p v-if="relatedBorrowers.length > 0" style="color: #909399; font-size: 0.8rem; margin-top: 5px;">
+                                Note: Borrower information extracted from application details.
+                            </p>
+                        </div>
+                        <el-table 
+                            :data="relatedBorrowers" 
+                            style="width: 100%" 
+                            class="borrowers-table"
+                            :key="`broker-borrowers-${brokerId}`"
+                            v-loading="loadingBorrowers"
+                        >
+                            <el-table-column prop="id" label="ID" width="80" />
+                            <el-table-column label="Name" min-width="150">
+                                <template #default="scope">
+                                    <router-link :to="`/borrower/${scope.row.id}`" class="borrower-link">
+                                        {{ scope.row.is_company ? scope.row.company_name : `${scope.row.first_name} ${scope.row.last_name}` }}
+                                    </router-link>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="email" label="Email" min-width="200" />
+                            <el-table-column prop="phone" label="Phone" width="120" />
+                            <el-table-column prop="is_company" label="Type" width="100">
+                                <template #default="scope">
+                                    <el-tag :type="scope.row.is_company ? 'warning' : 'primary'" size="small">
+                                        {{ scope.row.is_company ? 'Company' : 'Individual' }}
+                                    </el-tag>
+                                </template>
+                            </el-table-column>
+                            <el-table-column prop="application_count" label="Applications" width="120" />
+                        </el-table>
+                    </div>
+                </div>
             </el-tab-pane>
         </el-tabs>
     </div>
@@ -211,6 +253,9 @@ const account = ref({
 const brokers = ref({})
 const applications = ref([])
 const loadingApplications = ref(false)
+const relatedBorrowers = ref([])
+const loadingBorrowers = ref(false)
+const endpointNotAvailable = ref(false)
 
 onMounted(async () => {
     try {
@@ -222,13 +267,18 @@ onMounted(async () => {
 
 const getBroker = async () => {
     try {
+        console.log('=== GET BROKER DEBUG ===')
         const [err, res] = await api.broker(brokerId)
         if (!err) {
-            console.log(res);
+            console.log('Broker data received:', res);
             brokers.value = res
+            console.log('Calling getApplications first...')
             await getApplications()
+            console.log('Applications loaded, now calling getRelatedBorrowers...')
+            await getRelatedBorrowers()
+            console.log('Both functions completed')
         } else {
-            console.log(err)
+            console.log('Error getting broker:', err)
         }
     } catch (error) {
         console.error('Error in getBroker:', error)
@@ -251,6 +301,115 @@ const getApplications = async () => {
         applications.value = []
     } finally {
         loadingApplications.value = false
+    }
+}
+
+const getRelatedBorrowers = async () => {
+    console.log('=== GET RELATED BORROWERS STARTED ===')
+    console.log('applications.value:', applications.value)
+    console.log('applications.value.length:', applications.value?.length)
+    
+    try {
+        loadingBorrowers.value = true
+        
+        // Since the related-borrowers endpoint is not working, 
+        // we'll fetch application details to get actual borrower data
+        if (applications.value && applications.value.length > 0) {
+            const borrowerMap = new Map()
+            
+            console.log('=== BROKER BORROWERS DEBUG ===')
+            console.log('Applications found:', applications.value.length)
+            
+            // Fetch details for each application to get full borrower data
+            for (const application of applications.value) {
+                try {
+                    console.log(`Fetching application ${application.id} details...`)
+                    const [appErr, appRes] = await api.applicationWithCascade(application.id)
+                    
+                    if (!appErr && appRes) {
+                        console.log(`Application ${application.id} response:`, appRes)
+                        console.log(`Borrowers in application ${application.id}:`, appRes.borrowers)
+                        console.log(`Company borrowers in application ${application.id}:`, appRes.company_borrowers)
+                        
+                        // Process individual borrowers
+                        if (appRes.borrowers && Array.isArray(appRes.borrowers)) {
+                            console.log(`Processing ${appRes.borrowers.length} individual borrowers`)
+                            for (const borrower of appRes.borrowers) {
+                                if (borrower.id) {
+                                    const key = `individual_${borrower.id}`
+                                    if (!borrowerMap.has(key)) {
+                                        const borrowerData = {
+                                            id: borrower.id,
+                                            name: `${borrower.first_name || ''} ${borrower.last_name || ''}`.trim(),
+                                            is_company: false,
+                                            company_name: null,
+                                            first_name: borrower.first_name || '',
+                                            last_name: borrower.last_name || '',
+                                            email: borrower.email || '',
+                                            phone: borrower.phone || '',
+                                            application_count: 1
+                                        }
+                                        borrowerMap.set(key, borrowerData)
+                                        console.log(`Added individual borrower:`, borrowerData)
+                                    } else {
+                                        const existing = borrowerMap.get(key)
+                                        existing.application_count += 1
+                                        console.log(`Incremented application count for borrower ${borrower.id}`)
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Process company borrowers
+                        if (appRes.company_borrowers && Array.isArray(appRes.company_borrowers)) {
+                            console.log(`Processing ${appRes.company_borrowers.length} company borrowers`)
+                            for (const borrower of appRes.company_borrowers) {
+                                if (borrower.id) {
+                                    const key = `company_${borrower.id}`
+                                    if (!borrowerMap.has(key)) {
+                                        const borrowerData = {
+                                            id: borrower.id,
+                                            name: borrower.company_name || '',
+                                            is_company: true,
+                                            company_name: borrower.company_name || '',
+                                            first_name: '',
+                                            last_name: '',
+                                            email: borrower.email || '',
+                                            phone: borrower.phone || '',
+                                            application_count: 1
+                                        }
+                                        borrowerMap.set(key, borrowerData)
+                                        console.log(`Added company borrower:`, borrowerData)
+                                    } else {
+                                        const existing = borrowerMap.get(key)
+                                        existing.application_count += 1
+                                        console.log(`Incremented application count for company borrower ${borrower.id}`)
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        console.error(`Error fetching application ${application.id}:`, appErr)
+                    }
+                } catch (error) {
+                    console.error(`Error fetching application ${application.id} details:`, error)
+                }
+            }
+            
+            // Convert map to array
+            relatedBorrowers.value = Array.from(borrowerMap.values())
+            console.log('Final related borrowers:', relatedBorrowers.value)
+            endpointNotAvailable.value = false
+        } else {
+            relatedBorrowers.value = []
+            endpointNotAvailable.value = false
+        }
+    } catch (error) {
+        console.error('Error in getRelatedBorrowers:', error)
+        relatedBorrowers.value = []
+        endpointNotAvailable.value = false
+    } finally {
+        loadingBorrowers.value = false
     }
 }
 
@@ -455,5 +614,33 @@ p {
     background-color: #FFF;
     border-radius: 4px;
     border: 1px solid #E4E7ED;
+}
+
+.borrowers-section {
+    padding: 20px;
+}
+
+.borrowers-header {
+    margin-bottom: 20px;
+}
+
+.borrowers-header h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #000;
+    margin: 0;
+}
+
+.borrowers-table {
+    width: 100%;
+}
+
+.borrower-link {
+    color: #409EFF;
+    text-decoration: none;
+}
+
+.borrower-link:hover {
+    text-decoration: underline;
 }
 </style>
