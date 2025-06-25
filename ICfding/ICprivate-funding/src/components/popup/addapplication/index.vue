@@ -257,42 +257,7 @@
     }
     const createBorrower = () => {
         return {
-            // Personal Information
-            first_name: "",
-            last_name: "",
-            email: "",
-            phone: "",
-            date_of_birth: "",
-            tax_id: "",
-            marital_status: "",
-            residency_status: "",
-            referral_source: "",
-            tags: "",
-            
-            // Address Information
-            address_street: "",
-            address_city: "",
-            address_state: "",
-            address_postal_code: "",
-            address_country: "",
-            mailing_address: "",
-            
-            // Employment Information
-            employment_type: "",
-            employer_name: "",
-            job_title: "",
-            annual_income: null,
-            employment_duration: null,
-            employer_address: "",
-            
-            // Additional Financial Information
-            other_income: null,
-            monthly_expenses: null
-        }
-    }
-    const createGuarantor = () => {
-        return {
-            guarantor_type: "",
+            // ===== SHARED PERSONAL INFORMATION FIELDS =====
             title: "",
             first_name: "",
             last_name: "",
@@ -301,21 +266,79 @@
             home_phone: "",
             mobile: "",
             email: "",
+            
+            // ===== SHARED RESIDENTIAL ADDRESS FIELDS =====
             address_unit: "",
             address_street_no: "",
             address_street_name: "",
             address_suburb: "",
             address_state: "",
             address_postcode: "",
+            
+            // ===== SHARED EMPLOYMENT DETAILS FIELDS =====
             occupation: "",
             employer_name: "",
             employment_type: "",
-            annual_income: "",
+            annual_income: null,
+            
+            // ===== BORROWER-SPECIFIC FIELDS =====
+            tax_id: "",
+            marital_status: "",
+            residency_status: "",
+            referral_source: "",
+            tags: "",
+            
+            // Legacy fields for backward compatibility
+            phone: "",
+            residential_address: "",
+            mailing_address: "",
+            job_title: "",
+            employment_duration: null,
+            employer_address: "",
+            other_income: null,
+            monthly_expenses: null,
+            credit_score: null
+        }
+    }
+    const createGuarantor = () => {
+        return {
+            // ===== GUARANTOR-SPECIFIC FIELDS =====
+            guarantor_type: "individual",
+            
+            // ===== SHARED PERSONAL INFORMATION FIELDS =====
+            title: "",
+            first_name: "",
+            last_name: "",
+            date_of_birth: "",
+            drivers_licence_no: "",
+            home_phone: "",
+            mobile: "",
+            email: "",
+            
+            // ===== SHARED RESIDENTIAL ADDRESS FIELDS =====
+            address_unit: "",
+            address_street_no: "",
+            address_street_name: "",
+            address_suburb: "",
+            address_state: "",
+            address_postcode: "",
+            
+            // ===== SHARED EMPLOYMENT DETAILS FIELDS =====
+            occupation: "",
+            employer_name: "",
+            employment_type: "",
+            annual_income: null,
+            
+            // ===== RELATIONSHIP FIELDS =====
+            borrower: null,
+            application: null,
+            
+            // ===== COMPANY FIELDS (for company guarantors) =====
             company_name: "",
             company_abn: "",
             company_acn: "",
-            borrower: null,
-            application: null,
+            
+            // ===== FINANCIAL ITEMS =====
             assets: [],
             liabilities: []
         }
@@ -751,7 +774,7 @@
                 }
                 
                 // Validate employment_type against schema choices
-                const validEmploymentTypes = ["full_time", "part_time", "casual", "contract"];
+                const validEmploymentTypes = ["full_time", "part_time", "casual", "self_employed", "contractor", "unemployed", "retired"];
                 if (guarantor.employment_type && !validEmploymentTypes.includes(guarantor.employment_type)) {
                     guarantor.employment_type = null;
                 }

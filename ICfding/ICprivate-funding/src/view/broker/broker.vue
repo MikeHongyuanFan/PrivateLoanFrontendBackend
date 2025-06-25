@@ -346,7 +346,7 @@ const getRelatedBorrowers = async () => {
                                             first_name: borrower.first_name || '',
                                             last_name: borrower.last_name || '',
                                             email: borrower.email || '',
-                                            phone: borrower.phone || '',
+                                            phone: borrower.mobile || borrower.home_phone || '',
                                             application_count: 1
                                         }
                                         borrowerMap.set(key, borrowerData)
@@ -375,7 +375,7 @@ const getRelatedBorrowers = async () => {
                                             first_name: '',
                                             last_name: '',
                                             email: borrower.email || '',
-                                            phone: borrower.phone || '',
+                                            phone: borrower.mobile || borrower.home_phone || '',
                                             application_count: 1
                                         }
                                         borrowerMap.set(key, borrowerData)

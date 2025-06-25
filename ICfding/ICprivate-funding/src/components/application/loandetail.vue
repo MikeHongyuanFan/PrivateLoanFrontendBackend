@@ -26,6 +26,12 @@
                 <p>{{ formatApplicationType(detail.application_type, detail.application_type_other) }}</p>
             </div>
             <div class="item">
+                <p class="title">Product ID</p>
+                <p v-if="detail.product_name">{{ detail.product_name }} (ID: {{ detail.product_id }})</p>
+                <p v-else-if="detail.product_id">Product ID: {{ detail.product_id }}</p>
+                <p v-else>-</p>
+            </div>
+            <div class="item">
                 <p class="title">Loan Purpose</p>
                 <p>{{ detail.loan_purpose || '-' }}</p>
             </div>

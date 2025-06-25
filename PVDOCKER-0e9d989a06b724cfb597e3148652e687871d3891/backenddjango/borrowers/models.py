@@ -22,6 +22,15 @@ class Borrower(models.Model):
         ('widowed', 'Widowed'),
     ]
     
+    TITLE_CHOICES = [
+        ('mr', 'Mr'),
+        ('mrs', 'Mrs'),
+        ('ms', 'Ms'),
+        ('miss', 'Miss'),
+        ('dr', 'Dr'),
+        ('other', 'Other'),
+    ]
+    
     EMPLOYMENT_TYPE_CHOICES = [
         ('full_time', 'Full Time'),
         ('part_time', 'Part Time'),
@@ -49,31 +58,49 @@ class Borrower(models.Model):
         ('other', 'Other'),
     ]
     
-    # Personal information
+    # ===== SHARED PERSONAL INFORMATION FIELDS =====
+    # These fields match the Guarantor model structure for consistency
+    title = models.CharField(max_length=10, choices=TITLE_CHOICES, null=True, blank=True)
     first_name = models.CharField(max_length=100, null=True, blank=True)
     last_name = models.CharField(max_length=100, null=True, blank=True)
     date_of_birth = models.DateField(null=True, blank=True)
+    drivers_licence_no = models.CharField(max_length=50, null=True, blank=True)
+    home_phone = models.CharField(max_length=20, null=True, blank=True)
+    mobile = models.CharField(max_length=20, null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
-    phone = models.CharField(max_length=20, null=True, blank=True)
     
-    # Address information
-    residential_address = models.TextField(null=True, blank=True)
-    mailing_address = models.TextField(null=True, blank=True)
+    # ===== SHARED RESIDENTIAL ADDRESS FIELDS =====
+    # These fields match the Guarantor model structure for consistency
+    address_unit = models.CharField(max_length=20, null=True, blank=True)
+    address_street_no = models.CharField(max_length=20, null=True, blank=True)
+    address_street_name = models.CharField(max_length=100, null=True, blank=True)
+    address_suburb = models.CharField(max_length=100, null=True, blank=True)
+    address_state = models.CharField(max_length=50, null=True, blank=True)
+    address_postcode = models.CharField(max_length=10, null=True, blank=True)
     
+    # ===== SHARED EMPLOYMENT DETAILS FIELDS =====
+    # These fields match the Guarantor model structure for consistency
+    occupation = models.CharField(max_length=100, null=True, blank=True)
+    employer_name = models.CharField(max_length=255, null=True, blank=True)
+    employment_type = models.CharField(max_length=20, choices=EMPLOYMENT_TYPE_CHOICES, null=True, blank=True, default='full_time')
+    annual_income = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    
+    # ===== LEGACY FIELDS (DEPRECATED - KEPT FOR BACKWARD COMPATIBILITY) =====
+    # These fields are kept for backward compatibility but should not be used in new code
+    phone = models.CharField(max_length=20, null=True, blank=True)  # Legacy - use home_phone or mobile instead
+    residential_address = models.TextField(null=True, blank=True)  # Legacy - use structured address fields instead
+    mailing_address = models.TextField(null=True, blank=True)  # Legacy - use structured address fields instead
+    job_title = models.CharField(max_length=100, null=True, blank=True)  # Legacy - use occupation instead
+    employer_address = models.TextField(null=True, blank=True)  # Legacy field
+    employment_duration = models.PositiveIntegerField(null=True, blank=True, help_text="Duration in months")  # Legacy field
+    
+    # ===== BORROWER-SPECIFIC FIELDS =====
     # Identity information
     tax_id = models.CharField(max_length=50, null=True, blank=True, help_text="Tax File Number or equivalent")
     marital_status = models.CharField(max_length=20, choices=MARITAL_STATUS_CHOICES, null=True, blank=True)
     residency_status = models.CharField(max_length=20, choices=RESIDENCY_STATUS_CHOICES, null=True, blank=True)
     
-    # Employment information
-    employment_type = models.CharField(max_length=20, choices=EMPLOYMENT_TYPE_CHOICES, null=True, blank=True, default='full_time')
-    employer_name = models.CharField(max_length=255, null=True, blank=True)
-    employer_address = models.TextField(null=True, blank=True)
-    job_title = models.CharField(max_length=100, null=True, blank=True)
-    employment_duration = models.PositiveIntegerField(null=True, blank=True, help_text="Duration in months")
-    
     # Financial information
-    annual_income = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     other_income = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     monthly_expenses = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
     
@@ -273,12 +300,15 @@ class Guarantor(models.Model):
     EMPLOYMENT_TYPE_CHOICES = [
         ('full_time', 'Full Time'),
         ('part_time', 'Part Time'),
-        ('casual', 'Casual/Temp'),
-        ('contract', 'Contract'),
+        ('casual', 'Casual'),
+        ('self_employed', 'Self Employed'),
+        ('contractor', 'Contractor'),
+        ('unemployed', 'Unemployed'),
+        ('retired', 'Retired'),
     ]
     
-    # Basic information
-    guarantor_type = models.CharField(max_length=20, choices=GUARANTOR_TYPE_CHOICES, default='individual')
+    # ===== SHARED PERSONAL INFORMATION FIELDS =====
+    # These fields match the Borrower model structure for consistency
     title = models.CharField(max_length=10, choices=TITLE_CHOICES, null=True, blank=True)
     first_name = models.CharField(max_length=100, null=True, blank=True)
     last_name = models.CharField(max_length=100, null=True, blank=True)
@@ -288,20 +318,29 @@ class Guarantor(models.Model):
     mobile = models.CharField(max_length=20, null=True, blank=True)
     email = models.EmailField(null=True, blank=True)
     
-    # Address information
+    # ===== SHARED RESIDENTIAL ADDRESS FIELDS =====
+    # These fields match the Borrower model structure for consistency
     address_unit = models.CharField(max_length=20, null=True, blank=True)
     address_street_no = models.CharField(max_length=20, null=True, blank=True)
     address_street_name = models.CharField(max_length=100, null=True, blank=True)
     address_suburb = models.CharField(max_length=100, null=True, blank=True)
     address_state = models.CharField(max_length=50, null=True, blank=True)
     address_postcode = models.CharField(max_length=10, null=True, blank=True)
-    address = models.TextField(null=True, blank=True)  # Legacy field
     
-    # Employment information
+    # ===== SHARED EMPLOYMENT DETAILS FIELDS =====
+    # These fields match the Borrower model structure for consistency
     occupation = models.CharField(max_length=100, null=True, blank=True)
     employer_name = models.CharField(max_length=255, null=True, blank=True)
     employment_type = models.CharField(max_length=20, choices=EMPLOYMENT_TYPE_CHOICES, null=True, blank=True)
     annual_income = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    
+    # ===== LEGACY FIELDS (DEPRECATED - KEPT FOR BACKWARD COMPATIBILITY) =====
+    # These fields are kept for backward compatibility but should not be used in new code
+    address = models.TextField(null=True, blank=True)  # Legacy - use structured address fields instead
+    
+    # ===== GUARANTOR-SPECIFIC FIELDS =====
+    # Basic information
+    guarantor_type = models.CharField(max_length=20, choices=GUARANTOR_TYPE_CHOICES, default='individual')
     
     # Company information (for company guarantors)
     company_name = models.CharField(max_length=255, null=True, blank=True)

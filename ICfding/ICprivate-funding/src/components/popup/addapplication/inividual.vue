@@ -6,6 +6,18 @@
                 <h3>Personal Information</h3>
             </div>
             <div class="item">
+                <p>Title <span class="optional">(optional)</span></p>
+                <el-select v-model="item.title" placeholder="Select title" style="width: 100%">
+                    <el-option value="mr" label="Mr" />
+                    <el-option value="mrs" label="Mrs" />
+                    <el-option value="ms" label="Ms" />
+                    <el-option value="miss" label="Miss" />
+                    <el-option value="dr" label="Dr" />
+                    <el-option value="other" label="Other" />
+                </el-select>
+                <span class="hint">Title/honorific</span>
+            </div>
+            <div class="item">
                 <p>First Name <span class="optional">(optional)</span></p>
                 <el-input v-model="item.first_name" placeholder="Enter first name" />
                 <span class="hint">Legal first name</span>
@@ -14,16 +26,6 @@
                 <p>Last Name <span class="optional">(optional)</span></p>
                 <el-input v-model="item.last_name" placeholder="Enter last name" />
                 <span class="hint">Legal last name</span>
-            </div>
-            <div class="item">
-                <p>Email <span class="optional">(optional)</span></p>
-                <el-input v-model="item.email" type="email" placeholder="example@domain.com" />
-                <span class="hint">Valid email address</span>
-            </div>
-            <div class="item">
-                <p>Phone <span class="optional">(optional)</span></p>
-                <el-input v-model="item.phone" placeholder="e.g. +61 4XX XXX XXX" />
-                <span class="hint">Contact phone number</span>
             </div>
             <div class="item">
                 <p>Date of Birth <span class="optional">(optional)</span></p>
@@ -36,13 +38,118 @@
                 <span class="hint">Date must be in YYYY-MM-DD format</span>
             </div>
             <div class="item">
+                <p>Driver's License Number <span class="optional">(optional)</span></p>
+                <el-input v-model="item.drivers_licence_no" placeholder="Enter driver's license number" />
+                <span class="hint">Driver's license number</span>
+            </div>
+            <div class="item">
+                <p>Home Phone <span class="optional">(optional)</span></p>
+                <el-input v-model="item.home_phone" placeholder="e.g. +61 2 XXXX XXXX" />
+                <span class="hint">Home phone number</span>
+            </div>
+            <div class="item">
+                <p>Mobile Phone <span class="optional">(optional)</span></p>
+                <el-input v-model="item.mobile" placeholder="e.g. +61 4XX XXX XXX" />
+                <span class="hint">Mobile phone number</span>
+            </div>
+            <div class="item">
+                <p>Email <span class="optional">(optional)</span></p>
+                <el-input v-model="item.email" type="email" placeholder="example@domain.com" />
+                <span class="hint">Valid email address</span>
+            </div>
+
+            <!-- Residential Address Section -->
+            <div class="section-header">
+                <h3>Residential Address</h3>
+            </div>
+            <div class="item">
+                <p>Unit Number <span class="optional">(optional)</span></p>
+                <el-input v-model="item.address_unit" placeholder="e.g. Unit 1" />
+                <span class="hint">Unit, apartment, or suite number</span>
+            </div>
+            <div class="item">
+                <p>Street Number <span class="optional">(optional)</span></p>
+                <el-input v-model="item.address_street_no" placeholder="e.g. 123" />
+                <span class="hint">Street number</span>
+            </div>
+            <div class="item">
+                <p>Street Name <span class="optional">(optional)</span></p>
+                <el-input v-model="item.address_street_name" placeholder="e.g. Main Street" />
+                <span class="hint">Street name</span>
+            </div>
+            <div class="item">
+                <p>Suburb <span class="optional">(optional)</span></p>
+                <el-input v-model="item.address_suburb" placeholder="e.g. Sydney" />
+                <span class="hint">Suburb or city</span>
+            </div>
+            <div class="item">
+                <p>State <span class="optional">(optional)</span></p>
+                <el-select v-model="item.address_state" placeholder="Select state" style="width: 100%">
+                    <el-option value="NSW" label="New South Wales" />
+                    <el-option value="VIC" label="Victoria" />
+                    <el-option value="QLD" label="Queensland" />
+                    <el-option value="WA" label="Western Australia" />
+                    <el-option value="SA" label="South Australia" />
+                    <el-option value="TAS" label="Tasmania" />
+                    <el-option value="ACT" label="Australian Capital Territory" />
+                    <el-option value="NT" label="Northern Territory" />
+                </el-select>
+                <span class="hint">State or territory</span>
+            </div>
+            <div class="item">
+                <p>Postcode <span class="optional">(optional)</span></p>
+                <el-input v-model="item.address_postcode" placeholder="e.g. 2000" maxlength="4" />
+                <span class="hint">4-digit postcode</span>
+            </div>
+
+            <!-- Employment Details Section -->
+            <div class="section-header">
+                <h3>Employment Details</h3>
+            </div>
+            <div class="item">
+                <p>Occupation <span class="optional">(optional)</span></p>
+                <el-input v-model="item.occupation" placeholder="e.g. Software Engineer" />
+                <span class="hint">Current job title or occupation</span>
+            </div>
+            <div class="item">
+                <p>Employer Name <span class="optional">(optional)</span></p>
+                <el-input v-model="item.employer_name" placeholder="e.g. ABC Company" />
+                <span class="hint">Name of current employer</span>
+            </div>
+            <div class="item">
+                <p>Employment Type <span class="optional">(optional)</span></p>
+                <el-select v-model="item.employment_type" placeholder="Select type" style="width: 100%">
+                    <el-option value="full_time" label="Full Time" />
+                    <el-option value="part_time" label="Part Time" />
+                    <el-option value="casual" label="Casual/Temp" />
+                    <el-option value="contractor" label="Contractor" />
+                </el-select>
+                <span class="hint">Type of employment</span>
+            </div>
+            <div class="item">
+                <p>Annual Income ($) <span class="optional">(optional)</span></p>
+                <el-input-number 
+                    v-model="item.annual_income" 
+                    :min="0" 
+                    :step="1000"
+                    :precision="2"
+                    placeholder="Enter annual income" 
+                    style="width: 100%" />
+                <span class="hint">Annual income in dollars</span>
+            </div>
+
+            <!-- Additional Information Section -->
+            <div class="section-header">
+                <h3>Additional Information</h3>
+            </div>
+            <div class="item">
                 <p>Tax ID (TFN) <span class="optional">(optional)</span></p>
                 <el-input v-model="item.tax_id" placeholder="e.g. 123 456 789" maxlength="11" />
                 <span class="hint">Tax File Number</span>
             </div>
             <div class="item">
                 <p>Marital Status <span class="optional">(optional)</span></p>
-                <el-select v-model="item.marital_status" placeholder="Select status">
+                <el-select v-model="item.marital_status" placeholder="Select status" style="width: 100%">
                     <el-option value="single" label="Single" />
                     <el-option value="married" label="Married" />
                     <el-option value="de_facto" label="De Facto" />
@@ -53,158 +160,23 @@
             </div>
             <div class="item">
                 <p>Residency Status <span class="optional">(optional)</span></p>
-                <el-select v-model="item.residency_status" placeholder="Select status">
+                <el-select v-model="item.residency_status" placeholder="Select status" style="width: 100%">
                     <el-option value="citizen" label="Citizen" />
                     <el-option value="permanent_resident" label="Permanent Resident" />
                     <el-option value="temporary_resident" label="Temporary Resident" />
                     <el-option value="foreign_investor" label="Foreign Investor" />
                 </el-select>
-                <span class="hint">Current Australian residency status</span>
+                <span class="hint">Australian residency status</span>
             </div>
             <div class="item">
                 <p>Referral Source <span class="optional">(optional)</span></p>
-                <el-input v-model="item.referral_source" placeholder="How did you hear about us?" />
-                <span class="hint">How the borrower was referred</span>
+                <el-input v-model="item.referral_source" placeholder="e.g. Broker, Website, etc." />
+                <span class="hint">How did you hear about us?</span>
             </div>
             <div class="item">
                 <p>Tags <span class="optional">(optional)</span></p>
-                <el-input v-model="item.tags" placeholder="e.g. VIP, Repeat Customer" />
-                <span class="hint">Comma-separated tags for categorization</span>
-            </div>
-
-            <!-- Address Information Section -->
-            <div class="section-header">
-                <h3>Address Information</h3>
-            </div>
-            <div class="item full-width">
-                <p>Street Address <span class="optional">(optional)</span></p>
-                <el-input 
-                    v-model="item.address_street" 
-                    placeholder="Enter street address (unit, street number, street name)" />
-                <span class="hint">e.g., Unit 203/3 Samsung Street</span>
-            </div>
-            <div class="item">
-                <p>City/Suburb <span class="optional">(optional)</span></p>
-                <el-input v-model="item.address_city" placeholder="Enter city or suburb" />
-                <span class="hint">e.g., Waterloo</span>
-            </div>
-            <div class="item">
-                <p>State <span class="optional">(optional)</span></p>
-                <el-select v-model="item.address_state" placeholder="Select state">
-                    <el-option value="NSW" label="New South Wales (NSW)" />
-                    <el-option value="VIC" label="Victoria (VIC)" />
-                    <el-option value="QLD" label="Queensland (QLD)" />
-                    <el-option value="WA" label="Western Australia (WA)" />
-                    <el-option value="SA" label="South Australia (SA)" />
-                    <el-option value="TAS" label="Tasmania (TAS)" />
-                    <el-option value="ACT" label="Australian Capital Territory (ACT)" />
-                    <el-option value="NT" label="Northern Territory (NT)" />
-                </el-select>
-                <span class="hint">Select your state/territory</span>
-            </div>
-            <div class="item">
-                <p>Postal Code <span class="optional">(optional)</span></p>
-                <el-input v-model="item.address_postal_code" placeholder="Enter postal code" maxlength="4" />
-                <span class="hint">e.g., 2017</span>
-            </div>
-            <div class="item">
-                <p>Country <span class="optional">(optional)</span></p>
-                <el-input v-model="item.address_country" placeholder="Enter country" />
-                <span class="hint">e.g., Australia</span>
-            </div>
-            <div class="item full-width">
-                <p>Mailing Address <span class="optional">(optional)</span></p>
-                <el-input 
-                    v-model="item.mailing_address" 
-                    type="textarea" 
-                    :rows="2"
-                    placeholder="Enter mailing address (if different from residential)" />
-                <span class="hint">Leave empty if same as residential address</span>
-            </div>
-
-            <!-- Employment Information Section -->
-            <div class="section-header">
-                <h3>Employment Information</h3>
-            </div>
-            <div class="item">
-                <p>Employment Type <span class="optional">(optional)</span></p>
-                <el-select v-model="item.employment_type" placeholder="Select employment type">
-                    <el-option value="full_time" label="Full Time" />
-                    <el-option value="part_time" label="Part Time" />
-                    <el-option value="casual" label="Casual" />
-                    <el-option value="self_employed" label="Self Employed" />
-                    <el-option value="contractor" label="Contractor" />
-                    <el-option value="unemployed" label="Unemployed" />
-                    <el-option value="retired" label="Retired" />
-                </el-select>
-                <span class="hint">Current employment status</span>
-            </div>
-            <div class="item">
-                <p>Employer Name <span class="optional">(optional)</span></p>
-                <el-input v-model="item.employer_name" placeholder="Enter employer name" />
-                <span class="hint">Current or most recent employer</span>
-            </div>
-            <div class="item">
-                <p>Job Title <span class="optional">(optional)</span></p>
-                <el-input v-model="item.job_title" placeholder="Enter job title/position" />
-                <span class="hint">Current or most recent job title</span>
-            </div>
-            <div class="item">
-                <p>Annual Income <span class="optional">(optional)</span></p>
-                <el-input-number 
-                    v-model="item.annual_income" 
-                    :min="0" 
-                    :step="1000"
-                    :precision="2"
-                    placeholder="Enter annual income" 
-                    style="width: 100%" />
-                <span class="hint">Annual gross income in AUD</span>
-            </div>
-            <div class="item">
-                <p>Employment Duration (months) <span class="optional">(optional)</span></p>
-                <el-input-number 
-                    v-model="item.employment_duration" 
-                    :min="0" 
-                    :step="1"
-                    placeholder="Enter duration in months" 
-                    style="width: 100%" />
-                <span class="hint">How long employed with current employer (in months)</span>
-            </div>
-            <div class="item full-width">
-                <p>Employer Address <span class="optional">(optional)</span></p>
-                <el-input 
-                    v-model="item.employer_address" 
-                    type="textarea" 
-                    :rows="2"
-                    placeholder="Enter employer address" />
-                <span class="hint">Address of current or most recent employer</span>
-            </div>
-
-            <!-- Financial Information Section -->
-            <div class="section-header">
-                <h3>Additional Financial Information</h3>
-            </div>
-            <div class="item">
-                <p>Other Income <span class="optional">(optional)</span></p>
-                <el-input-number 
-                    v-model="item.other_income" 
-                    :min="0" 
-                    :step="100"
-                    :precision="2"
-                    placeholder="Enter other income" 
-                    style="width: 100%" />
-                <span class="hint">Additional income from other sources (AUD)</span>
-            </div>
-            <div class="item">
-                <p>Monthly Expenses <span class="optional">(optional)</span></p>
-                <el-input-number 
-                    v-model="item.monthly_expenses" 
-                    :min="0" 
-                    :step="100"
-                    :precision="2"
-                    placeholder="Enter monthly expenses" 
-                    style="width: 100%" />
-                <span class="hint">Total monthly living expenses (AUD)</span>
+                <el-input v-model="item.tags" placeholder="e.g. VIP, Priority, etc." />
+                <span class="hint">Any tags or notes</span>
             </div>
 
             <div class="buttons">

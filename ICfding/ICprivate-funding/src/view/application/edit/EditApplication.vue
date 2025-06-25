@@ -375,29 +375,19 @@ onMounted(async () => {
                     borrower.monthly_expenses = parseFloat(borrower.monthly_expenses) || 0;
                 }
                 
-                // Parse structured address data from address object if available
-                if (borrower.address) {
-                    borrower.address_street = borrower.address.street || '';
-                    borrower.address_city = borrower.address.city || '';
-                    borrower.address_state = borrower.address.state || '';
-                    borrower.address_postal_code = borrower.address.postal_code || '';
-                    borrower.address_country = borrower.address.country || '';
-                    console.log('Parsed address fields from nested object:', {
-                        address_street: borrower.address_street,
-                        address_city: borrower.address_city,
-                        address_state: borrower.address_state,
-                        address_postal_code: borrower.address_postal_code,
-                        address_country: borrower.address_country
-                    });
-                } else {
-                    console.log('No nested address object found, fields will remain empty');
-                    // Initialize empty fields
-                    borrower.address_street = '';
-                    borrower.address_city = '';
-                    borrower.address_state = '';
-                    borrower.address_postal_code = '';
-                    borrower.address_country = '';
-                }
+                // Handle unified field names - no need to parse nested address object
+                // The backend now sends unified field names directly
+                console.log('Borrower data with unified fields:', {
+                    home_phone: borrower.home_phone,
+                    mobile: borrower.mobile,
+                    occupation: borrower.occupation,
+                    address_unit: borrower.address_unit,
+                    address_street_no: borrower.address_street_no,
+                    address_street_name: borrower.address_street_name,
+                    address_suburb: borrower.address_suburb,
+                    address_state: borrower.address_state,
+                    address_postcode: borrower.address_postcode
+                });
             });
         }
         
@@ -545,44 +535,24 @@ const handleSave = async () => {
             applicationData.quantity_surveyor = applicationData.quantity_surveyor.id;
         }
         
-        // Transform structured address data for borrowers
+        // Handle unified field names for borrowers - no transformation needed
         if (applicationData.borrowers && applicationData.borrowers.length > 0) {
             applicationData.borrowers.forEach((borrower, index) => {
-                console.log(`=== EDIT BORROWER ${index} ADDRESS DEBUG ===`);
-                console.log('Original borrower data:', {
-                    address_street: borrower.address_street,
-                    address_city: borrower.address_city,
+                console.log(`=== EDIT BORROWER ${index} UNIFIED FIELDS DEBUG ===`);
+                console.log('Borrower data with unified fields:', {
+                    home_phone: borrower.home_phone,
+                    mobile: borrower.mobile,
+                    occupation: borrower.occupation,
+                    address_unit: borrower.address_unit,
+                    address_street_no: borrower.address_street_no,
+                    address_street_name: borrower.address_street_name,
+                    address_suburb: borrower.address_suburb,
                     address_state: borrower.address_state,
-                    address_postal_code: borrower.address_postal_code,
-                    address_country: borrower.address_country,
-                    mailing_address: borrower.mailing_address
+                    address_postcode: borrower.address_postcode
                 });
                 
-                // Create structured address object for API
-                if (borrower.address_street || borrower.address_city || borrower.address_state || borrower.address_postal_code || borrower.address_country) {
-                    borrower.address = {
-                        street: borrower.address_street || '',
-                        city: borrower.address_city || '',
-                        state: borrower.address_state || '',
-                        postal_code: borrower.address_postal_code || '',
-                        country: borrower.address_country || ''
-                    };
-                    console.log('Created nested address object:', borrower.address);
-                } else {
-                    console.log('No address fields found, skipping nested address creation');
-                }
-                
-                // Clean up the individual address fields since we're sending them as nested object
-                delete borrower.address_street;
-                delete borrower.address_city;
-                delete borrower.address_state;
-                delete borrower.address_postal_code;
-                delete borrower.address_country;
-                
-                console.log('Final borrower data:', {
-                    address: borrower.address,
-                    mailing_address: borrower.mailing_address
-                });
+                // Ensure unified field names are preserved - no transformation needed
+                // The backend expects these field names directly
             });
         }
         
@@ -937,37 +907,47 @@ const removeLiability = (companyIndex = 0, liabilityIndex) => {
 
 const addBorrower = () => {
     application.value.borrowers.push({
-        // Personal Information
+        // ===== SHARED PERSONAL INFORMATION FIELDS =====
+        title: "",
         first_name: "",
         last_name: "",
-        email: "",
-        phone: "",
         date_of_birth: "",
+        drivers_licence_no: "",
+        home_phone: "",
+        mobile: "",
+        email: "",
+        
+        // ===== SHARED RESIDENTIAL ADDRESS FIELDS =====
+        address_unit: "",
+        address_street_no: "",
+        address_street_name: "",
+        address_suburb: "",
+        address_state: "",
+        address_postcode: "",
+        
+        // ===== SHARED EMPLOYMENT DETAILS FIELDS =====
+        occupation: "",
+        employer_name: "",
+        employment_type: "",
+        annual_income: null,
+        
+        // ===== BORROWER-SPECIFIC FIELDS =====
         tax_id: "",
         marital_status: "",
         residency_status: "",
         referral_source: "",
         tags: "",
         
-        // Address Information
-        address_street: "",
-        address_city: "",
-        address_state: "",
-        address_postal_code: "",
-        address_country: "",
+        // Legacy fields for backward compatibility
+        phone: "",
+        residential_address: "",
         mailing_address: "",
-        
-        // Employment Information
-        employment_type: "",
-        employer_name: "",
         job_title: "",
-        annual_income: null,
         employment_duration: null,
         employer_address: "",
-        
-        // Additional Financial Information
         other_income: null,
-        monthly_expenses: null
+        monthly_expenses: null,
+        credit_score: null
     });
 };
 
@@ -977,7 +957,10 @@ const removeBorrower = (idx) => {
 
 const addGuarantor = () => {
     application.value.guarantors.push({
-        guarantor_type: "",
+        // ===== GUARANTOR-SPECIFIC FIELDS =====
+        guarantor_type: "individual",
+        
+        // ===== SHARED PERSONAL INFORMATION FIELDS =====
         title: "",
         first_name: "",
         last_name: "",
@@ -986,21 +969,31 @@ const addGuarantor = () => {
         home_phone: "",
         mobile: "",
         email: "",
+        
+        // ===== SHARED RESIDENTIAL ADDRESS FIELDS =====
         address_unit: "",
         address_street_no: "",
         address_street_name: "",
         address_suburb: "",
         address_state: "",
         address_postcode: "",
+        
+        // ===== SHARED EMPLOYMENT DETAILS FIELDS =====
         occupation: "",
         employer_name: "",
         employment_type: "",
-        annual_income: "",
+        annual_income: null,
+        
+        // ===== RELATIONSHIP FIELDS =====
+        borrower: null,
+        application: null,
+        
+        // ===== COMPANY FIELDS (for company guarantors) =====
         company_name: "",
         company_abn: "",
         company_acn: "",
-        borrower: null,
-        application: null,
+        
+        // ===== FINANCIAL ITEMS =====
         assets: [],
         liabilities: []
     });

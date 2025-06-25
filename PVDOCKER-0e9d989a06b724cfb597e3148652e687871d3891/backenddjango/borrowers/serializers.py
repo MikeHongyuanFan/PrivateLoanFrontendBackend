@@ -72,32 +72,68 @@ class BorrowerDetailSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'updated_at', 'created_by']
         extra_kwargs = {
-            # Make most fields optional and allow null/blank values for minimal data creation
+            # ===== SHARED PERSONAL INFORMATION FIELDS =====
+            'title': {'required': False, 'allow_null': True, 'allow_blank': True},
             'first_name': {'required': False, 'allow_null': True, 'allow_blank': True},
             'last_name': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'email': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'phone': {'required': False, 'allow_null': True, 'allow_blank': True},
             'date_of_birth': {'required': False, 'allow_null': True},
+            'drivers_licence_no': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'home_phone': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'mobile': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'email': {'required': False, 'allow_null': True, 'allow_blank': True},
+            
+            # ===== SHARED RESIDENTIAL ADDRESS FIELDS =====
+            'address_unit': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'address_street_no': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'address_street_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'address_suburb': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'address_state': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'address_postcode': {'required': False, 'allow_null': True, 'allow_blank': True},
+            
+            # ===== SHARED EMPLOYMENT DETAILS FIELDS =====
+            'occupation': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'employer_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'employment_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'annual_income': {'required': False, 'allow_null': True},
+            
+            # ===== LEGACY FIELDS =====
+            'phone': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'residential_address': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'mailing_address': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'job_title': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'employer_address': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'employment_duration': {'required': False, 'allow_null': True},
+            
+            # ===== BORROWER-SPECIFIC FIELDS =====
             'tax_id': {'required': False, 'allow_null': True, 'allow_blank': True},
             'marital_status': {'required': False, 'allow_null': True, 'allow_blank': True},
             'residency_status': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'employment_type': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'employer_name': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'job_title': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'annual_income': {'required': False, 'allow_null': True},
-            'employment_duration': {'required': False, 'allow_null': True},
-            'residential_address': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'mailing_address': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'other_income': {'required': False, 'allow_null': True},
+            'monthly_expenses': {'required': False, 'allow_null': True},
+            'bank_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'bank_account_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'bank_account_number': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'bank_bsb': {'required': False, 'allow_null': True, 'allow_blank': True},
             'referral_source': {'required': False, 'allow_null': True, 'allow_blank': True},
             'tags': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'notes': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'notes_text': {'required': False, 'allow_null': True, 'allow_blank': True},
             'is_company': {'required': False, 'allow_null': True},
             'company_name': {'required': False, 'allow_null': True, 'allow_blank': True},
             'company_abn': {'required': False, 'allow_null': True, 'allow_blank': True},
             'company_acn': {'required': False, 'allow_null': True, 'allow_blank': True},
             'company_address': {'required': False, 'allow_null': True, 'allow_blank': True},
             'industry_type': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'borrower_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'contact_number': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'annual_company_income': {'required': False, 'allow_null': True},
+            'is_trustee': {'required': False, 'allow_null': True},
+            'is_smsf_trustee': {'required': False, 'allow_null': True},
+            'trustee_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'registered_address_unit': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'registered_address_street_no': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'registered_address_street_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'registered_address_suburb': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'registered_address_state': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'registered_address_postcode': {'required': False, 'allow_null': True, 'allow_blank': True},
         }
     
     def create(self, validated_data):
@@ -129,28 +165,40 @@ class GuarantorSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ['created_at', 'updated_at', 'created_by']
         extra_kwargs = {
-            # Make most fields optional and allow null/blank values for minimal data creation
-            'guarantor_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            # ===== SHARED PERSONAL INFORMATION FIELDS =====
+            'title': {'required': False, 'allow_null': True, 'allow_blank': True},
             'first_name': {'required': False, 'allow_null': True, 'allow_blank': True},
             'last_name': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'company_name': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'email': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'mobile': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'home_phone': {'required': False, 'allow_null': True, 'allow_blank': True},
             'date_of_birth': {'required': False, 'allow_null': True},
+            'drivers_licence_no': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'home_phone': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'mobile': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'email': {'required': False, 'allow_null': True, 'allow_blank': True},
+            
+            # ===== SHARED RESIDENTIAL ADDRESS FIELDS =====
+            'address_unit': {'required': False, 'allow_null': True, 'allow_blank': True},
             'address_street_no': {'required': False, 'allow_null': True, 'allow_blank': True},
             'address_street_name': {'required': False, 'allow_null': True, 'allow_blank': True},
             'address_suburb': {'required': False, 'allow_null': True, 'allow_blank': True},
             'address_state': {'required': False, 'allow_null': True, 'allow_blank': True},
             'address_postcode': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'employment_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            
+            # ===== SHARED EMPLOYMENT DETAILS FIELDS =====
+            'occupation': {'required': False, 'allow_null': True, 'allow_blank': True},
             'employer_name': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'employment_type': {'required': False, 'allow_null': True, 'allow_blank': True},
             'annual_income': {'required': False, 'allow_null': True},
+            
+            # ===== LEGACY FIELDS =====
+            'address': {'required': False, 'allow_null': True, 'allow_blank': True},
+            
+            # ===== GUARANTOR-SPECIFIC FIELDS =====
+            'guarantor_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'company_name': {'required': False, 'allow_null': True, 'allow_blank': True},
             'company_abn': {'required': False, 'allow_null': True, 'allow_blank': True},
             'company_acn': {'required': False, 'allow_null': True, 'allow_blank': True},
             'borrower': {'required': False, 'allow_null': True},
             'application': {'required': False, 'allow_null': True},
-            'notes': {'required': False, 'allow_null': True, 'allow_blank': True},
         }
     
     def create(self, validated_data):

@@ -64,8 +64,19 @@
         </div>
         <div class="item">
             <p>Product ID <span class="required">*</span></p>
-            <el-input v-model="detail.product_id" placeholder="e.g. PROD-123" />
-            <span class="hint">Product identifier (max 50 characters)</span>
+            <el-select v-model="detail.product_id" placeholder="Select a product" filterable clearable>
+                <el-option 
+                    v-for="product in products" 
+                    :key="product.id" 
+                    :value="product.id.toString()" 
+                    :label="product.name">
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-weight: bold;">{{ product.name }}</span>
+                        <span style="font-size: 12px; color: #8c8c8c;">ID: {{ product.id }}</span>
+                    </div>
+                </el-option>
+            </el-select>
+            <span class="hint">Select a product from the dropdown</span>
         </div>
         <div class="item">
             <p>Expected Interest Rate (p.a) (%)</p>
@@ -250,6 +261,7 @@
     // Reactive data for valuers and quantity surveyors
     const valuers = ref([]);
     const quantitySurveyors = ref([]);
+    const products = ref([]);
     const showValuerForm = ref(false);
     const showQsForm = ref(false);
     const savingValuer = ref(false);
@@ -294,6 +306,18 @@
             }
         } catch (error) {
             console.error('Error loading quantity surveyors:', error);
+        }
+    };
+
+    // Load products
+    const loadProducts = async () => {
+        try {
+            const [err, data] = await api.getProducts();
+            if (!err && data) {
+                products.value = data.results || data;
+            }
+        } catch (error) {
+            console.error('Error loading products:', error);
         }
     };
 
@@ -406,6 +430,7 @@
         // Load valuers and QS
         loadValuers();
         loadQuantitySurveyors();
+        loadProducts();
 
         // Check if loan_purpose is already set and is a valid enum value
         const validPurposes = ["purchase", "refinance", "construction", "equity_release", 

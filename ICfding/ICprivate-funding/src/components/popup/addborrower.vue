@@ -116,7 +116,7 @@
                         </div>
                         <div class="item">
                             <p>Postal Code</p>
-                            <el-input v-model="overview.address_postal_code" placeholder="Enter postal code" maxlength="4" />
+                            <el-input v-model="overview.address_postcode" placeholder="Enter postal code" maxlength="4" />
                         </div>
                         <div class="item">
                             <p>Country</p>
@@ -263,26 +263,42 @@ const props = defineProps({
 
 const activeNames = ref("1")
 const overview = ref({
+    // ===== SHARED PERSONAL INFORMATION FIELDS =====
+    title: "",
     first_name: "",
     last_name: "",
-    email: "",
-    phone: "",
     date_of_birth: "",
+    drivers_licence_no: "",
+    home_phone: "",
+    mobile: "",
+    email: "",
+    
+    // ===== SHARED RESIDENTIAL ADDRESS FIELDS =====
+    address_unit: "",
+    address_street_no: "",
+    address_street_name: "",
+    address_suburb: "",
+    address_state: "",
+    address_postcode: "",
+    
+    // ===== SHARED EMPLOYMENT DETAILS FIELDS =====
+    occupation: "",
+    employer_name: "",
+    employment_type: "",
+    annual_income: null,
+    
+    // ===== BORROWER-SPECIFIC FIELDS =====
     tax_id: "",
     marital_status: "",
     residency_status: "",
     referral_source: "",
     tags: "",
-    employment_type: "",
-    address_street: "",
-    address_city: "",
-    address_state: "",
-    address_postal_code: "",
-    address_country: "",
+    
+    // Legacy fields for backward compatibility
+    phone: "",
+    residential_address: "",
     mailing_address: "",
-    employer_name: "",
     job_title: "",
-    annual_income: null,
     employment_duration: null,
     employer_address: "",
     other_income: null,
@@ -312,7 +328,7 @@ const isPersonalInfoValid = computed(() => {
 })
 
 const isAddressValid = computed(() => {
-    return overview.value.address_street && overview.value.address_city && overview.value.address_state && overview.value.address_postal_code;
+    return overview.value.address_street && overview.value.address_city && overview.value.address_state && overview.value.address_postcode;
 })
 
 const isEmploymentValid = computed(() => {

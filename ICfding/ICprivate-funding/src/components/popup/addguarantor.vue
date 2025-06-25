@@ -84,7 +84,7 @@
                 <el-option label="Full-time" value="full_time" />
                 <el-option label="Part-time" value="part_time" />
                 <el-option label="Casual" value="casual" />
-                <el-option label="Contract" value="contract" />
+                <el-option label="Contractor" value="contractor" />
               </el-select>
             </div>
             <div class="item">
@@ -230,24 +230,46 @@ const applicationOptions = ref([]);
 const isEdit = computed(() => props.action.startsWith('Edit'));
 
 const form = ref({
+  // ===== GUARANTOR-SPECIFIC FIELDS =====
+  guarantor_type: 'individual',
+  
+  // ===== SHARED PERSONAL INFORMATION FIELDS =====
+  title: '',
   first_name: '',
   last_name: '',
   date_of_birth: '',
+  drivers_licence_no: '',
+  home_phone: '',
+  mobile: '',
   email: '',
+  
+  // ===== SHARED RESIDENTIAL ADDRESS FIELDS =====
+  address_unit: '',
+  address_street_no: '',
+  address_street_name: '',
+  address_suburb: '',
+  address_state: '',
+  address_postcode: '',
+  
+  // ===== SHARED EMPLOYMENT DETAILS FIELDS =====
+  occupation: '',
+  employer_name: '',
+  employment_type: '',
+  annual_income: null,
+  
+  // ===== RELATIONSHIP FIELDS =====
+  borrower_id: null,
+  application_id: null,
+  relationship: '',
+  relationship_other: '',
+  
+  // Legacy fields for backward compatibility
   phone: '',
   address: '',
   city: '',
-  state: '',
   postal_code: '',
-  employment_type: '',
-  annual_income: null,
-  employer_name: '',
   years_with_employer: null,
-  relationship: '',
-  relationship_other: '',
-  guarantor_type: 'individual',
-  borrower_id: null,
-  application_id: null,
+  
   ...props.guarantorData
 });
 

@@ -5,51 +5,96 @@
     in a single combined table to reflect the unified data structure approach.
     -->
     <div class="content">
-        <div v-if="!guarantorsWithFinancialItems.length">
+        <div v-if="!guarantorsWithFinancialItems.length" class="no-data">
             <p>No guarantor financial information in this application</p>
         </div>
-        <div class="form" v-for="(guarantor, gIndex) in guarantorsWithFinancialItems" :key="gIndex">
-            <div class="index">
-                <h1>{{ guarantor.first_name }} {{ guarantor.last_name }} - Financial Items</h1>
-                <p class="subtitle">Assets and Liabilities (Unified Table)</p>
-            </div>
-            
-            <div v-if="!guarantor.financialItems || guarantor.financialItems.length === 0" class="no-financial-items">
-                <p>No financial items (assets or liabilities) for this guarantor</p>
-            </div>
-            
-            <template v-else>
-                <div class="item header">
-                    <p class="title">Type</p>
-                    <p class="title">Category</p>
-                    <p class="title">Description</p>
-                    <p class="title">Description (if applicable)</p>
-                    <p class="title">Value/Amount</p>
-                    <p class="title">Amount Owing/Monthly Payment</p>
-                    <p class="title">BG Type</p>
+        <div v-else class="form">
+            <div v-for="(guarantor, gIndex) in guarantorsWithFinancialItems" :key="gIndex" class="guarantor-section">
+                <div class="section-header">
+                    <h3>{{ guarantor.first_name }} {{ guarantor.last_name }}</h3>
+                    <p class="guarantor-type">Guarantor</p>
                 </div>
                 
-                <div class="item" v-for="(item, index) in guarantor.financialItems" :key="index">
-                    <p>{{ item.itemType }}</p>
-                    <p>{{ item.category || '-' }}</p>
-                    <p>{{ item.description || '-' }}</p>
-                    <p>{{ item.descriptionIfApplicable || '-' }}</p>
-                    <p>${{ formatNumber(item.primaryAmount) || '0' }}</p>
-                    <p>${{ formatNumber(item.secondaryAmount) || '0' }}</p>
-                    <p>{{ item.bg_type || 'BG1' }}</p>
+                <!-- Financial Summary -->
+                <div class="summary-grid">
+                    <div class="item">
+                        <p class="title">Total Assets</p>
+                        <p>{{ formatCurrency(guarantor.totalAssetValue) }}</p>
+                    </div>
+                    <div class="item">
+                        <p class="title">Total Liabilities</p>
+                        <p>{{ formatCurrency(guarantor.totalLiabilityAmount) }}</p>
+                    </div>
+                    <div class="item">
+                        <p class="title">Net Worth</p>
+                        <p>{{ formatCurrency(guarantor.netWorth) }}</p>
+                    </div>
                 </div>
                 
-                <!-- Summary Row -->
-                <div class="item summary" v-if="guarantor.financialItems.length > 0">
-                    <p><strong>Total</strong></p>
-                    <p>-</p>
-                    <p>-</p>
-                    <p>-</p>
-                    <p><strong>${{ formatNumber(guarantor.totalAssetValue) }}</strong></p>
-                    <p><strong>${{ formatNumber(guarantor.totalLiabilityAmount) }}</strong></p>
-                    <p><strong>Net: ${{ formatNumber(guarantor.netWorth) }}</strong></p>
+                <div v-if="!guarantor.financialItems || guarantor.financialItems.length === 0" class="no-data">
+                    <p>No financial items (assets or liabilities) for this guarantor</p>
                 </div>
-            </template>
+                
+                <template v-else>
+                    <!-- Assets Section -->
+                    <div v-if="guarantor.financialItems.filter(item => item.itemType === 'Asset').length > 0" class="assets-section">
+                        <h4>Assets & Liabilities</h4>
+                        <div class="assets-grid">
+                            <div v-for="(item, index) in guarantor.financialItems.filter(item => item.itemType === 'Asset')" :key="index" class="asset-item">
+                                <div class="item">
+                                    <p class="title">Assets & Liabilities Type</p>
+                                    <p>{{ item.category || '-' }}</p>
+                                </div>
+                                <div class="item">
+                                    <p class="title">Description</p>
+                                    <p>{{ item.description || '-' }}</p>
+                                </div>
+                                <div class="item">
+                                    <p class="title">Value</p>
+                                    <p>{{ formatCurrency(item.primaryAmount) }}</p>
+                                </div>
+                                <div class="item">
+                                    <p class="title">Amount Owing</p>
+                                    <p>{{ formatCurrency(item.secondaryAmount) }}</p>
+                                </div>
+                                <div class="item">
+                                    <p class="title">BG Type</p>
+                                    <p>{{ item.bg_type || 'BG1' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Liabilities Section -->
+                    <div v-if="guarantor.financialItems.filter(item => item.itemType === 'Liability').length > 0" class="liabilities-section">
+                        <h4>Assets & Liabilities</h4>
+                        <div class="liabilities-grid">
+                            <div v-for="(item, index) in guarantor.financialItems.filter(item => item.itemType === 'Liability')" :key="index" class="liability-item">
+                                <div class="item">
+                                    <p class="title">Assets & Liabilities Type</p>
+                                    <p>{{ item.category || '-' }}</p>
+                                </div>
+                                <div class="item">
+                                    <p class="title">Description</p>
+                                    <p>{{ item.description || '-' }}</p>
+                                </div>
+                                <div class="item">
+                                    <p class="title">Amount</p>
+                                    <p>{{ formatCurrency(item.primaryAmount) }}</p>
+                                </div>
+                                <div class="item">
+                                    <p class="title">Monthly Payment</p>
+                                    <p>{{ formatCurrency(item.secondaryAmount) }}</p>
+                                </div>
+                                <div class="item">
+                                    <p class="title">BG Type</p>
+                                    <p>{{ item.bg_type || 'BG1' }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
         </div>
     </div>
 </template>
@@ -131,45 +176,101 @@
             maximumFractionDigits: 2
         });
     };
+
+    const formatCurrency = (value) => {
+        if (!value) return '$0';
+        return '$' + parseFloat(value).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    };
 </script>
 
 <style scoped>
     .content {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;        
-    }
-    .form {
         padding: 20px;
         border-radius: 6px;
-        background: #FFF;
+        background: #FFF;  
+        min-height: 250px;      
+    }
+
+    .form {
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
+    }
+
+    .guarantor-section {
+        margin-bottom: 30px;
+    }
+
+    .section-header {
+        margin-bottom: 20px;
+    }
+
+    .section-header h3 {
+        margin: 0 0 5px 0;
+        color: #384144;
+        font-feature-settings: 'liga' off, 'clig' off;
+        font-size: 0.9rem;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 12px;
+    }
+
+    .guarantor-type {
+        margin: 0;
+        color: #7A858E;
+        font-feature-settings: 'liga' off, 'clig' off;
+        font-size: 0.75rem;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 12px;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .assets-section, .liabilities-section {
+        margin-bottom: 20px;
+    }
+
+    .assets-section h4, .liabilities-section h4 {
+        margin: 0 0 15px 0;
+        color: #384144;
+        font-feature-settings: 'liga' off, 'clig' off;
+        font-size: 0.9rem;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 12px;
+    }
+
+    .assets-grid, .liabilities-grid {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .asset-item, .liability-item {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        padding: 15px;
+        background: #FAFAFA;
+        border-radius: 6px;
+        border: 1px solid #E8EBEE;
+    }
+
+    .item {
         display: flex;
         flex-direction: column;
         gap: 10px;
     }
-    .item {
-        display: grid;
-        grid-template-columns: 1fr 1.5fr 2fr 2fr 1.2fr 1.5fr 1fr;
-        gap: 10px;
-        padding: 10px 0;
-        border-bottom: 1px solid #E8EBEE;
-    }
-    .header {
-        border-bottom: 2px solid #E8EBEE;
-        font-weight: bold;
-        background-color: #f8f9fa;
-    }
-    .summary {
-        border-bottom: 2px solid #2196F3;
-        background-color: #f0f8ff;
-        font-weight: bold;
-    }
-    .no-financial-items {
-        padding: 20px;
-        text-align: center;
-        color: #7A858E;
-        font-style: italic;
-    }
+
     p {
         color: #384144;
         font-feature-settings: 'liga' off, 'clig' off;
@@ -179,25 +280,41 @@
         line-height: 140%;
         margin: 0;
     }
+
     .title {
         color: #7A858E;
+        font-feature-settings: 'liga' off, 'clig' off;
+        font-size: 0.75rem;
+        font-style: normal;
+        font-weight: 500;
+        line-height: 12px;
     }
-    .index {
-        margin: 20px 0 10px 0;
+
+    .no-data {
+        text-align: center;
+        padding: 40px;
+        color: #666;
+        font-style: italic;
     }
-    h1 {
+
+    .no-data p {
+        margin: 0;
         color: #384144;
         font-feature-settings: 'liga' off, 'clig' off;
-        font-size: 0.9rem;
+        font-size: 0.75rem;
         font-style: normal;
         font-weight: 600;
-        line-height: normal;
-        margin: 0 0 5px 0;
+        line-height: 140%;
     }
-    .subtitle {
-        color: #7A858E;
-        font-size: 0.7rem;
-        margin: 0;
-        font-style: italic;
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .asset-item, .liability-item {
+            grid-template-columns: 1fr;
+        }
     }
 </style>

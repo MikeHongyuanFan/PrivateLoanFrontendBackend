@@ -18,7 +18,8 @@ from documents.models import Document, Fee, Repayment, Note, Ledger
 from documents.serializers import DocumentSerializer, NoteSerializer, FeeSerializer, RepaymentSerializer, LedgerSerializer
 
 # Import from other serializer modules
-from .borrowers import BorrowerSerializer, GuarantorSerializer, CompanyBorrowerSerializer
+from .borrowers import GuarantorSerializer, CompanyBorrowerSerializer
+from borrowers.serializers import BorrowerDetailSerializer as BorrowerSerializer
 from .property import SecurityPropertySerializer, LoanRequirementSerializer
 from .funding import FundingCalculationInputSerializer, FundingCalculationHistorySerializer
 from .professionals import ValuerListSerializer, QuantitySurveyorListSerializer
@@ -486,13 +487,16 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
     stage_display = serializers.CharField(source='get_stage_display', read_only=True)
     created_by_details = UserSerializer(source='created_by', read_only=True)
     
+    # Product information
+    product_name = serializers.SerializerMethodField()
+    
     class Meta:
         model = Application
         fields = [
             # Basic fields
             'id', 'reference_number', 'loan_amount', 'loan_term', 'capitalised_interest_term',
             'interest_rate', 'purpose', 'repayment_frequency',
-            'application_type', 'application_type_other', 'product_id', 'estimated_settlement_date',
+            'application_type', 'application_type_other', 'product_id', 'product_name', 'estimated_settlement_date',
             'stage', 'stage_display', 'created_at', 'updated_at',
             
             # Loan purpose details
@@ -535,7 +539,10 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
             'funding_result',
             
             # Metadata
-            'created_by_details'
+            'created_by_details',
+            
+            # Product information
+            'product_name'
         ]
     
     def get_borrowers(self, obj) -> list:
@@ -604,6 +611,17 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
         else:
             history = FundingCalculationHistory.objects.filter(application=obj).order_by('-created_at')
         return FundingCalculationHistorySerializer(history, many=True, context=self.context).data
+    
+    def get_product_name(self, obj) -> str:
+        """Get the product name"""
+        if obj.product_id:
+            try:
+                from products.models import Product
+                product = Product.objects.get(id=obj.product_id)
+                return product.name
+            except:
+                return f"Product {obj.product_id}"
+        return ""
         
     def to_representation(self, instance):
         data = super().to_representation(instance)

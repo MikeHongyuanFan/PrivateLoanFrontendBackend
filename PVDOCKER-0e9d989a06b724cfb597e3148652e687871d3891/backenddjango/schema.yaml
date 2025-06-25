@@ -7433,7 +7433,7 @@ components:
         borrowers:
           type: array
           items:
-            $ref: '#/components/schemas/Borrower'
+            $ref: '#/components/schemas/BorrowerDetail'
         guarantors:
           type: array
           items:
@@ -7720,7 +7720,7 @@ components:
         borrowers:
           type: array
           items:
-            $ref: '#/components/schemas/BorrowerRequest'
+            $ref: '#/components/schemas/BorrowerDetailRequest'
         guarantors:
           type: array
           items:
@@ -7950,6 +7950,10 @@ components:
           nullable: true
           description: Product identifier
           maxLength: 50
+        product_name:
+          type: string
+          description: Get the product name
+          readOnly: true
         estimated_settlement_date:
           type: string
           format: date
@@ -8272,6 +8276,7 @@ components:
       - ledger_entries
       - loan_requirements
       - notes
+      - product_name
       - quantity_surveyor
       - repayments
       - security_properties
@@ -8802,125 +8807,6 @@ components:
     BlankEnum:
       enum:
       - ''
-    Borrower:
-      type: object
-      description: Serializer for individual borrowers with null/blank handling for
-        minimal data creation
-      properties:
-        id:
-          type: integer
-          readOnly: true
-        first_name:
-          type: string
-          nullable: true
-          maxLength: 100
-        last_name:
-          type: string
-          nullable: true
-          maxLength: 100
-        email:
-          type: string
-          format: email
-          nullable: true
-          maxLength: 254
-        phone:
-          type: string
-          nullable: true
-          maxLength: 20
-        date_of_birth:
-          type: string
-          format: date
-          nullable: true
-        address:
-          $ref: '#/components/schemas/Address'
-        employment_info:
-          type: object
-          additionalProperties: {}
-          readOnly: true
-        tax_id:
-          type: string
-          nullable: true
-          description: Tax File Number or equivalent
-          maxLength: 50
-        marital_status:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/MaritalStatusEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
-        residency_status:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/ResidencyStatusEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
-        referral_source:
-          type: string
-          nullable: true
-          maxLength: 100
-        tags:
-          type: string
-          nullable: true
-          maxLength: 255
-        assets:
-          type: array
-          items:
-            $ref: '#/components/schemas/Asset'
-          readOnly: true
-        liabilities:
-          type: array
-          items:
-            $ref: '#/components/schemas/Liability'
-          readOnly: true
-        employment_type:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/EmploymentTypeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
-        employer_name:
-          type: string
-          nullable: true
-          maxLength: 255
-        job_title:
-          type: string
-          nullable: true
-          maxLength: 100
-        annual_income:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
-        employment_duration:
-          type: integer
-          maximum: 2147483647
-          minimum: 0
-          nullable: true
-          description: Duration in months
-        employer_address:
-          type: string
-          nullable: true
-        other_income:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
-        monthly_expenses:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
-        mailing_address:
-          type: string
-          nullable: true
-        residential_address:
-          type: string
-          nullable: true
-      required:
-      - assets
-      - employment_info
-      - id
-      - liabilities
     BorrowerDetail:
       type: object
       description: Serializer for detailed borrower information with null/blank handling
@@ -8933,6 +8819,12 @@ components:
           allOf:
           - $ref: '#/components/schemas/User'
           readOnly: true
+        title:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/TitleEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         first_name:
           type: string
           nullable: true
@@ -8945,11 +8837,66 @@ components:
           type: string
           format: date
           nullable: true
+        drivers_licence_no:
+          type: string
+          nullable: true
+          maxLength: 50
+        home_phone:
+          type: string
+          nullable: true
+          maxLength: 20
+        mobile:
+          type: string
+          nullable: true
+          maxLength: 20
         email:
           type: string
           format: email
           nullable: true
           maxLength: 254
+        address_unit:
+          type: string
+          nullable: true
+          maxLength: 20
+        address_street_no:
+          type: string
+          nullable: true
+          maxLength: 20
+        address_street_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        address_suburb:
+          type: string
+          nullable: true
+          maxLength: 100
+        address_state:
+          type: string
+          nullable: true
+          maxLength: 50
+        address_postcode:
+          type: string
+          nullable: true
+          maxLength: 10
+        occupation:
+          type: string
+          nullable: true
+          maxLength: 100
+        employer_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        employment_type:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GuarantorEmploymentTypeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        annual_income:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
         phone:
           type: string
           nullable: true
@@ -8960,6 +8907,19 @@ components:
         mailing_address:
           type: string
           nullable: true
+        job_title:
+          type: string
+          nullable: true
+          maxLength: 100
+        employer_address:
+          type: string
+          nullable: true
+        employment_duration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Duration in months
         tax_id:
           type: string
           nullable: true
@@ -8977,34 +8937,6 @@ components:
           - $ref: '#/components/schemas/ResidencyStatusEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
-        employment_type:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/EmploymentTypeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
-        employer_name:
-          type: string
-          nullable: true
-          maxLength: 255
-        employer_address:
-          type: string
-          nullable: true
-        job_title:
-          type: string
-          nullable: true
-          maxLength: 100
-        employment_duration:
-          type: integer
-          maximum: 2147483647
-          minimum: 0
-          nullable: true
-          description: Duration in months
-        annual_income:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
         other_income:
           type: string
           format: decimal
@@ -9074,8 +9006,10 @@ components:
           nullable: true
         is_trustee:
           type: boolean
+          nullable: true
         is_smsf_trustee:
           type: boolean
+          nullable: true
         trustee_name:
           type: string
           nullable: true
@@ -9128,6 +9062,12 @@ components:
       description: Serializer for detailed borrower information with null/blank handling
         for minimal data creation
       properties:
+        title:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/TitleEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         first_name:
           type: string
           nullable: true
@@ -9140,11 +9080,66 @@ components:
           type: string
           format: date
           nullable: true
+        drivers_licence_no:
+          type: string
+          nullable: true
+          maxLength: 50
+        home_phone:
+          type: string
+          nullable: true
+          maxLength: 20
+        mobile:
+          type: string
+          nullable: true
+          maxLength: 20
         email:
           type: string
           format: email
           nullable: true
           maxLength: 254
+        address_unit:
+          type: string
+          nullable: true
+          maxLength: 20
+        address_street_no:
+          type: string
+          nullable: true
+          maxLength: 20
+        address_street_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        address_suburb:
+          type: string
+          nullable: true
+          maxLength: 100
+        address_state:
+          type: string
+          nullable: true
+          maxLength: 50
+        address_postcode:
+          type: string
+          nullable: true
+          maxLength: 10
+        occupation:
+          type: string
+          nullable: true
+          maxLength: 100
+        employer_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        employment_type:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GuarantorEmploymentTypeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        annual_income:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
         phone:
           type: string
           nullable: true
@@ -9155,6 +9150,19 @@ components:
         mailing_address:
           type: string
           nullable: true
+        job_title:
+          type: string
+          nullable: true
+          maxLength: 100
+        employer_address:
+          type: string
+          nullable: true
+        employment_duration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Duration in months
         tax_id:
           type: string
           nullable: true
@@ -9172,34 +9180,6 @@ components:
           - $ref: '#/components/schemas/ResidencyStatusEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
-        employment_type:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/EmploymentTypeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
-        employer_name:
-          type: string
-          nullable: true
-          maxLength: 255
-        employer_address:
-          type: string
-          nullable: true
-        job_title:
-          type: string
-          nullable: true
-          maxLength: 100
-        employment_duration:
-          type: integer
-          maximum: 2147483647
-          minimum: 0
-          nullable: true
-          description: Duration in months
-        annual_income:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
         other_income:
           type: string
           format: decimal
@@ -9269,8 +9249,10 @@ components:
           nullable: true
         is_trustee:
           type: boolean
+          nullable: true
         is_smsf_trustee:
           type: boolean
+          nullable: true
         trustee_name:
           type: string
           nullable: true
@@ -9317,12 +9299,6 @@ components:
           allOf:
           - $ref: '#/components/schemas/User'
           readOnly: true
-        guarantor_type:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/GuarantorTypeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
         title:
           nullable: true
           oneOf:
@@ -9382,9 +9358,6 @@ components:
           type: string
           nullable: true
           maxLength: 10
-        address:
-          type: string
-          nullable: true
         occupation:
           type: string
           nullable: true
@@ -9404,6 +9377,15 @@ components:
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+        address:
+          type: string
+          nullable: true
+        guarantor_type:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GuarantorTypeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         company_name:
           type: string
           nullable: true
@@ -9440,12 +9422,6 @@ components:
       description: Serializer for guarantor information with null/blank handling for
         minimal data creation
       properties:
-        guarantor_type:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/GuarantorTypeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
         title:
           nullable: true
           oneOf:
@@ -9505,9 +9481,6 @@ components:
           type: string
           nullable: true
           maxLength: 10
-        address:
-          type: string
-          nullable: true
         occupation:
           type: string
           nullable: true
@@ -9527,6 +9500,15 @@ components:
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+        address:
+          type: string
+          nullable: true
+        guarantor_type:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GuarantorTypeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         company_name:
           type: string
           nullable: true
@@ -9604,103 +9586,6 @@ components:
       - created_at
       - id
       - related_brokers
-    BorrowerRequest:
-      type: object
-      description: Serializer for individual borrowers with null/blank handling for
-        minimal data creation
-      properties:
-        first_name:
-          type: string
-          nullable: true
-          maxLength: 100
-        last_name:
-          type: string
-          nullable: true
-          maxLength: 100
-        email:
-          type: string
-          format: email
-          nullable: true
-          maxLength: 254
-        phone:
-          type: string
-          nullable: true
-          maxLength: 20
-        date_of_birth:
-          type: string
-          format: date
-          nullable: true
-        address:
-          $ref: '#/components/schemas/AddressRequest'
-        tax_id:
-          type: string
-          nullable: true
-          description: Tax File Number or equivalent
-          maxLength: 50
-        marital_status:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/MaritalStatusEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
-        residency_status:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/ResidencyStatusEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
-        referral_source:
-          type: string
-          nullable: true
-          maxLength: 100
-        tags:
-          type: string
-          nullable: true
-          maxLength: 255
-        employment_type:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/EmploymentTypeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
-        employer_name:
-          type: string
-          nullable: true
-          maxLength: 255
-        job_title:
-          type: string
-          nullable: true
-          maxLength: 100
-        annual_income:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
-        employment_duration:
-          type: integer
-          maximum: 2147483647
-          minimum: 0
-          nullable: true
-          description: Duration in months
-        employer_address:
-          type: string
-          nullable: true
-        other_income:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
-        monthly_expenses:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
-        mailing_address:
-          type: string
-          nullable: true
-        residential_address:
-          type: string
-          nullable: true
     Branch:
       type: object
       description: Serializer for branch information with null/blank handling for
@@ -10372,24 +10257,6 @@ components:
           format: decimal
           pattern: ^-?\d{0,3}(?:\.\d{0,2})?$
           nullable: true
-    EmploymentTypeEnum:
-      enum:
-      - full_time
-      - part_time
-      - casual
-      - self_employed
-      - contractor
-      - unemployed
-      - retired
-      type: string
-      description: |-
-        * `full_time` - Full Time
-        * `part_time` - Part Time
-        * `casual` - Casual
-        * `self_employed` - Self Employed
-        * `contractor` - Contractor
-        * `unemployed` - Unemployed
-        * `retired` - Retired
     ExitStrategyEnum:
       enum:
       - sale
@@ -10829,13 +10696,19 @@ components:
       - full_time
       - part_time
       - casual
-      - contract
+      - self_employed
+      - contractor
+      - unemployed
+      - retired
       type: string
       description: |-
         * `full_time` - Full Time
         * `part_time` - Part Time
-        * `casual` - Casual/Temp
-        * `contract` - Contract
+        * `casual` - Casual
+        * `self_employed` - Self Employed
+        * `contractor` - Contractor
+        * `unemployed` - Unemployed
+        * `retired` - Retired
     GuarantorRequest:
       type: object
       description: Serializer for guarantor with null/blank handling for minimal data
@@ -12391,6 +12264,12 @@ components:
       description: Serializer for detailed borrower information with null/blank handling
         for minimal data creation
       properties:
+        title:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/TitleEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         first_name:
           type: string
           nullable: true
@@ -12403,11 +12282,66 @@ components:
           type: string
           format: date
           nullable: true
+        drivers_licence_no:
+          type: string
+          nullable: true
+          maxLength: 50
+        home_phone:
+          type: string
+          nullable: true
+          maxLength: 20
+        mobile:
+          type: string
+          nullable: true
+          maxLength: 20
         email:
           type: string
           format: email
           nullable: true
           maxLength: 254
+        address_unit:
+          type: string
+          nullable: true
+          maxLength: 20
+        address_street_no:
+          type: string
+          nullable: true
+          maxLength: 20
+        address_street_name:
+          type: string
+          nullable: true
+          maxLength: 100
+        address_suburb:
+          type: string
+          nullable: true
+          maxLength: 100
+        address_state:
+          type: string
+          nullable: true
+          maxLength: 50
+        address_postcode:
+          type: string
+          nullable: true
+          maxLength: 10
+        occupation:
+          type: string
+          nullable: true
+          maxLength: 100
+        employer_name:
+          type: string
+          nullable: true
+          maxLength: 255
+        employment_type:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GuarantorEmploymentTypeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
+        annual_income:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
+          nullable: true
         phone:
           type: string
           nullable: true
@@ -12418,6 +12352,19 @@ components:
         mailing_address:
           type: string
           nullable: true
+        job_title:
+          type: string
+          nullable: true
+          maxLength: 100
+        employer_address:
+          type: string
+          nullable: true
+        employment_duration:
+          type: integer
+          maximum: 2147483647
+          minimum: 0
+          nullable: true
+          description: Duration in months
         tax_id:
           type: string
           nullable: true
@@ -12435,34 +12382,6 @@ components:
           - $ref: '#/components/schemas/ResidencyStatusEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
-        employment_type:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/EmploymentTypeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
-        employer_name:
-          type: string
-          nullable: true
-          maxLength: 255
-        employer_address:
-          type: string
-          nullable: true
-        job_title:
-          type: string
-          nullable: true
-          maxLength: 100
-        employment_duration:
-          type: integer
-          maximum: 2147483647
-          minimum: 0
-          nullable: true
-          description: Duration in months
-        annual_income:
-          type: string
-          format: decimal
-          pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
-          nullable: true
         other_income:
           type: string
           format: decimal
@@ -12532,8 +12451,10 @@ components:
           nullable: true
         is_trustee:
           type: boolean
+          nullable: true
         is_smsf_trustee:
           type: boolean
+          nullable: true
         trustee_name:
           type: string
           nullable: true
@@ -12573,12 +12494,6 @@ components:
       description: Serializer for guarantor information with null/blank handling for
         minimal data creation
       properties:
-        guarantor_type:
-          nullable: true
-          oneOf:
-          - $ref: '#/components/schemas/GuarantorTypeEnum'
-          - $ref: '#/components/schemas/BlankEnum'
-          - $ref: '#/components/schemas/NullEnum'
         title:
           nullable: true
           oneOf:
@@ -12638,9 +12553,6 @@ components:
           type: string
           nullable: true
           maxLength: 10
-        address:
-          type: string
-          nullable: true
         occupation:
           type: string
           nullable: true
@@ -12660,6 +12572,15 @@ components:
           format: decimal
           pattern: ^-?\d{0,10}(?:\.\d{0,2})?$
           nullable: true
+        address:
+          type: string
+          nullable: true
+        guarantor_type:
+          nullable: true
+          oneOf:
+          - $ref: '#/components/schemas/GuarantorTypeEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+          - $ref: '#/components/schemas/NullEnum'
         company_name:
           type: string
           nullable: true

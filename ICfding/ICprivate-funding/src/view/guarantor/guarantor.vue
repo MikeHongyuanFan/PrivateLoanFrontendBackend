@@ -8,48 +8,158 @@
         <el-tabs v-model="activeName" class="tabs" >
             <el-tab-pane name="1">
                 <template #label>
-                    <div class="label">Overview</div>
+                    <div class="label">Personal Information</div>
                 </template>
                 <div class="tab">
+                    <div class="info">
+                        <p style="color: #7A858E">Title</p>
+                        <p class="text">{{ formatTitle(overview.title) }}</p>
+                    </div>
                     <div class="info">
                         <p style="color: #7A858E">Guarantor Name</p>
                         <p class="text">{{ overview.name || '-' }}</p>
                     </div>
                     <div class="info">
-                        <p style="color: #7A858E">Guarantor Address</p>
-                        <p class="text">{{ overview.address || '-' }}</p>
-                    </div>
-                    <div class="info">
-                        <p style="color: #7A858E">Phone Number</p>
-                        <p class="text">{{ overview.phone || '-' }}</p>
+                        <p style="color: #7A858E">Guarantor Type</p>
+                        <p class="text">{{ overview.guarantor_type || 'Individual' }}</p>
                     </div>
                     <div class="info">
                         <p style="color: #7A858E">Email Address</p>
                         <p class="text">{{ overview.email || '-' }}</p>
                     </div>
                     <div class="info">
-                        <p style="color: #7A858E">Relationship to Borrower</p>
-                        <p class="text">{{ overview.relationship || '-' }}</p>
+                        <p style="color: #7A858E">Home Phone</p>
+                        <p class="text">{{ overview.home_phone || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Mobile Phone</p>
+                        <p class="text">{{ overview.mobile || '-' }}</p>
                     </div>
                     <div class="info">
                         <p style="color: #7A858E">Date of Birth</p>
                         <p class="text">{{ overview.birth || '-' }}</p>
                     </div>
                     <div class="info">
-                        <p style="color: #7A858E">Employment Status</p>
-                        <p class="text">{{ overview.status || '-' }}</p>
+                        <p style="color: #7A858E">Driver's License Number</p>
+                        <p class="text">{{ overview.drivers_licence_no || '-' }}</p>
+                    </div>
+                </div>
+            </el-tab-pane>
+            <el-tab-pane name="2">
+                <template #label>
+                    <div class="label">Residential Address</div>
+                </template>
+                <div class="tab">
+                    <div class="info">
+                        <p style="color: #7A858E">Unit Number</p>
+                        <p class="text">{{ overview.address_unit || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Street Number</p>
+                        <p class="text">{{ overview.address_street_no || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Street Name</p>
+                        <p class="text">{{ overview.address_street_name || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Suburb</p>
+                        <p class="text">{{ overview.address_suburb || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">State</p>
+                        <p class="text">{{ overview.address_state || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Postcode</p>
+                        <p class="text">{{ overview.address_postcode || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Full Address</p>
+                        <p class="text">{{ formatFullAddress(overview) }}</p>
+                    </div>
+                </div>
+            </el-tab-pane>
+            <el-tab-pane name="3">
+                <template #label>
+                    <div class="label">Employment Information</div>
+                </template>
+                <div class="tab">
+                    <div class="info">
+                        <p style="color: #7A858E">Occupation</p>
+                        <p class="text">{{ overview.occupation || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Employment Type</p>
+                        <p class="text">{{ formatEmploymentType(overview.status) }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Employer Name</p>
+                        <p class="text">{{ overview.employer_name || '-' }}</p>
                     </div>
                     <div class="info">
                         <p style="color: #7A858E">Annual Income</p>
                         <p class="text">{{ overview.income || '-' }}</p>
                     </div>
+                </div>
+            </el-tab-pane>
+            <el-tab-pane name="4">
+                <template #label>
+                    <div class="label">Company Details</div>
+                </template>
+                <div class="tab" v-if="overview.guarantor_type === 'company'">
                     <div class="info">
-                        <p style="color: #7A858E">Credit Score</p>
+                        <p style="color: #7A858E">Company Name</p>
+                        <p class="text">{{ overview.company_name || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">ABN</p>
+                        <p class="text">{{ overview.company_abn || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">ACN</p>
+                        <p class="text">{{ overview.company_acn || '-' }}</p>
+                    </div>
+                </div>
+                <div class="tab" v-else>
+                    <div class="info">
+                        <p style="color: #7A858E">No Company Details</p>
+                        <p class="text">This is an individual guarantor</p>
+                    </div>
+                </div>
+            </el-tab-pane>
+            <el-tab-pane name="5">
+                <template #label>
+                    <div class="label">Legacy Information</div>
+                </template>
+                <div class="tab">
+                    <div class="info">
+                        <p style="color: #7A858E">Legacy Phone</p>
+                        <p class="text">{{ overview.phone || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Legacy Address</p>
+                        <p class="text">{{ overview.address || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Legacy City</p>
+                        <p class="text">{{ overview.city || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Legacy Postal Code</p>
+                        <p class="text">{{ overview.postal_code || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Legacy Years with Employer</p>
+                        <p class="text">{{ overview.years_with_employer || '-' }}</p>
+                    </div>
+                    <div class="info">
+                        <p style="color: #7A858E">Legacy Credit Score</p>
                         <p class="text">{{ overview.score || '-' }}</p>
                     </div>
                 </div>
             </el-tab-pane>
-            <el-tab-pane name="2">
+            <el-tab-pane name="6">
                 <template #label>
                     <div class="label">Related Borrowers</div>
                 </template>
@@ -86,7 +196,7 @@
                     </div>
                 </div>
             </el-tab-pane>
-            <el-tab-pane name="3">
+            <el-tab-pane name="7">
                 <template #label>
                     <div class="label">Related Applications</div>
                 </template>
@@ -144,15 +254,34 @@
     const activeName = ref('1');
     const guarantorId = route.params.guarantorId;
     const overview = ref({
+        title: "",
         name: "Broker One",
+        guarantor_type: "individual",
         address: "Address",
         phone: "123456789",
+        home_phone: "",
+        mobile: "",
         email: "broker@gmail.com",
         relationship: "Branch Name",
         birth: "14.05.1986",
         status: "Full-time",
         income: "$200,000.00",
-        score: "85"
+        score: "85",
+        drivers_licence_no: "",
+        address_unit: "",
+        address_street_no: "",
+        address_street_name: "",
+        address_suburb: "",
+        address_state: "",
+        address_postcode: "",
+        occupation: "",
+        employer_name: "",
+        company_name: "",
+        company_abn: "",
+        company_acn: "",
+        city: "",
+        postal_code: "",
+        years_with_employer: ""
     });
     
     const relatedBorrowers = ref([]);
@@ -174,9 +303,13 @@
                 date: new Date(res.created_at).toLocaleString()
             };
             overview.value = {
+                title: res.title || "",
                 name: `${res.first_name} ${res.last_name}`,
+                guarantor_type: res.guarantor_type || "individual",
                 address: `${res.address_street_name || ''}, ${res.address_suburb || ''}, ${res.address_state || ''} ${res.address_postcode || ''}`,
-                phone: res.mobile || res.phone,
+                phone: res.phone || res.mobile || res.home_phone || "",
+                home_phone: res.home_phone || "",
+                mobile: res.mobile || "",
                 email: res.email,
                 relationship: 'Guarantor',
                 birth: res.date_of_birth ? new Date(res.date_of_birth).toLocaleDateString() : 'N/A',
@@ -185,8 +318,21 @@
                     style: 'currency', 
                     currency: 'USD' 
                 }).format(res.annual_income) : 'N/A',
-                employer: res.employer_name || 'N/A',
-                years_employed: 'N/A',
+                employer_name: res.employer_name || 'N/A',
+                occupation: res.occupation || 'N/A',
+                drivers_licence_no: res.drivers_licence_no || "",
+                address_unit: res.address_unit || "",
+                address_street_no: res.address_street_no || "",
+                address_street_name: res.address_street_name || "",
+                address_suburb: res.address_suburb || "",
+                address_state: res.address_state || "",
+                address_postcode: res.address_postcode || "",
+                company_name: res.company_name || "",
+                company_abn: res.company_abn || "",
+                company_acn: res.company_acn || "",
+                city: res.city || "",
+                postal_code: res.postal_code || "",
+                years_with_employer: res.years_with_employer || "",
                 score: 'N/A'
             };
         } else {
@@ -201,19 +347,21 @@
         loadingBorrowers.value = true;
         try {
             const [err, res] = await api.getGuarantorBorrowers(guarantorId);
-            if (!err && res.results) {
+            if (!err && res && res.results) {
                 relatedBorrowers.value = res.results.map(borrower => ({
                     id: borrower.id,
-                    name: `${borrower.first_name} ${borrower.last_name}`,
+                    name: `${borrower.first_name || ''} ${borrower.last_name || ''}`.trim() || 'Unnamed Borrower',
                     relationship: 'Guarantor',
-                    email: borrower.email,
-                    phone: borrower.mobile || borrower.phone
+                    email: borrower.email || 'N/A',
+                    phone: borrower.mobile || borrower.home_phone || borrower.phone || 'N/A'
                 }));
-            } else if (err) {
-                console.error('Error fetching related borrowers:', err);
+            } else {
+                console.error('Error loading related borrowers:', err);
+                relatedBorrowers.value = [];
             }
         } catch (error) {
-            console.error('Error fetching related borrowers:', error);
+            console.error('Error loading related borrowers:', error);
+            relatedBorrowers.value = [];
         } finally {
             loadingBorrowers.value = false;
         }
@@ -223,19 +371,21 @@
         loadingApplications.value = true;
         try {
             const [err, res] = await api.getGuarantorApplications(guarantorId);
-            if (!err && res.results) {
-                relatedApplications.value = res.results.map(app => ({
-                    id: app.id,
-                    reference_number: app.reference_number,
-                    title: app.title || `Application #${app.id}`,
-                    status: app.status,
-                    created_at: new Date(app.created_at).toLocaleDateString()
+            if (!err && res && res.results) {
+                relatedApplications.value = res.results.map(application => ({
+                    id: application.id,
+                    reference_number: application.reference_number || `APP-${application.id}`,
+                    title: application.purpose || 'No Purpose Specified',
+                    status: application.stage || 'Unknown',
+                    created_at: application.created_at ? new Date(application.created_at).toLocaleDateString() : 'N/A'
                 }));
-            } else if (err) {
-                console.error('Error fetching related applications:', err);
+            } else {
+                console.error('Error loading related applications:', err);
+                relatedApplications.value = [];
             }
         } catch (error) {
-            console.error('Error fetching related applications:', error);
+            console.error('Error loading related applications:', error);
+            relatedApplications.value = [];
         } finally {
             loadingApplications.value = false;
         }
@@ -247,6 +397,46 @@
     
     const viewApplication = (applicationId) => {
         router.push(`/application/${applicationId}`);
+    };
+
+    // Formatting functions
+    const formatTitle = (title) => {
+        if (!title) return '-';
+        const titleMap = {
+            'mr': 'Mr',
+            'mrs': 'Mrs',
+            'ms': 'Ms',
+            'miss': 'Miss',
+            'dr': 'Dr',
+            'other': 'Other'
+        };
+        return titleMap[title] || title;
+    };
+
+    const formatEmploymentType = (type) => {
+        if (!type) return '-';
+        const typeMap = {
+            'full_time': 'Full Time',
+            'part_time': 'Part Time',
+            'casual': 'Casual',
+            'self_employed': 'Self Employed',
+            'contractor': 'Contractor',
+            'unemployed': 'Unemployed',
+            'retired': 'Retired'
+        };
+        return typeMap[type] || type;
+    };
+
+    const formatFullAddress = (guarantor) => {
+        const parts = [];
+        if (guarantor.address_unit) parts.push(guarantor.address_unit);
+        if (guarantor.address_street_no) parts.push(guarantor.address_street_no);
+        if (guarantor.address_street_name) parts.push(guarantor.address_street_name);
+        if (guarantor.address_suburb) parts.push(guarantor.address_suburb);
+        if (guarantor.address_state) parts.push(guarantor.address_state);
+        if (guarantor.address_postcode) parts.push(guarantor.address_postcode);
+        
+        return parts.length > 0 ? parts.join(' ') : '-';
     };
 </script>
 

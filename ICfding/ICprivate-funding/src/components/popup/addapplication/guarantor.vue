@@ -42,17 +42,17 @@
                 <span class="hint">Date must be in YYYY-MM-DD format</span>
             </div>
             <div class="item">
-                <p>Driver's License No</p>
-                <el-input v-model="item.drivers_licence_no" placeholder="e.g. 12345678" />
+                <p>Driver's License Number</p>
+                <el-input v-model="item.drivers_licence_no" placeholder="Enter driver's license number" />
                 <span class="hint">Driver's license number</span>
             </div>
             <div class="item">
-                <p>Home Phone</p>
-                <el-input v-model="item.home_phone" placeholder="e.g. +61 2 1234 5678" />
+                <p>Home Phone <span class="optional">(optional)</span></p>
+                <el-input v-model="item.home_phone" placeholder="e.g. +61 2 XXXX XXXX" />
                 <span class="hint">Home phone number</span>
             </div>
             <div class="item">
-                <p>Mobile <span class="required">*</span></p>
+                <p>Mobile Phone <span class="optional">(optional)</span></p>
                 <el-input v-model="item.mobile" placeholder="e.g. +61 4XX XXX XXX" />
                 <span class="hint">Mobile phone number</span>
             </div>
@@ -61,48 +61,52 @@
                 <el-input v-model="item.email" type="email" placeholder="example@domain.com" />
                 <span class="hint">Valid email address</span>
             </div>
+
+            <!-- Residential Address Section -->
             <div class="long_item">
-                <h1>Address</h1>
+                <h1>Residential Address</h1>
             </div>
             <div class="item">
-                <p>Unit/Suite</p>
-                <el-input v-model="item.address_unit" placeholder="e.g. Unit 5" />
-                <span class="hint">Unit or suite number if applicable</span>
+                <p>Unit Number <span class="optional">(optional)</span></p>
+                <el-input v-model="item.address_unit" placeholder="e.g. Unit 1" />
+                <span class="hint">Unit, apartment, or suite number</span>
             </div>
             <div class="item">
-                <p>Street No <span class="required">*</span></p>
+                <p>Street Number <span class="optional">(optional)</span></p>
                 <el-input v-model="item.address_street_no" placeholder="e.g. 123" />
                 <span class="hint">Street number</span>
             </div>
             <div class="item">
-                <p>Street Name <span class="required">*</span></p>
+                <p>Street Name <span class="optional">(optional)</span></p>
                 <el-input v-model="item.address_street_name" placeholder="e.g. Main Street" />
                 <span class="hint">Street name</span>
             </div>
             <div class="item">
-                <p>Suburb <span class="required">*</span></p>
-                <el-input v-model="item.address_suburb" placeholder="e.g. Richmond" />
-                <span class="hint">Suburb name</span>
+                <p>Suburb <span class="optional">(optional)</span></p>
+                <el-input v-model="item.address_suburb" placeholder="e.g. Sydney" />
+                <span class="hint">Suburb or city</span>
             </div>
             <div class="item">
-                <p>State <span class="required">*</span></p>
-                <el-select v-model="item.address_state" placeholder="Select state">
-                    <el-option value="NSW" label="NSW" />
-                    <el-option value="VIC" label="VIC" />
-                    <el-option value="QLD" label="QLD" />
-                    <el-option value="SA" label="SA" />
-                    <el-option value="WA" label="WA" />
-                    <el-option value="TAS" label="TAS" />
-                    <el-option value="NT" label="NT" />
-                    <el-option value="ACT" label="ACT" />
+                <p>State <span class="optional">(optional)</span></p>
+                <el-select v-model="item.address_state" placeholder="Select state" style="width: 100%">
+                    <el-option value="NSW" label="New South Wales" />
+                    <el-option value="VIC" label="Victoria" />
+                    <el-option value="QLD" label="Queensland" />
+                    <el-option value="WA" label="Western Australia" />
+                    <el-option value="SA" label="South Australia" />
+                    <el-option value="TAS" label="Tasmania" />
+                    <el-option value="ACT" label="Australian Capital Territory" />
+                    <el-option value="NT" label="Northern Territory" />
                 </el-select>
-                <span class="hint">Australian state or territory</span>
+                <span class="hint">State or territory</span>
             </div>
             <div class="item">
-                <p>Postcode <span class="required">*</span></p>
-                <el-input v-model="item.address_postcode" placeholder="e.g. 3000" maxlength="4" />
+                <p>Postcode <span class="optional">(optional)</span></p>
+                <el-input v-model="item.address_postcode" placeholder="e.g. 2000" maxlength="4" />
                 <span class="hint">4-digit postcode</span>
             </div>
+
+            <!-- Employment Details Section -->
             <div class="long_item">
                 <h1>Employment Details</h1>
             </div>
@@ -122,7 +126,7 @@
                     <el-option value="full_time" label="Full Time" />
                     <el-option value="part_time" label="Part Time" />
                     <el-option value="casual" label="Casual/Temp" />
-                    <el-option value="contract" label="Contract" />
+                    <el-option value="contractor" label="Contractor" />
                 </el-select>
                 <span class="hint">Type of employment</span>
             </div>
@@ -198,8 +202,7 @@
 
 <script setup>
     import { ref, onMounted } from 'vue';
-    import { borrowerApi } from '@/api/borrowers';
-    import { applicationApi } from '@/api/application';
+    import { api } from '@/api';
     import { ElLoading, ElMessage } from 'element-plus';
 
     const props = defineProps({
@@ -220,7 +223,7 @@
     const fetchBorrowers = async () => {
         loadingBorrowers.value = true;
         try {
-            const [error, data] = await borrowerApi.borrowers();
+            const [error, data] = await api.borrowers();
             if (error) {
                 ElMessage.error('Failed to load borrowers: ' + (error.detail || 'Unknown error'));
                 return;
@@ -232,10 +235,8 @@
             
             // Map API response to dropdown options with safe access to properties
             borrowerOptions.value = borrowersArray.map(borrower => ({
-                value: borrower.id || '', // Store only the ID as value with fallback
-                label: borrower.first_name && borrower.last_name ? 
-                       `${borrower.first_name} ${borrower.last_name}` : 
-                       (borrower.name || 'Unknown Borrower') // Display name as label with fallback
+                value: borrower.id,
+                label: `${borrower.first_name || ''} ${borrower.last_name || ''}`.trim() || `Borrower ${borrower.id}`
             }));
         } catch (err) {
             console.error('Error fetching borrowers:', err);
@@ -249,7 +250,7 @@
     const fetchApplications = async () => {
         loadingApplications.value = true;
         try {
-            const [error, data] = await applicationApi.applications();
+            const [error, data] = await api.applications();
             if (error) {
                 ElMessage.error('Failed to load applications: ' + (error.detail || 'Unknown error'));
                 return;
@@ -261,8 +262,8 @@
             
             // Map API response to dropdown options with safe access to properties
             applicationOptions.value = applicationsArray.map(application => ({
-                value: application.id || '', // Store only the ID as value with fallback
-                label: application.reference_number || 'Unknown Reference' // Display reference number as label with fallback
+                value: application.id,
+                label: `Application #${application.id} - ${application.reference_number || 'No Reference'}`
             }));
         } catch (err) {
             console.error('Error fetching applications:', err);
@@ -317,10 +318,15 @@
     }
     .long_item {
         grid-column: 1 / 4;
-        display: flex;
-        flex-direction: column;
-        align-items: start;
-        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid #e8e8e8;
+        margin-bottom: 10px;
+    }
+    .long_item h1 {
+        color: #2984DE;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin: 0;
     }
     p {
         color: #384144;
@@ -330,14 +336,6 @@
         font-weight: 500;
         line-height: 12px;
         margin: 0;
-    }
-    h1 {
-        color: #384144;
-        font-feature-settings: 'liga' off, 'clig' off;
-        font-size: 0.9rem;
-        font-style: normal;
-        font-weight: 500;
-        line-height: 12px;
     }
     .buttons {
         grid-column: 1 / 4;
@@ -364,5 +362,23 @@
     .required {
         color: #f56c6c;
         margin-left: 2px;
+    }
+    
+    .optional {
+        color: #909399;
+        font-weight: normal;
+        font-style: italic;
+        margin-left: 2px;
+    }
+
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .guarantor {
+            grid-template-columns: 1fr;
+        }
+        .long_item,
+        .buttons {
+            grid-column: 1;
+        }
     }
 </style>
