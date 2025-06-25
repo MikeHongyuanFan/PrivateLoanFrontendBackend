@@ -4940,6 +4940,29 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/documents/fees/{id}/download_invoice/:
+    get:
+      operationId: documents_fees_download_invoice_retrieve
+      description: Download a fee invoice
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this fee.
+        required: true
+      tags:
+      - documents
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fee'
+          description: ''
   /api/documents/fees/{id}/mark-paid/:
     post:
       operationId: documents_fees_mark_paid_create
@@ -4963,6 +4986,45 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/FeeRequest'
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fee'
+          description: ''
+  /api/documents/fees/{id}/preview_invoice/:
+    get:
+      operationId: documents_fees_preview_invoice_retrieve
+      description: Preview a fee invoice in the browser
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this fee.
+        required: true
+      tags:
+      - documents
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Fee'
+          description: ''
+  /api/documents/fees/compliance/:
+    get:
+      operationId: documents_fees_compliance_retrieve
+      description: Get fee compliance statistics for dashboard
+      tags:
+      - documents
       security:
       - jwtAuth: []
       - Bearer: []
@@ -5596,6 +5658,29 @@ paths:
       responses:
         '204':
           description: No response body
+  /api/documents/repayments/{id}/download_invoice/:
+    get:
+      operationId: documents_repayments_download_invoice_retrieve
+      description: Download a repayment invoice
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this repayment.
+        required: true
+      tags:
+      - documents
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Repayment'
+          description: ''
   /api/documents/repayments/{id}/mark-paid/:
     post:
       operationId: documents_repayments_mark_paid_create
@@ -5619,6 +5704,29 @@ paths:
           multipart/form-data:
             schema:
               $ref: '#/components/schemas/RepaymentRequest'
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Repayment'
+          description: ''
+  /api/documents/repayments/{id}/preview_invoice/:
+    get:
+      operationId: documents_repayments_preview_invoice_retrieve
+      description: Preview a repayment invoice in the browser
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this repayment.
+        required: true
+      tags:
+      - documents
       security:
       - jwtAuth: []
       - Bearer: []

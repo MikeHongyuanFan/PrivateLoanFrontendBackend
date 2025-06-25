@@ -1,17 +1,17 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { CircleCheck, View, Upload, Delete } from '@element-plus/icons-vue'
+import { CircleCheck, View, Upload, Delete, Edit } from '@element-plus/icons-vue'
 import { api } from '@/api'
 import { ElMessageBox, ElMessage } from 'element-plus'
 
 const emit = defineEmits(['refresh'])
 
-const { repayments } = defineProps({
-  repayments: Array
+const { fees } = defineProps({
+  fees: Array
 })
 
 const viewDialogVisible = ref(false)
-const currentRepayment = ref(null)
+const currentFee = ref(null)
 const loading = ref({
   markPaid: false,
   delete: false,
@@ -23,12 +23,14 @@ onMounted(() => {
 
 const upload = async (id, file) => {
   loading.value.upload = true
-  const [err, res] = await api.updateRepayments(id, file)
+  const formData = new FormData()
+  formData.append('invoice', file)
+  const [err, res] = await api.patchFee(id, formData)
   if (!err) {
-    ElMessage.success('Repayment updated successfully')
+    ElMessage.success('Fee updated successfully')
     emit('refresh')
   } else {
-    ElMessage.error('Failed to update repayment')
+    ElMessage.error('Failed to update fee')
     console.error(err)
   }
   loading.value.upload = false
@@ -48,13 +50,13 @@ const handleUpload = (row) => {
 }
 
 const handleView = (row) => {
-  currentRepayment.value = row
+  currentFee.value = row
   viewDialogVisible.value = true
 }
 
 const handleDelete = (row) => {
   ElMessageBox.confirm(
-    'Are you sure you want to delete this repayment?',
+    'Are you sure you want to delete this fee?',
     'Warning',
     {
       confirmButtonText: 'Delete',
@@ -64,12 +66,12 @@ const handleDelete = (row) => {
   ).then(async () => {
     loading.value.delete = true
     try {
-      const [err, res] = await api.deleteRepayment(row.id)
+      const [err, res] = await api.deleteFee(row.id)
       if (!err) {
-        ElMessage.success('Repayment deleted successfully')
+        ElMessage.success('Fee deleted successfully')
         emit('refresh')
       } else {
-        ElMessage.error('Failed to delete repayment')
+        ElMessage.error('Failed to delete fee')
         console.error(err)
       }
     } catch (error) {
@@ -86,12 +88,12 @@ const handleDelete = (row) => {
 const markAsPaid = async (row) => {
   loading.value.markPaid = row.id
   try {
-    const [err, res] = await api.markRepaymentAsPaid(row.id)
+    const [err, res] = await api.markFeePaid(row.id, {})
     if (!err) {
-      ElMessage.success('Repayment marked as paid')
+      ElMessage.success('Fee marked as paid')
       emit('refresh')
     } else {
-      ElMessage.error('Failed to mark repayment as paid')
+      ElMessage.error('Failed to mark fee as paid')
       console.error(err)
     }
   } catch (error) {
@@ -102,10 +104,10 @@ const markAsPaid = async (row) => {
   }
 }
 
-const viewInvoice = async (repayment) => {
+const viewInvoice = async (fee) => {
   try {
     // Try to preview first, if that fails, download
-    const [previewError, previewResponse] = await api.previewRepaymentInvoice(repayment.id)
+    const [previewError, previewResponse] = await api.previewFeeInvoice(fee.id)
     
     if (!previewError && previewResponse) {
       // Create blob URL for preview
@@ -121,7 +123,7 @@ const viewInvoice = async (repayment) => {
       }, 1000)
     } else {
       // If preview fails, try download
-      const [downloadError, downloadResponse] = await api.downloadRepaymentInvoice(repayment.id)
+      const [downloadError, downloadResponse] = await api.downloadFeeInvoice(fee.id)
       
       if (!downloadError && downloadResponse) {
         // Create blob URL for download
@@ -131,7 +133,7 @@ const viewInvoice = async (repayment) => {
         // Create download link
         const link = document.createElement('a')
         link.href = url
-        link.download = `repayment_invoice_${repayment.id}.pdf`
+        link.download = `fee_invoice_${fee.id}.pdf`
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
@@ -147,18 +149,59 @@ const viewInvoice = async (repayment) => {
     ElMessage.error('Failed to access invoice file')
   }
 }
+
+const formatAmount = (amount) => {
+  return parseFloat(amount).toFixed(2)
+}
+
+const formatDate = (date) => {
+  if (!date) return 'N/A'
+  return new Date(date).toLocaleDateString()
+}
+
+const getStatusTag = (fee) => {
+  if (fee.paid_date) {
+    return { type: 'success', text: 'Paid' }
+  }
+  if (fee.due_date) {
+    const today = new Date()
+    const dueDate = new Date(fee.due_date)
+    if (dueDate < today) {
+      return { type: 'danger', text: 'Overdue' }
+    }
+  }
+  return { type: 'warning', text: 'Pending' }
+}
 </script>
 
 <template>
-  <el-table :data="repayments" class="table" :header-cell-style="{ background: '#f8f8f8', color: '#272727' }">
+  <el-table :data="fees" class="table" :header-cell-style="{ background: '#f8f8f8', color: '#272727' }">
     <el-table-column type="selection" width="50" align="center" />
-    <el-table-column prop="id" label="ID" />
-    <el-table-column prop="application" label="Application" />
-    <el-table-column prop="amount" label="Amount" />
-    <el-table-column prop="status" label="Status" />
-    <el-table-column prop="due_date" label="Due Date" />
-    <el-table-column prop="paid_date" label="Paid Date" />
-    <el-table-column prop="created_by_name" label="Created By" />
+    <el-table-column prop="id" label="ID" width="80" />
+    <el-table-column prop="fee_type_display" label="Fee Type" width="150" />
+    <el-table-column label="Amount" width="120">
+      <template #default="scope">
+        ${{ formatAmount(scope.row.amount) }}
+      </template>
+    </el-table-column>
+    <el-table-column label="Status" width="100">
+      <template #default="scope">
+        <el-tag :type="getStatusTag(scope.row).type" size="small">
+          {{ getStatusTag(scope.row).text }}
+        </el-tag>
+      </template>
+    </el-table-column>
+    <el-table-column label="Due Date" width="120">
+      <template #default="scope">
+        {{ formatDate(scope.row.due_date) }}
+      </template>
+    </el-table-column>
+    <el-table-column label="Paid Date" width="120">
+      <template #default="scope">
+        {{ formatDate(scope.row.paid_date) }}
+      </template>
+    </el-table-column>
+    <el-table-column prop="created_by_name" label="Created By" width="120" />
     <el-table-column label="Action" width="420" align="center">
       <template #default="scope">
         <div class="action-buttons">
@@ -210,25 +253,30 @@ const viewInvoice = async (repayment) => {
     </el-table-column>
   </el-table>
 
-  <!-- Repayment Detail Dialog -->
+  <!-- Fee Detail Dialog -->
   <el-dialog
     v-model="viewDialogVisible"
-    title="Repayment Details"
+    title="Fee Details"
     width="50%"
   >
-    <div v-if="currentRepayment" class="repayment-detail">
+    <div v-if="currentFee" class="fee-detail">
       <el-descriptions :column="1" border>
-        <el-descriptions-item label="ID">{{ currentRepayment.id }}</el-descriptions-item>
-        <el-descriptions-item label="Application">{{ currentRepayment.application }}</el-descriptions-item>
-        <el-descriptions-item label="Amount">{{ currentRepayment.amount }}</el-descriptions-item>
-        <el-descriptions-item label="Status">{{ currentRepayment.status }}</el-descriptions-item>
-        <el-descriptions-item label="Due Date">{{ currentRepayment.due_date }}</el-descriptions-item>
-        <el-descriptions-item label="Paid Date">{{ currentRepayment.paid_date || 'Not paid yet' }}</el-descriptions-item>
-        <el-descriptions-item label="Created By">{{ currentRepayment.created_by_name }}</el-descriptions-item>
-        <el-descriptions-item label="Created At">{{ currentRepayment.created_at }}</el-descriptions-item>
-        <el-descriptions-item label="Updated At">{{ currentRepayment.updated_at }}</el-descriptions-item>
-        <el-descriptions-item label="Invoice" v-if="currentRepayment.invoice">
-          <el-button type="primary" size="small" @click="viewInvoice(currentRepayment)">
+        <el-descriptions-item label="ID">{{ currentFee.id }}</el-descriptions-item>
+        <el-descriptions-item label="Fee Type">{{ currentFee.fee_type_display }}</el-descriptions-item>
+        <el-descriptions-item label="Amount">${{ formatAmount(currentFee.amount) }}</el-descriptions-item>
+        <el-descriptions-item label="Status">
+          <el-tag :type="getStatusTag(currentFee).type">
+            {{ getStatusTag(currentFee).text }}
+          </el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="Due Date">{{ formatDate(currentFee.due_date) }}</el-descriptions-item>
+        <el-descriptions-item label="Paid Date">{{ formatDate(currentFee.paid_date) || 'Not paid yet' }}</el-descriptions-item>
+        <el-descriptions-item label="Description">{{ currentFee.description || 'No description' }}</el-descriptions-item>
+        <el-descriptions-item label="Created By">{{ currentFee.created_by_name }}</el-descriptions-item>
+        <el-descriptions-item label="Created At">{{ formatDate(currentFee.created_at) }}</el-descriptions-item>
+        <el-descriptions-item label="Updated At">{{ formatDate(currentFee.updated_at) }}</el-descriptions-item>
+        <el-descriptions-item label="Invoice" v-if="currentFee.invoice">
+          <el-button type="primary" size="small" @click="viewInvoice(currentFee)">
             <el-icon><View /></el-icon>
             View Invoice
           </el-button>
@@ -238,7 +286,7 @@ const viewInvoice = async (repayment) => {
     <template #footer>
       <span class="dialog-footer">
         <el-button @click="viewDialogVisible = false">Close</el-button>
-        <el-button type="primary" v-if="currentRepayment && !currentRepayment.paid_date" @click="markAsPaid(currentRepayment); viewDialogVisible = false">
+        <el-button type="primary" v-if="currentFee && !currentFee.paid_date" @click="markAsPaid(currentFee); viewDialogVisible = false">
           Mark as Paid
         </el-button>
       </span>
@@ -293,8 +341,8 @@ const viewInvoice = async (repayment) => {
   }
 
   .upload {
-    border: 1px solid #B3BFCA;
-    color: #B3BFCA;
+    border: 1px solid #FF9800;
+    color: #FF9800;
     min-width: 70px;
     
     &:disabled {
@@ -304,8 +352,8 @@ const viewInvoice = async (repayment) => {
   }
 
   .delete {
-    border: 1px solid #F56C6C;
-    color: #F56C6C;
+    border: 1px solid #F44336;
+    color: #F44336;
     min-width: 32px;
     
     &:disabled {
@@ -319,8 +367,10 @@ const viewInvoice = async (repayment) => {
   }
 }
 
-.repayment-detail {
-  margin: 20px 0;
+.fee-detail {
+  .el-descriptions {
+    margin-bottom: 20px;
+  }
 }
 
 .dialog-footer {
@@ -328,4 +378,4 @@ const viewInvoice = async (repayment) => {
   justify-content: flex-end;
   gap: 10px;
 }
-</style>
+</style> 

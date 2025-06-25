@@ -131,5 +131,19 @@ export const documentsApi = {
   markRepaymentAsPaid: (id) => sendRequest({
     url: `/api/documents/repayments/${id}/mark-paid/`,
     method: 'post'
+  }),
+
+  // Download a repayment invoice
+  downloadRepaymentInvoice: (id) => sendRequest({
+    url: `/api/documents/repayments/${id}/download_invoice/`,
+    method: 'get',
+    responseType: 'blob'
+  }),
+
+  // Preview a repayment invoice
+  previewRepaymentInvoice: (id) => sendRequest({
+    url: `/api/documents/repayments/${id}/preview_invoice/`,
+    method: 'get',
+    responseType: 'blob'
   })
 };

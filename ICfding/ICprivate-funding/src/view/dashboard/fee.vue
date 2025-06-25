@@ -5,46 +5,40 @@ import Calendar from '@/components/icons/calendar.vue';
 import Search from '@/components/buttons/search.vue';
 import Clear from '@/components/buttons/clear.vue';
 import Create from '@/components/buttons/create.vue'
-import AddRepayment from '@/components/popup/addrepayment.vue';
+import AddFee from '@/components/popup/addfee.vue';
 import { Pagination } from '@/components'
-import { RepaymentTable } from './components'
+import { FeeTable } from './components'
 import { ElMessage } from 'element-plus';
 import { Search as SearchIcon, Refresh, Plus } from '@element-plus/icons-vue';
 
-const action = ref("Add Repayment")
+const action = ref("Add Fee")
 const popup = ref(false)
-const repayments = ref([])
-const repayment = ref({})
+const fees = ref([])
+const fee = ref({})
 const loading = ref(false)
 const totalInfo = computed(() =>[
     {
-        title: "Total Repayment",
-        money: repayment.value.total_amount_due,
-        num: repayment.value.total_repayments
+        title: "Total Fees",
+        money: fee.value.total_amount_due,
+        num: fee.value.total_fees
     },
     {
         title: "Paid on Time",
-        money: repayment.value.total_amount_paid,
-        num: repayment.value.paid_on_time
+        money: fee.value.total_amount_paid,
+        num: fee.value.paid_on_time
     },
     {
         title: "Paid Late",
         money: "-",
-        num: repayment.value.paid_late
+        num: fee.value.paid_late
     },
     {
         title: "Overdue",
-        money: repayment.value.total_amount_due - repayment.value.total_amount_paid,
-        num: repayment.value.missed
+        money: fee.value.total_amount_due - fee.value.total_amount_paid,
+        num: fee.value.missed
     }
 ])
-const searchedRepayment = ref("")
-// const statuses = ref([
-//     { value: "scheduled", label: "Scheduled" },
-//     { value: "dueSoon", label: "Due Soon" },
-//     { value: "paid", label: "Paid" },
-//     { value: "overdue", label: "Overdue" }
-// ])
+const searchedFee = ref("")
 const paginationInfo = ref({
     total: 10,
 })
@@ -68,18 +62,18 @@ const selected = ref({
 })
 
 onMounted(() => {
-    getRepayments()
-    getRepaymentCompliance()
+    getFees()
+    getFeeCompliance()
 })
 
-const getRepayments = async () => {
+const getFees = async () => {
     loading.value = true
     selected.value.due_after = dateRange.value[0]
     selected.value.due_before = dateRange.value[1]
-    const [err, res] = await api.repayments(selected.value)
+    const [err, res] = await api.getFees(selected.value)
     if (!err) {
         console.log(res);
-        repayments.value = res?.results || []
+        fees.value = res?.results || []
         paginationInfo.value.total = res?.count || 0
     } else {
         console.log(err)
@@ -87,50 +81,50 @@ const getRepayments = async () => {
     loading.value = false
 }
 
-async function getRepaymentCompliance() {
+async function getFeeCompliance() {
     let params = {}
-    const [err, res] = await api.repaymentCompliance(params)
-    console.log('🚀 ~ getData3 ~ repaymentCompliance:', res)
-    repayment.value = res
+    const [err, res] = await api.feeCompliance(params)
+    console.log('🚀 ~ getData3 ~ feeCompliance:', res)
+    fee.value = res
 }
 
 const handleChange = (currantPage) => {
     selected.value.page = currantPage
-    getRepayments()
+    getFees()
     console.log(currantPage);
 }
 
-const addRepayment = () => {
+const addFee = () => {
     popup.value = true
-    popupAction.value = "Add Payment"
+    popupAction.value = "Add Fee"
 }
 
 const handleEdit = (id) => {
     popup.value = true
-    popupAction.value = `Edit Payment ${id}`
+    popupAction.value = `Edit Fee ${id}`
 }
 
 const close = () => {
     popup.value = false
-    // Refresh the repayments list after adding a new one
-    getRepayments()
+    // Refresh the fees list after adding a new one
+    getFees()
 }
 
 const handleSearch = () => {
     console.log(dateRange.value)
-    getRepayments()
+    getFees()
 }
 
 const handleClear = () => {
-    searchedRepayment.value = ""
+    searchedFee.value = ""
     selectedStatus.value = ""
     dateRange.value = ""
-    getRepayments()
+    getFees()
 }
 </script>
 
 <template>
-    <div class="repayment-dashboard">
+    <div class="fee-dashboard">
         <!-- Statistics Cards -->
         <div class="stats-section">
             <div class="stats-grid">
@@ -141,7 +135,7 @@ const handleClear = () => {
                     <div class="stat-content">
                         <h3>{{ info.title }}</h3>
                         <div class="stat-value">{{ info.money }}</div>
-                        <p>{{ info.num }} repayments</p>
+                        <p>{{ info.num }} fees</p>
                     </div>
                 </div>
             </div>
@@ -152,8 +146,8 @@ const handleClear = () => {
             <div class="controls-container">
                 <div class="filters-group">
                     <el-input 
-                        v-model="searchedRepayment" 
-                        placeholder="Search repayments..." 
+                        v-model="searchedFee" 
+                        placeholder="Search fees..." 
                         class="search-input"
                         clearable
                     >
@@ -187,7 +181,7 @@ const handleClear = () => {
                 </div>
                 
                 <div class="action-group">
-                    <el-button type="success" @click="addRepayment" :icon="Plus">
+                    <el-button type="success" @click="addFee" :icon="Plus">
                         {{ action }}
                     </el-button>
                 </div>
@@ -197,7 +191,7 @@ const handleClear = () => {
         <!-- Data Table -->
         <div class="table-section">
             <div class="table-container">
-                <RepaymentTable :repayments="repayments" @refresh="getRepayments" />
+                <FeeTable :fees="fees" @refresh="getFees" />
                 <div class="pagination-wrapper">
                     <Pagination :="paginationInfo" @change="handleChange" />
                 </div>
@@ -206,13 +200,13 @@ const handleClear = () => {
 
         <!-- Popup -->
         <transition name="slide-right-popup">
-            <AddRepayment v-if="popup" :action="popupAction" @close="close" />
+            <AddFee v-if="popup" :action="popupAction" @close="close" />
         </transition>
     </div>
 </template>
 
 <style lang="scss" scoped>
-.repayment-dashboard {
+.fee-dashboard {
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -290,9 +284,9 @@ const handleClear = () => {
 
     // Color variants
     &.item1 {
-      border-left: 4px solid #384144;
-      .stat-icon { background: #384144; }
-      .stat-value { color: #384144; }
+      border-left: 4px solid #28a745;
+      .stat-icon { background: #28a745; }
+      .stat-value { color: #28a745; }
     }
 
     &.item2 {
@@ -377,7 +371,7 @@ const handleClear = () => {
 
 // Responsive Design
 @media (max-width: 768px) {
-  .repayment-dashboard {
+  .fee-dashboard {
     padding: 16px;
     gap: 16px;
   }
@@ -421,4 +415,4 @@ const handleClear = () => {
   opacity: 0;
   transform: translateX(100%);
 }
-</style>
+</style> 

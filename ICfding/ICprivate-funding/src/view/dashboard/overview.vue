@@ -10,6 +10,7 @@ const router = useRouter()
 const loadingData = ref(false)
 const dashboard = ref({})
 const repayment = ref({})
+const fee = ref({})
 const volume = ref({})
 const archivedStats = ref({})
 const applicationPopup = ref(false)
@@ -19,6 +20,7 @@ onActivated(() => {
   getApplicationStatus()
   getApplicationVolume()
   getRepaymentCompliance()
+  getFeeCompliance()
   getArchivedStats()
 })
 
@@ -51,6 +53,13 @@ async function getRepaymentCompliance() {
   const [err, res] = await api.repaymentCompliance(params)
   console.log('🚀 ~ getData3 ~ repaymentCompliance:', res)
   repayment.value = res
+}
+
+async function getFeeCompliance() {
+  let params = {}
+  const [err, res] = await api.feeCompliance(params)
+  console.log('🚀 ~ getData4 ~ feeCompliance:', res)
+  fee.value = res
 }
 
 async function getArchivedStats() {
@@ -89,82 +98,139 @@ const viewArchived = () => {
 
 <template>
   <div class="dashboard" v-loading="loadingData">
-    <div class="cards">
-      <div class="card">
-        <h1>Application</h1>
-        <div class="num">{{ volume.total_applications }}</div>
-        <p>Total Applications</p>
-        <button @click="toPage('application')">View Application</button>
-      </div>
-      <div class="card">
-        <h1>Active Loans</h1>
-        <div class="num">{{ dashboard.total_active }}</div>
-        <p>Active Loans</p>
-        <button @click="toPage('application')">View Active Loans</button>
-      </div>
-      <div class="card">
-        <h1>Total Loan Value</h1>
-        <div class="num">${{ volume.total_loan_amount }}</div>
-        <p>Total Loan Value</p>
-        <button @click="toPage('application')">View Loan Value</button>
-      </div>
-      <div class="card">
-        <h1>Repayment</h1>
-        <div class="num">${{ repayment.total_amount_due }}</div>
-        <p>On-Time Payment Rate</p>
-        <button @click="toPage('repayment')">View Repayment</button>
+    <!-- Main Statistics Cards -->
+    <div class="stats-section">
+      <div class="stats-grid">
+        <div class="stat-card primary">
+          <div class="stat-icon">
+            <img src="/src/assets/icons/quick_act_1.png" alt="applications" />
+          </div>
+          <div class="stat-content">
+            <h3>Total Applications</h3>
+            <div class="stat-value">{{ volume.total_applications || 0 }}</div>
+            <p>Applications in the system</p>
+          </div>
+          <button class="stat-action" @click="toPage('application')">
+            View Applications
+          </button>
+        </div>
+
+        <div class="stat-card success">
+          <div class="stat-icon">
+            <img src="/src/assets/icons/quick_act_2.png" alt="loans" />
+          </div>
+          <div class="stat-content">
+            <h3>Active Loans</h3>
+            <div class="stat-value">{{ dashboard.total_active || 0 }}</div>
+            <p>Currently active loans</p>
+          </div>
+          <button class="stat-action" @click="toPage('application')">
+            View Active Loans
+          </button>
+        </div>
+
+        <div class="stat-card info">
+          <div class="stat-icon">
+            <img src="/src/assets/icons/quick_act_3.png" alt="value" />
+          </div>
+          <div class="stat-content">
+            <h3>Total Loan Value</h3>
+            <div class="stat-value">${{ volume.total_loan_amount || 0 }}</div>
+            <p>Combined loan portfolio value</p>
+          </div>
+          <button class="stat-action" @click="toPage('application')">
+            View Portfolio
+          </button>
+        </div>
+
+        <div class="stat-card warning">
+          <div class="stat-icon">
+            <img src="/src/assets/icons/quick_act_1.png" alt="repayments" />
+          </div>
+          <div class="stat-content">
+            <h3>Repayments Due</h3>
+            <div class="stat-value">${{ repayment.total_amount_due || 0 }}</div>
+            <p>Total repayments outstanding</p>
+          </div>
+          <button class="stat-action" @click="toPage('repayment')">
+            View Repayments
+          </button>
+        </div>
+
+        <div class="stat-card danger">
+          <div class="stat-icon">
+            <img src="/src/assets/icons/quick_act_2.png" alt="fees" />
+          </div>
+          <div class="stat-content">
+            <h3>Fees Outstanding</h3>
+            <div class="stat-value">${{ fee.total_amount_due || 0 }}</div>
+            <p>Total fees pending payment</p>
+          </div>
+          <button class="stat-action" @click="toPage('fee')">
+            View Fees
+          </button>
+        </div>
       </div>
     </div>
-    <!-- New row for archived applications -->
-    <div class="archived-section">
-      <div class="card archived-card">
-        <h1>Archived Applications</h1>
-        <div class="num">{{ archivedStats.total_archived || 0 }}</div>
-        <p>Applications automatically archived when closed</p>
-        <button @click="viewArchived">View Archived</button>
+
+    <!-- Secondary Information -->
+    <div class="secondary-section">
+      <div class="secondary-grid">
+        <div class="info-card archived">
+          <div class="info-content">
+            <h3>Archived Applications</h3>
+            <div class="info-value">{{ archivedStats.total_archived || 0 }}</div>
+            <p>Applications automatically archived when closed</p>
+          </div>
+          <button class="info-action" @click="viewArchived">
+            View Archived
+          </button>
+        </div>
       </div>
     </div>
-    <div class="boxs">
-      <!-- <div class="box">
-        <div class="title">Recent Applications</div>
-        <div class="content">
-          <ApplicationTable></ApplicationTable>
+
+    <!-- Quick Actions Section -->
+    <div class="actions-section">
+      <div class="actions-container">
+        <div class="actions-header">
+          <h2>Quick Actions</h2>
+          <p>Common tasks and shortcuts</p>
+        </div>
+        <div class="actions-grid">
+          <button class="action-card primary" @click="toAddApplication">
+            <div class="action-icon">
+              <img src="/src/assets/icons/quick_act_1.png" alt="new application" />
+            </div>
+            <div class="action-content">
+              <h4>New Application</h4>
+              <p>Create a new loan application</p>
+            </div>
+          </button>
+
+          <button class="action-card secondary" @click="toAddBorrower">
+            <div class="action-icon">
+              <img src="/src/assets/icons/quick_act_2.png" alt="new borrower" />
+            </div>
+            <div class="action-content">
+              <h4>New Borrower</h4>
+              <p>Add a new borrower to the system</p>
+            </div>
+          </button>
+
+          <button class="action-card tertiary" @click="toDocument">
+            <div class="action-icon">
+              <img src="/src/assets/icons/quick_act_3.png" alt="upload document" />
+            </div>
+            <div class="action-content">
+              <h4>Upload Document</h4>
+              <p>Upload and manage documents</p>
+            </div>
+          </button>
         </div>
       </div>
-      <div class="box">
-        <div class="title">Recent Notification</div>
-        <div class="content">
-          <NotificationTable></NotificationTable>
-        </div>
-      </div> -->
-      <div class="box">
-        <div class="title">Quick Actions</div>
-        <div class="buttons">
-          <button class="quick_act" @click="toAddApplication">
-            <img src="/src/assets/icons/quick_act_1.png" alt="act" />
-            New Application
-          </button>
-          <button class="quick_act1" @click="toAddBorrower">
-            <img src="/src/assets/icons/quick_act_2.png" alt="act" />
-            New Borrower
-          </button>
-          <button class="quick_act1" @click="toDocument">
-            <img src="/src/assets/icons/quick_act_3.png" alt="act" />
-            Upload Document
-          </button>
-          <!-- <button class="quick_act1" @click="toAddNote">
-            <img src="/src/assets/icons/quick_act_4.png" alt="act" />
-            Add Note
-          </button> -->
-        </div>
-      </div>
-      <!-- <div class="box">
-        <div class="title">Upcoming Repayment</div>
-        <div class="content">
-          <UpcomingTable></UpcomingTable>
-        </div>
-      </div> -->
     </div>
+
+    <!-- Popups -->
     <transition name="slide-right-popup">
       <AddApplication v-if="applicationPopup" 
         action="Add Application" 
@@ -184,218 +250,339 @@ const viewArchived = () => {
 
 <style lang="scss" scoped>
 .dashboard {
-  // font-family: Inter;
   display: flex;
   flex-direction: column;
-  gap: 20px;
-}
-
-.cards {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-}
-
-.card {
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 10px;
-  border-radius: 5px;
-  border: 1px solid #e8ebee;
-  background: #fff;
-}
-
-h1 {
-  color: #384144;
-  font-feature-settings:
-    'liga' off,
-    'clig' off;
-  font-size: 1.1rem;
-  font-style: normal;
-  font-weight: 500;
-  line-height: normal;
-}
-
-.num {
-  color: #384144;
-  font-feature-settings:
-    'liga' off,
-    'clig' off;
-  font-size: 1.5rem;
-  font-style: normal;
-  font-weight: 600;
-  line-height: normal;
-}
-
-p {
-  color: #7a858e;
-  font-feature-settings:
-    'liga' off,
-    'clig' off;
-  font-size: 1rem;
-  font-style: normal;
-  font-weight: 400;
-  line-height: normal;
-  margin: 0 0 30px 0;
-}
-
-.card button {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px 0;
-  border-radius: 5px;
-  border: 1px solid #b3bfca;
-  background: #2984de;
-  color: #fff;
-  font-feature-settings:
-    'liga' off,
-    'clig' off;
-  font-size: 1rem;
-  font-style: normal;
-  font-weight: 500;
-  line-height: normal;
-}
-
-.card button:hover {
-  background: #1f63a9;
-}
-
-.archived-section {
-  width: 100%;
-  display: flex;
-  justify-content: flex-start;
-}
-
-.archived-card {
-  width: 25%;
+  gap: 24px;
+  padding: 24px;
   background: #f8f9fa;
-  border-color: #dee2e6;
+  min-height: 100vh;
 }
 
-.archived-card h1 {
-  color: #6c757d;
+// Main Statistics Section
+.stats-section {
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+  }
+
+  .stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .stat-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+
+      img {
+        width: 24px;
+        height: 24px;
+        filter: brightness(0) invert(1);
+      }
+    }
+
+    .stat-content {
+      flex: 1;
+
+      h3 {
+        color: #495057;
+        font-size: 14px;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .stat-value {
+        font-size: 28px;
+        font-weight: 700;
+        margin: 0 0 8px 0;
+        line-height: 1.2;
+      }
+
+      p {
+        color: #6c757d;
+        font-size: 13px;
+        margin: 0;
+        line-height: 1.4;
+      }
+    }
+
+    .stat-action {
+      background: transparent;
+      border: 1px solid currentColor;
+      color: inherit;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: auto;
+
+      &:hover {
+        background: currentColor;
+        color: white;
+      }
+    }
+
+    // Color variants
+    &.primary {
+      border-left: 4px solid #2984de;
+      .stat-icon { background: #2984de; }
+      .stat-value { color: #2984de; }
+      .stat-action { color: #2984de; }
+    }
+
+    &.success {
+      border-left: 4px solid #28a745;
+      .stat-icon { background: #28a745; }
+      .stat-value { color: #28a745; }
+      .stat-action { color: #28a745; }
+    }
+
+    &.info {
+      border-left: 4px solid #17a2b8;
+      .stat-icon { background: #17a2b8; }
+      .stat-value { color: #17a2b8; }
+      .stat-action { color: #17a2b8; }
+    }
+
+    &.warning {
+      border-left: 4px solid #ffc107;
+      .stat-icon { background: #ffc107; }
+      .stat-value { color: #ffc107; }
+      .stat-action { color: #ffc107; }
+    }
+
+    &.danger {
+      border-left: 4px solid #dc3545;
+      .stat-icon { background: #dc3545; }
+      .stat-value { color: #dc3545; }
+      .stat-action { color: #dc3545; }
+    }
+  }
 }
 
-.archived-card .num {
-  color: #495057;
+// Secondary Information Section
+.secondary-section {
+  .secondary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  .info-card {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+
+    .info-content {
+      flex: 1;
+
+      h3 {
+        color: #495057;
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+      }
+
+      .info-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: #6c757d;
+        margin: 0 0 4px 0;
+      }
+
+      p {
+        color: #6c757d;
+        font-size: 13px;
+        margin: 0;
+        line-height: 1.4;
+      }
+    }
+
+    .info-action {
+      background: #6c757d;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.2s ease;
+
+      &:hover {
+        background: #5a6268;
+      }
+    }
+
+    &.archived {
+      border-left: 4px solid #6c757d;
+    }
+  }
 }
 
-.archived-card button {
-  background: #6c757d;
-  border-color: #6c757d;
+// Quick Actions Section
+.actions-section {
+  .actions-container {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e9ecef;
+
+    .actions-header {
+      margin-bottom: 24px;
+      text-align: center;
+
+      h2 {
+        color: #495057;
+        font-size: 20px;
+        font-weight: 600;
+        margin: 0 0 8px 0;
+      }
+
+      p {
+        color: #6c757d;
+        font-size: 14px;
+        margin: 0;
+      }
+    }
+
+    .actions-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 16px;
+    }
+
+    .action-card {
+      background: white;
+      border: 1px solid #e9ecef;
+      border-radius: 8px;
+      padding: 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      text-align: left;
+
+      &:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
+
+      .action-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+
+        img {
+          width: 20px;
+          height: 20px;
+          filter: brightness(0) invert(1);
+        }
+      }
+
+      .action-content {
+        flex: 1;
+
+        h4 {
+          color: #495057;
+          font-size: 14px;
+          font-weight: 600;
+          margin: 0 0 4px 0;
+        }
+
+        p {
+          color: #6c757d;
+          font-size: 12px;
+          margin: 0;
+          line-height: 1.4;
+        }
+      }
+
+      &.primary {
+        border-color: #2984de;
+        .action-icon { background: #2984de; }
+        &:hover { border-color: #1f63a9; }
+      }
+
+      &.secondary {
+        border-color: #28a745;
+        .action-icon { background: #28a745; }
+        &:hover { border-color: #1e7e34; }
+      }
+
+      &.tertiary {
+        border-color: #17a2b8;
+        .action-icon { background: #17a2b8; }
+        &:hover { border-color: #117a8b; }
+      }
+    }
+  }
 }
 
-.archived-card button:hover {
-  background: #5a6268;
+// Responsive Design
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .actions-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .info-card {
+    flex-direction: column;
+    text-align: center;
+  }
 }
 
-.boxs {
-  width: 100%;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-  align-items: start;
-}
-
-.box {
-  display: flex;
-  flex-direction: column;
-  border-radius: 5px;
-  border: 1px solid #e8ebee;
-  background: #fff;
-}
-
-.title {
-  padding: 10px 20px;
-  border-bottom: 1px solid #e8ebee;
-  color: #384144;
-  font-feature-settings:
-    'liga' off,
-    'clig' off;
-  font-size: 1rem;
-  font-style: normal;
-  font-weight: 500;
-  line-height: normal;
-}
-
-.content {
-  height: 300px;
-  padding: 10px 10px 0;
-}
-
-.buttons {
-  padding: 20px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 20px;
-}
-
-.buttons img {
-  width: 20px;
-  height: 20px;
-}
-
-.quick_act {
-  padding: 5px 0;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  border-radius: 5px;
-  border: 1px solid #b3bfca;
-  background: #2984de;
-  color: #fff;
-  font-feature-settings:
-    'liga' off,
-    'clig' off;
-  font-size: 1rem;
-  font-style: normal;
-  font-weight: 500;
-  line-height: normal;
-}
-
-.quick_act:hover {
-  background: #1f63a9;
-}
-
-.quick_act1 {
-  padding: 5px 0;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  border-radius: 5px;
-  border: 1.5px solid #2984de;
-  background: #fff;
-  color: #2984de;
-  font-feature-settings:
-    'liga' off,
-    'clig' off;
-  font-size: 1rem;
-  font-style: normal;
-  font-weight: 500;
-  line-height: normal;
-}
-
-.quick_act1:hover {
-  background: #e8ebee;
-}
-.slide-right-popup-enter-active, .slide-right-popup-leave-active {
+// Transition animations
+.slide-right-popup-enter-active,
+.slide-right-popup-leave-active {
   transition: all 0.3s ease;
 }
-.slide-right-popup-enter-from, .slide-right-popup-leave-to {
+
+.slide-right-popup-enter-from,
+.slide-right-popup-leave-to {
   opacity: 0;
   transform: translateX(100%);
 }
-.slide-right-popup-enter-to, .slide-right-popup-leave-from {
-  opacity: 1;
-  transform: translateX(0);
-}
 </style>
+

@@ -122,8 +122,10 @@
             <AddGuarantor
                 v-if="popup"
                 :action="popupAction"
+                :guarantorData="editData"
                 @close="close"
                 @minimize="minimize"
+                @refresh="getGuarantors"
             ></AddGuarantor>
         </transition>
     </div>
@@ -199,10 +201,12 @@
     }
     const addGuarantor = () => {
         popupAction.value = "Add Guarantor"
+        editData.value = null
         popup.value = true
     }
     const close = () => {
         popup.value = false
+        editData.value = null
     }
     const minimize = () => {
         

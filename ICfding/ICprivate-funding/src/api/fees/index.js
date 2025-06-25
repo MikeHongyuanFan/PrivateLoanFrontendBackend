@@ -73,6 +73,33 @@ export function markFeePaid(feeId, paymentData) {
     })
 }
 
+// Download a fee invoice
+export function downloadFeeInvoice(feeId) {
+    return sendRequest({
+        url: `/api/documents/fees/${feeId}/download_invoice/`,
+        method: 'get',
+        responseType: 'blob'
+    })
+}
+
+// Preview a fee invoice
+export function previewFeeInvoice(feeId) {
+    return sendRequest({
+        url: `/api/documents/fees/${feeId}/preview_invoice/`,
+        method: 'get',
+        responseType: 'blob'
+    })
+}
+
+// Get fee compliance statistics for dashboard
+export function feeCompliance(params = {}) {
+    return sendRequest({
+        url: '/api/documents/fees/compliance/',
+        method: 'get',
+        params: params
+    })
+}
+
 export const feesApi = {
     getFees,
     getFeesByApplication,
@@ -81,5 +108,8 @@ export const feesApi = {
     updateFee,
     patchFee,
     deleteFee,
-    markFeePaid
+    markFeePaid,
+    downloadFeeInvoice,
+    previewFeeInvoice,
+    feeCompliance
 } 

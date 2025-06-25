@@ -229,6 +229,15 @@ const applicationOptions = ref([]);
 
 const isEdit = computed(() => props.action.startsWith('Edit'));
 
+// Debug computed property to help identify issues
+const debugInfo = computed(() => ({
+  isEdit: isEdit.value,
+  hasGuarantorData: !!props.guarantorData,
+  guarantorId: props.guarantorData?.id,
+  action: props.action,
+  formInitialized: !!form.value.first_name || !!form.value.last_name
+}));
+
 const form = ref({
   // ===== GUARANTOR-SPECIFIC FIELDS =====
   guarantor_type: 'individual',
@@ -306,6 +315,22 @@ watch(() => props.applicationId, (newVal) => {
   }
 }, { immediate: true });
 
+// Watch for guarantorData prop changes to initialize form for editing
+watch(() => props.guarantorData, (newData) => {
+  console.log('guarantorData prop changed:', newData);
+  if (newData && Object.keys(newData).length > 0) {
+    // Initialize form with guarantor data for editing
+    const formData = mapGuarantorApiToForm(newData);
+    form.value = { ...form.value, ...formData };
+    console.log('Form initialized with guarantor data:', form.value);
+  }
+}, { immediate: true, deep: true });
+
+// Watch debug info for troubleshooting
+watch(debugInfo, (newInfo) => {
+  console.log('Debug info changed:', newInfo);
+}, { immediate: true });
+
 // Load all borrowers
 const loadAllBorrowers = async () => {
   loadingBorrowers.value = true;
@@ -350,8 +375,10 @@ const loadAllApplications = async () => {
 
 // Load related data if editing
 const loadRelatedData = async () => {
-  if (isEdit.value && props.guarantorData.id) {
+  if (isEdit.value && props.guarantorData && props.guarantorData.id) {
     try {
+      console.log('Loading related data for guarantor ID:', props.guarantorData.id);
+      
       // Get the guarantor data and map it to form format
       const [error, response] = await api.getGuarantor(props.guarantorData.id);
       if (!error && response) {
@@ -394,10 +421,21 @@ const loadRelatedData = async () => {
       console.error('Error loading related data:', error);
       ElMessage.error('Failed to load guarantor data');
     }
+  } else if (isEdit.value) {
+    console.warn('Edit mode but no guarantor ID provided:', props.guarantorData);
   }
 };
 
 onMounted(() => {
+  console.log('AddGuarantor component mounted');
+  console.log('Props received:', {
+    action: props.action,
+    guarantorData: props.guarantorData,
+    borrowerId: props.borrowerId,
+    applicationId: props.applicationId,
+    isEdit: isEdit.value
+  });
+  
   // Load all borrowers and applications
   loadAllBorrowers();
   loadAllApplications();
@@ -429,6 +467,10 @@ const handleSubmit = async () => {
     // Make API call to create/update guarantor
     let guarantorId;
     if (isEdit.value) {
+      if (!props.guarantorData || !props.guarantorData.id) {
+        throw new Error('Cannot update guarantor: No guarantor ID provided');
+      }
+      
       const [error, response] = await api.updateGuarantor(props.guarantorData.id, formData);
       if (error) {
         console.error('API Error:', error);

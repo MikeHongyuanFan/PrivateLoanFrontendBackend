@@ -15,7 +15,7 @@
                 type="primary" 
                 size="small" 
                 @click="showAddFeeDialog"
-                :disabled="!applicationId"
+                :disabled="!applicationId && !dashboardMode"
             >
                 <el-icon><Plus /></el-icon>
                 Add Fee
@@ -147,9 +147,9 @@
                             Edit
                         </el-button>
                         <el-button 
-                            v-if="fee.invoice_url" 
+                            v-if="fee.invoice" 
                             size="small" 
-                            @click="viewInvoice(fee.invoice_url)"
+                            @click="viewInvoice(fee)"
                         >
                             <el-icon><Document /></el-icon>
                             Invoice
@@ -186,6 +186,17 @@
                             :key="type.value" 
                             :label="type.label" 
                             :value="type.value" 
+                        />
+                    </el-select>
+                </el-form-item>
+                
+                <el-form-item label="Application" prop="application" v-if="dashboardMode">
+                    <el-select v-model="feeForm.application" placeholder="Select application">
+                        <el-option 
+                            v-for="app in applications" 
+                            :key="app.id" 
+                            :label="`${app.reference_number} - ${app.borrowers?.[0]?.first_name || 'N/A'} ${app.borrowers?.[0]?.last_name || ''}`" 
+                            :value="app.id" 
                         />
                     </el-select>
                 </el-form-item>
@@ -256,6 +267,7 @@
 import { ref, onMounted, computed, watch } from 'vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import { feesApi } from '@/api/fees'
+import { api } from '@/api'
 import { 
     Close, Plus, Refresh, Check, Edit, Delete, Document, Upload 
 } from '@element-plus/icons-vue'
@@ -268,6 +280,10 @@ const props = defineProps({
     applicationId: {
         type: [String, Number], 
         default: null
+    },
+    dashboardMode: {
+        type: Boolean,
+        default: false
     }
 })
 
@@ -275,6 +291,7 @@ const emit = defineEmits(['close', 'minimize'])
 
 // Reactive data
 const fees = ref([])
+const applications = ref([])
 const loading = ref(false)
 const saving = ref(false)
 const filterFeeType = ref('')
@@ -306,19 +323,29 @@ const feeTypes = [
 ]
 
 // Form validation rules
-const feeFormRules = {
-    fee_type: [
-        { required: true, message: 'Please select a fee type', trigger: 'change' }
-    ],
-    amount: [
-        { required: true, message: 'Please enter an amount', trigger: 'blur' },
-        { 
-            pattern: /^\d+(\.\d{0,2})?$/, 
-            message: 'Please enter a valid amount', 
-            trigger: 'blur' 
-        }
-    ]
-}
+const feeFormRules = computed(() => {
+    const rules = {
+        fee_type: [
+            { required: true, message: 'Please select a fee type', trigger: 'change' }
+        ],
+        amount: [
+            { required: true, message: 'Please enter an amount', trigger: 'blur' },
+            { 
+                pattern: /^\d+(\.\d{0,2})?$/, 
+                message: 'Please enter a valid amount', 
+                trigger: 'blur' 
+            }
+        ]
+    }
+    
+    if (props.dashboardMode) {
+        rules.application = [
+            { required: true, message: 'Please select an application', trigger: 'change' }
+        ]
+    }
+    
+    return rules
+})
 
 // Computed properties
 const filteredFees = computed(() => {
@@ -343,6 +370,19 @@ const filteredFees = computed(() => {
 // Methods
 const handleClose = () => {
     emit('close')
+}
+
+const getApplications = async () => {
+    try {
+        const [err, res] = await api.getApplications({ page_size: 1000 })
+        if (!err && res) {
+            applications.value = res.results || res
+        } else {
+            console.error('Error fetching applications:', err)
+        }
+    } catch (error) {
+        console.error('Error fetching applications:', error)
+    }
 }
 
 const getFees = async () => {
@@ -385,7 +425,9 @@ const applyFilters = () => {
 const showAddFeeDialog = () => {
     editingFee.value = null
     resetFeeForm()
-    feeForm.value.application = props.applicationId || props.id
+    if (!props.dashboardMode) {
+        feeForm.value.application = props.applicationId || props.id
+    }
     showFeeDialog.value = true
 }
 
@@ -535,9 +577,49 @@ const deleteFee = async (fee) => {
     }
 }
 
-const viewInvoice = (invoiceUrl) => {
-    if (invoiceUrl) {
-        window.open(invoiceUrl, '_blank')
+const viewInvoice = async (fee) => {
+    try {
+        // Try to preview first, if that fails, download
+        const [previewError, previewResponse] = await feesApi.previewFeeInvoice(fee.id)
+        
+        if (!previewError && previewResponse) {
+            // Create blob URL for preview
+            const blob = new Blob([previewResponse], { type: 'application/pdf' })
+            const url = window.URL.createObjectURL(blob)
+            
+            // Open in new tab
+            const newWindow = window.open(url, '_blank')
+            
+            // Clean up blob URL after a delay
+            setTimeout(() => {
+                window.URL.revokeObjectURL(url)
+            }, 1000)
+        } else {
+            // If preview fails, try download
+            const [downloadError, downloadResponse] = await feesApi.downloadFeeInvoice(fee.id)
+            
+            if (!downloadError && downloadResponse) {
+                // Create blob URL for download
+                const blob = new Blob([downloadResponse])
+                const url = window.URL.createObjectURL(blob)
+                
+                // Create download link
+                const link = document.createElement('a')
+                link.href = url
+                link.download = `fee_invoice_${fee.id}.pdf`
+                document.body.appendChild(link)
+                link.click()
+                document.body.removeChild(link)
+                
+                // Clean up blob URL
+                window.URL.revokeObjectURL(url)
+            } else {
+                ElMessage.error('Failed to access invoice file')
+            }
+        }
+    } catch (error) {
+        console.error('Error accessing invoice:', error)
+        ElMessage.error('Failed to access invoice file')
     }
 }
 
@@ -584,6 +666,10 @@ watch(() => props.id, (newVal) => {
 // Lifecycle
 onMounted(() => {
     if (props.applicationId || props.id) {
+        getFees()
+    }
+    if (props.dashboardMode) {
+        getApplications()
         getFees()
     }
 })

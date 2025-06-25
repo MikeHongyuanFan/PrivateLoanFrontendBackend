@@ -61,6 +61,18 @@ export const constantRoutes = [
           ],
         },
       },
+      {
+        path: '/dashboard/fee',
+        component: () => import('@/view/dashboard/fee.vue'),
+        meta: {
+          title: 'Overview',
+          keepAlive: false,
+          breadcrumb: [
+            { label: 'Dashboard', path: '/dashboard/index' },
+            { label: 'Fee' },
+          ],
+        },
+      },
     ],
   },
   //application
