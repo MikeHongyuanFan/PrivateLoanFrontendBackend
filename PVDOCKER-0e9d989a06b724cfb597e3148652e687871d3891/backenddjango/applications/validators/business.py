@@ -7,6 +7,7 @@ ABN, ACN validation and company borrower information validation.
 
 from django.core.exceptions import ValidationError
 import re
+import logging
 
 
 def validate_abn(abn):
@@ -74,23 +75,41 @@ def validate_company_borrower(company_data):
     """
     Validate company borrower information - permissive for minimal data creation
     """
+    logger = logging.getLogger(__name__)
+    
+    logger.info("=== VALIDATE COMPANY BORROWER DEBUG ===")
+    logger.info(f"Company data: {company_data}")
+    
     errors = {}
     
     # Only validate identifiers if provided (don't require them)
-    errors.update(_validate_identifiers(company_data))
+    logger.info("Validating identifiers...")
+    identifier_errors = _validate_identifiers(company_data)
+    errors.update(identifier_errors)
+    logger.info(f"Identifier errors: {identifier_errors}")
     
     # Validate business type and years (only if provided)
-    errors.update(_validate_business_details(company_data))
+    logger.info("Validating business details...")
+    business_errors = _validate_business_details(company_data)
+    errors.update(business_errors)
+    logger.info(f"Business errors: {business_errors}")
     
     # Validate financial information (only if provided)
-    errors.update(_validate_financial_info(company_data))
+    logger.info("Validating financial info...")
+    financial_errors = _validate_financial_info(company_data)
+    errors.update(financial_errors)
+    logger.info(f"Financial errors: {financial_errors}")
     
     # Skip address validation for minimal data creation
     # errors.update(_validate_address(company_data))
     
     # Validate directors information (only if provided)
-    errors.update(_validate_directors(company_data))
+    logger.info("Validating directors...")
+    director_errors = _validate_directors(company_data)
+    errors.update(director_errors)
+    logger.info(f"Director errors: {director_errors}")
     
+    logger.info(f"Total validation errors: {errors}")
     return errors
 
 
@@ -182,19 +201,28 @@ def _validate_address(company_data):
 
 def _validate_directors(company_data):
     """Validate company directors only if provided"""
+    logger = logging.getLogger(__name__)
     errors = {}
+    
+    logger.info(f"Validating directors: {company_data.get('directors')}")
     
     if company_data.get('directors'):
         for i, director in enumerate(company_data['directors']):
+            logger.info(f"Validating director {i}: {director}")
             # Only validate directors that have names (skip empty ones)
             if director.get('name') and director['name'].strip():
                 # Validate roles if provided
                 if director.get('roles'):
                     valid_roles = ['director', 'secretary', 'public_officer', 'shareholder']
                     roles = director['roles'].split(',')
+                    logger.info(f"Director {i} roles: {roles}")
                     for role in roles:
                         role = role.strip().lower()
                         if role not in valid_roles:
-                            errors[f'directors[{i}].roles'] = f'Invalid role: {role}. Valid roles are: {", ".join(valid_roles)}'
+                            error_msg = f'Invalid role: {role}. Valid roles are: {", ".join(valid_roles)}'
+                            errors[f'directors[{i}].roles'] = error_msg
+                            logger.error(f"Invalid role for director {i}: {role}")
+            else:
+                logger.info(f"Skipping director {i} - no name or empty name")
                     
     return errors 

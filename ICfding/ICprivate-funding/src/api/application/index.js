@@ -356,6 +356,7 @@ export function applicationWithCascade(id) {
             if (res) {
                 // Ensure all expected arrays exist with defaults
                 res.borrowers = res.borrowers || [];
+                res.company_borrowers = res.company_borrowers || []; // NEW: Separate company borrowers
                 res.guarantors = res.guarantors || [];
                 res.security_properties = res.security_properties || [];
                 res.loan_requirements = res.loan_requirements || [];
@@ -366,20 +367,108 @@ export function applicationWithCascade(id) {
                 res.ledger_entries = res.ledger_entries || [];
                 res.funding_calculation_history = res.funding_calculation_history || [];
                 
-                // Ensure borrowers have assets and liabilities (from unified tables)
+                // Ensure individual borrowers have assets and liabilities (from unified tables)
                 res.borrowers.forEach(borrower => {
                     borrower.assets = borrower.assets || [];        // From unified Asset table
                     borrower.liabilities = borrower.liabilities || [];    // From unified Liability table
+                });
+                
+                // NEW: Ensure company borrowers have assets and liabilities with trust structure fields
+                res.company_borrowers.forEach(company => {
+                    company.assets = company.assets || [];        // From unified Asset table
+                    company.liabilities = company.liabilities || [];    // From unified Liability table
+                    
+                    // Ensure trust structure fields are present
+                    company.is_trustee = company.is_trustee || false;
+                    company.is_smsf_trustee = company.is_smsf_trustee || false;
+                    company.trustee_name = company.trustee_name || null;
+                    
+                    // Process company assets to handle updated asset types
+                    company.assets.forEach(asset => {
+                        // Remove "To be refinanced" asset type - convert to "Other" if needed
+                        if (asset.asset_type === 'To be refinanced') {
+                            asset.asset_type = 'Other';
+                            if (!asset.description_if_applicable) {
+                                asset.description_if_applicable = 'Originally "To be refinanced" asset';
+                            }
+                        }
+                        
+                        // Ensure to_be_refinanced field is present for company assets
+                        asset.to_be_refinanced = asset.to_be_refinanced || false;
+                        
+                        // Remove bg_type for company assets (not applicable)
+                        delete asset.bg_type;
+                    });
+                    
+                    // Process company liabilities
+                    company.liabilities.forEach(liability => {
+                        // Ensure to_be_refinanced field is present for company liabilities
+                        liability.to_be_refinanced = liability.to_be_refinanced || false;
+                        
+                        // Remove bg_type for company liabilities (not applicable)
+                        delete liability.bg_type;
+                    });
                 });
                 
                 // Ensure guarantors have assets and liabilities (from unified tables - should already be there from cascade)
                 res.guarantors.forEach(guarantor => {
                     guarantor.assets = guarantor.assets || [];      // From unified Asset table
                     guarantor.liabilities = guarantor.liabilities || [];  // From unified Liability table
+                    
+                    // Process guarantor assets to handle updated asset types
+                    guarantor.assets.forEach(asset => {
+                        // Remove "To be refinanced" asset type - convert to "Other" if needed
+                        if (asset.asset_type === 'To be refinanced') {
+                            asset.asset_type = 'Other';
+                            if (!asset.description_if_applicable) {
+                                asset.description_if_applicable = 'Originally "To be refinanced" asset';
+                            }
+                        }
+                        
+                        // Remove to_be_refinanced for guarantor assets (not applicable)
+                        delete asset.to_be_refinanced;
+                        
+                        // Ensure bg_type is present for guarantor assets
+                        asset.bg_type = asset.bg_type || 'BG1';
+                    });
+                    
+                    // Process guarantor liabilities
+                    guarantor.liabilities.forEach(liability => {
+                        // Remove to_be_refinanced for guarantor liabilities (not applicable)
+                        delete liability.to_be_refinanced;
+                        
+                        // Ensure bg_type is present for guarantor liabilities
+                        liability.bg_type = liability.bg_type || 'bg1';
+                    });
+                });
+                
+                // Process individual borrower assets and liabilities
+                res.borrowers.forEach(borrower => {
+                    borrower.assets.forEach(asset => {
+                        // Remove "To be refinanced" asset type - convert to "Other" if needed
+                        if (asset.asset_type === 'To be refinanced') {
+                            asset.asset_type = 'Other';
+                            if (!asset.description_if_applicable) {
+                                asset.description_if_applicable = 'Originally "To be refinanced" asset';
+                            }
+                        }
+                        
+                        // Remove to_be_refinanced for individual borrower assets (not applicable)
+                        delete asset.to_be_refinanced;
+                        delete asset.bg_type;
+                    });
+                    
+                    borrower.liabilities.forEach(liability => {
+                        // Remove to_be_refinanced for individual borrower liabilities (not applicable)
+                        delete liability.to_be_refinanced;
+                        delete liability.bg_type;
+                    });
                 });
                 
                 // Additional computed properties for easy access
-                res.total_borrower_count = res.borrowers.length;
+                res.total_borrower_count = res.borrowers.length + res.company_borrowers.length;
+                res.total_individual_borrower_count = res.borrowers.length;
+                res.total_company_borrower_count = res.company_borrowers.length;
                 res.total_guarantor_count = res.guarantors.length;
                 res.total_security_property_count = res.security_properties.length;
                 res.total_loan_requirement_count = res.loan_requirements.length;
@@ -390,7 +479,7 @@ export function applicationWithCascade(id) {
                 res.total_security_value = res.security_properties.reduce((sum, prop) => 
                     sum + (parseFloat(prop.estimated_value) || 0), 0);
                 
-                // Calculate borrower and guarantor totals
+                // Calculate individual borrower totals
                 res.borrowers.forEach(borrower => {
                     borrower.total_assets = borrower.assets.reduce((sum, asset) => 
                         sum + (parseFloat(asset.value) || 0), 0);
@@ -399,6 +488,16 @@ export function applicationWithCascade(id) {
                     borrower.net_worth = borrower.total_assets - borrower.total_liabilities;
                 });
                 
+                // Calculate company borrower totals
+                res.company_borrowers.forEach(company => {
+                    company.total_assets = company.assets.reduce((sum, asset) => 
+                        sum + (parseFloat(asset.value) || 0), 0);
+                    company.total_liabilities = company.liabilities.reduce((sum, liability) => 
+                        sum + (parseFloat(liability.amount) || 0), 0);
+                    company.net_worth = company.total_assets - company.total_liabilities;
+                });
+                
+                // Calculate guarantor totals
                 res.guarantors.forEach(guarantor => {
                     if (!guarantor.total_assets) {
                         guarantor.total_assets = guarantor.assets.reduce((sum, asset) => 
@@ -415,8 +514,10 @@ export function applicationWithCascade(id) {
                 res.financial_summary = {
                     total_fees: res.fees.reduce((sum, fee) => sum + (parseFloat(fee.amount) || 0), 0),
                     total_repayments: res.repayments.reduce((sum, repayment) => sum + (parseFloat(repayment.amount) || 0), 0),
-                    total_borrower_assets: res.borrowers.reduce((sum, borrower) => sum + (borrower.total_assets || 0), 0),
-                    total_borrower_liabilities: res.borrowers.reduce((sum, borrower) => sum + (borrower.total_liabilities || 0), 0),
+                    total_individual_borrower_assets: res.borrowers.reduce((sum, borrower) => sum + (borrower.total_assets || 0), 0),
+                    total_individual_borrower_liabilities: res.borrowers.reduce((sum, borrower) => sum + (borrower.total_liabilities || 0), 0),
+                    total_company_borrower_assets: res.company_borrowers.reduce((sum, company) => sum + (company.total_assets || 0), 0),
+                    total_company_borrower_liabilities: res.company_borrowers.reduce((sum, company) => sum + (company.total_liabilities || 0), 0),
                     total_guarantor_assets: res.guarantors.reduce((sum, guarantor) => sum + (guarantor.total_assets || 0), 0),
                     total_guarantor_liabilities: res.guarantors.reduce((sum, guarantor) => sum + (guarantor.total_liabilities || 0), 0),
                 };

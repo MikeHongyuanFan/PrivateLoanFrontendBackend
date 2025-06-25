@@ -23,6 +23,7 @@
                     <p class="title">Type</p>
                     <p class="title">Category</p>
                     <p class="title">Description</p>
+                    <p class="title">Description (if applicable)</p>
                     <p class="title">Value/Amount</p>
                     <p class="title">Amount Owing/Monthly Payment</p>
                     <p class="title">BG Type</p>
@@ -32,6 +33,7 @@
                     <p>{{ item.itemType }}</p>
                     <p>{{ item.category || '-' }}</p>
                     <p>{{ item.description || '-' }}</p>
+                    <p>{{ item.descriptionIfApplicable || '-' }}</p>
                     <p>${{ formatNumber(item.primaryAmount) || '0' }}</p>
                     <p>${{ formatNumber(item.secondaryAmount) || '0' }}</p>
                     <p>{{ item.bg_type || 'BG1' }}</p>
@@ -41,7 +43,8 @@
                 <div class="item summary" v-if="guarantor.financialItems.length > 0">
                     <p><strong>Total</strong></p>
                     <p>-</p>
-                    <p><strong>{{ guarantor.financialItems.length }} items</strong></p>
+                    <p>-</p>
+                    <p>-</p>
                     <p><strong>${{ formatNumber(guarantor.totalAssetValue) }}</strong></p>
                     <p><strong>${{ formatNumber(guarantor.totalLiabilityAmount) }}</strong></p>
                     <p><strong>Net: ${{ formatNumber(guarantor.netWorth) }}</strong></p>
@@ -76,6 +79,7 @@
                     itemType: 'Asset',
                     category: asset.asset_type,
                     description: asset.description,
+                    descriptionIfApplicable: asset.description_if_applicable,
                     primaryAmount: asset.value,
                     secondaryAmount: asset.amount_owing,
                     bg_type: asset.bg_type,
@@ -89,6 +93,7 @@
                     itemType: 'Liability',
                     category: liability.liability_type,
                     description: liability.description,
+                    descriptionIfApplicable: liability.description_if_applicable,
                     primaryAmount: liability.amount,
                     secondaryAmount: liability.monthly_payment,
                     bg_type: liability.bg_type,
@@ -144,7 +149,7 @@
     }
     .item {
         display: grid;
-        grid-template-columns: 1fr 1.5fr 2fr 1.2fr 1.5fr 1fr;
+        grid-template-columns: 1fr 1.5fr 2fr 2fr 1.2fr 1.5fr 1fr;
         gap: 10px;
         padding: 10px 0;
         border-bottom: 1px solid #E8EBEE;

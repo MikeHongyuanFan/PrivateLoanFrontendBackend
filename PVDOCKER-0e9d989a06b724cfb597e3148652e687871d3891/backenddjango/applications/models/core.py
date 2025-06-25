@@ -218,6 +218,10 @@ class Application(BaseApplicationModel):
         blank=True,
         help_text="Details about prior applications"
     )
+    application_already_submitted = models.BooleanField(
+        default=False,
+        help_text="Whether the application has already been submitted"
+    )
     
     # ============================================================================
     # EXIT STRATEGY

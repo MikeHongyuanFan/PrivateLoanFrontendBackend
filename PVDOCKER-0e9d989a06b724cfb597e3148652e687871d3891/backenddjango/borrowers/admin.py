@@ -58,6 +58,20 @@ class AssetAdmin(admin.ModelAdmin):
     search_fields = ('description', 'address')
     list_filter = ('asset_type', 'to_be_refinanced', 'created_at')
     raw_id_fields = ('borrower', 'guarantor', 'created_by')
+    fieldsets = (
+        ('Asset Information', {
+            'fields': ('asset_type', 'description', 'value', 'amount_owing')
+        }),
+        ('Additional Details', {
+            'fields': ('to_be_refinanced', 'address', 'bg_type')
+        }),
+        ('Relationships', {
+            'fields': ('borrower', 'guarantor')
+        }),
+        ('System Information', {
+            'fields': ('created_by',)
+        }),
+    )
 
 @admin.register(Liability)
 class LiabilityAdmin(admin.ModelAdmin):

@@ -1,10 +1,10 @@
 <template>
     <div class="form">
         <div class="long_item">
-            <h1>Company Assets</h1>
+            <h1>Asset & Liabilities</h1>
         </div>
         <div v-if="companyList.length === 0" class="no-company">
-            <p>No company borrowers found. Please add a company borrower first to manage assets and liabilities.</p>
+            <p>No company borrowers found. Please add a company borrower first to manage assets.</p>
             <div class="add-company">
                 <el-button type="primary" @click="$emit('addCompany')">Add Company Borrower</el-button>
             </div>
@@ -28,7 +28,6 @@
                         <el-option value="Credit Card" label="Credit Card" />
                         <el-option value="Other Creditor" label="Other Creditor" />
                         <el-option value="Other" label="Other" />
-                        <el-option value="To be refinanced" label="To be refinanced" />
                     </el-select>
                     <span class="hint">Type of asset</span>
                 </div>
@@ -65,63 +64,6 @@
                 <el-button type="primary" @click="$emit('addAsset', index)">Add Asset</el-button>
             </div>
             <div class="long_item">
-                <h1>Liabilities</h1>
-            </div>
-            <div v-for="(liability, idx) in ensureLiabilities(company)" :key="idx" class="liability">
-                <div class="item">
-                    <p>Liability Type <span class="required">*</span></p>
-                    <el-select v-model="liability.liability_type" placeholder="Select liability type">
-                        <el-option value="mortgage" label="Mortgage" />
-                        <el-option value="personal_loan" label="Personal Loan" />
-                        <el-option value="car_loan" label="Car Loan" />
-                        <el-option value="credit_card" label="Credit Card" />
-                        <el-option value="tax_debt" label="Tax Debt" />
-                        <el-option value="other_creditor" label="Other Creditor" />
-                        <el-option value="other" label="Other" />
-                    </el-select>
-                    <span class="hint">Type of liability</span>
-                </div>
-                <div class="item">
-                    <p>Description <span class="required">*</span></p>
-                    <el-input v-model="liability.description" placeholder="Brief description of the liability" />
-                    <span class="hint">Brief description of the liability</span>
-                </div>
-                <div class="item">
-                    <p>Amount ($) <span class="required">*</span></p>
-                    <el-input v-model="liability.amount" type="number" placeholder="e.g. 150000" />
-                    <span class="hint">Total amount of the liability (max 10 digits)</span>
-                </div>
-                <div class="item">
-                    <p>Lender</p>
-                    <el-input v-model="liability.lender" placeholder="Name of the lender" />
-                    <span class="hint">Name of the bank or financial institution</span>
-                </div>
-                <div class="item">
-                    <p>Monthly Payment ($)</p>
-                    <el-input v-model="liability.monthly_payment" type="number" placeholder="e.g. 1500" />
-                    <span class="hint">Monthly repayment amount (max 8 digits)</span>
-                </div>
-                <div class="item">
-                    <p>To Be Refinanced</p>
-                    <el-checkbox v-model="liability.to_be_refinanced">Yes</el-checkbox>
-                    <span class="hint">Check if this liability will be refinanced</span>
-                </div>
-                <div class="item">
-                    <p>BG Type <span class="required">*</span></p>
-                    <el-radio-group v-model="liability.bg_type">
-                        <el-radio value="bg1">BG1</el-radio>
-                        <el-radio value="bg2">BG2</el-radio>
-                    </el-radio-group>
-                    <span class="hint">Borrower/Guarantor classification</span>
-                </div>
-                <div class="buttons">
-                    <el-button type="danger" @click="$emit('removeLiability', index)" :disabled="ensureLiabilities(company).length <= 1">Remove</el-button>
-                </div>
-            </div>
-            <div class="add">
-                <el-button type="primary" @click="$emit('addLiability', index)">Add Liability</el-button>
-            </div>
-            <div class="long_item">
                 <h1>Financial Summary</h1>
             </div>
             <div class="item">
@@ -133,11 +75,6 @@
                 <p>Total Assets ($)</p>
                 <el-input :value="calculateTotalAssets(company)" type="number" disabled />
                 <span class="hint">Sum of all assets (calculated automatically)</span>
-            </div>
-            <div class="item">
-                <p>Total Liabilities ($)</p>
-                <el-input :value="calculateTotalLiabilities(company)" type="number" disabled />
-                <span class="hint">Sum of all liabilities (calculated automatically)</span>
             </div>
         </div>
     </div>
@@ -153,7 +90,7 @@
         }
     });
 
-    const emit = defineEmits(['addAsset', 'removeAsset', 'addLiability', 'removeLiability', 'addCompany']);
+    const emit = defineEmits(['addAsset', 'removeAsset', 'addCompany']);
 
     // Computed property to ensure reactivity and filter out empty companies
     const companyList = computed(() => {
@@ -185,28 +122,12 @@
         }, 0);
     };
 
-    const calculateTotalLiabilities = (company) => {
-        if (!company?.liabilities || !Array.isArray(company.liabilities)) return 0;
-        return company.liabilities.reduce((total, liability) => {
-            const amount = parseFloat(liability.amount) || 0;
-            return total + amount;
-        }, 0);
-    };
-
     // New function to ensure assets are properly initialized
     const ensureAssets = (company) => {
         if (!company?.assets || !Array.isArray(company.assets)) {
             return [];
         }
         return company.assets;
-    };
-
-    // New function to ensure liabilities are properly initialized
-    const ensureLiabilities = (company) => {
-        if (!company?.liabilities || !Array.isArray(company.liabilities)) {
-            return [];
-        }
-        return company.liabilities;
     };
 </script>
 
@@ -270,7 +191,7 @@
         align-items: start;
         gap: 10px;
     }
-    .asset, .liability {
+    .asset {
         grid-column: 1 / 4;
         display: grid;
         grid-template-columns: repeat(3, 1fr);

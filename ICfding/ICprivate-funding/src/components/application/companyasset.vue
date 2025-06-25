@@ -22,6 +22,9 @@
                             <el-table-column prop="description" label="Description" min-width="200">
                                 <template #default="{ row }">{{ row.description || '-' }}</template>
                             </el-table-column>
+                            <el-table-column prop="description_if_applicable" label="Description (if applicable)" min-width="200">
+                                <template #default="{ row }">{{ row.description_if_applicable || '-' }}</template>
+                            </el-table-column>
                             <el-table-column prop="value" label="Value" min-width="120">
                                 <template #default="{ row }">{{ formatCurrency(row.value) }}</template>
                             </el-table-column>
@@ -37,31 +40,9 @@
                         </el-table>
                     </div>
                     
-                    <!-- Liabilities Table -->
-                    <div v-if="borrower.liabilities && borrower.liabilities.length > 0" class="liabilities_section">
-                        <h4>Liabilities ({{ borrower.liabilities.length }})</h4>
-                        <el-table :data="borrower.liabilities" style="width: 100%" class="liabilities_table">
-                            <el-table-column prop="liability_type" label="Liability Type" min-width="120">
-                                <template #default="{ row }">{{ row.liability_type || '-' }}</template>
-                            </el-table-column>
-                            <el-table-column prop="description" label="Description" min-width="200">
-                                <template #default="{ row }">{{ row.description || '-' }}</template>
-                            </el-table-column>
-                            <el-table-column prop="amount" label="Amount" min-width="120">
-                                <template #default="{ row }">{{ formatCurrency(row.amount) }}</template>
-                            </el-table-column>
-                            <el-table-column prop="monthly_payment" label="Monthly Payment" min-width="120">
-                                <template #default="{ row }">{{ formatCurrency(row.monthly_payment) }}</template>
-                            </el-table-column>
-                            <el-table-column prop="to_be_refinanced" label="To Be Refinanced" min-width="120">
-                                <template #default="{ row }">{{ row.to_be_refinanced ? 'Yes' : 'No' }}</template>
-                            </el-table-column>
-                        </el-table>
-                    </div>
-                    
                     <!-- No Data Messages -->
-                    <div v-if="(!borrower.assets || borrower.assets.length === 0) && (!borrower.liabilities || borrower.liabilities.length === 0)" class="no_data">
-                        <p>No assets or liabilities found for this {{ borrower.is_company ? 'company' : 'borrower/guarantor' }}</p>
+                    <div v-if="(!borrower.assets || borrower.assets.length === 0)" class="no_data">
+                        <p>No assets found for this {{ borrower.is_company ? 'company' : 'borrower/guarantor' }}</p>
                     </div>
                 </div>
             </div>
@@ -75,6 +56,9 @@
                 </el-table-column>
                 <el-table-column prop="description" label="Description" min-width="200">
                     <template #default="{ row }">{{ row.description || '-' }}</template>
+                </el-table-column>
+                <el-table-column prop="description_if_applicable" label="Description (if applicable)" min-width="200">
+                    <template #default="{ row }">{{ row.description_if_applicable || '-' }}</template>
                 </el-table-column>
                 <el-table-column prop="value" label="Value" min-width="120">
                     <template #default="{ row }">{{ formatCurrency(row.value) }}</template>

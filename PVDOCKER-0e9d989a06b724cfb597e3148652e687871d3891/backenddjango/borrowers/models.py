@@ -170,7 +170,6 @@ class Asset(models.Model):
         ('Credit Card', 'Credit Card'),
         ('Other Creditor', 'Other Creditor'),
         ('Other', 'Other'),
-        ('To be refinanced', 'To be refinanced'),  # Only for company assets
     ]
     
     # Use a different name for the choices to avoid collision

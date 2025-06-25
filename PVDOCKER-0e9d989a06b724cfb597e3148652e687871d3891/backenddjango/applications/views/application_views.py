@@ -808,6 +808,84 @@ class ApplicationViewSet(viewsets.ModelViewSet):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+    @action(detail=False, methods=['post'])
+    def create_with_cascade(self, request):
+        """
+        Create application with cascade support for all related objects.
+        
+        This endpoint allows creating an application and its nested related objects:
+        - Borrowers (create)
+        - Guarantors (create)
+        - Company Borrowers (create)
+        - Security Properties (create)
+        - Loan Requirements (create)
+        - Funding Calculation (trigger new calculation)
+        
+        This endpoint is optimized for creating complete applications with all related objects
+        in a single request.
+        """
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        logger.info("=== CREATE WITH CASCADE DEBUG ===")
+        logger.info(f"Request data keys: {list(request.data.keys())}")
+        
+        # Log company borrowers data specifically
+        if 'company_borrowers' in request.data:
+            logger.info(f"Company borrowers data: {request.data['company_borrowers']}")
+            if isinstance(request.data['company_borrowers'], list):
+                for i, company in enumerate(request.data['company_borrowers']):
+                    logger.info(f"Company {i}: {company}")
+        
+        from ..serializers import ApplicationCreateSerializer
+        serializer = ApplicationCreateSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+        
+        if serializer.is_valid():
+            try:
+                logger.info("Serializer validation passed, creating application...")
+                application = serializer.save()
+                
+                # Create a note about the cascade creation for audit purposes
+                from documents.models import Note
+                Note.objects.create(
+                    application=application,
+                    content=f"Application created with cascade by {request.user.get_full_name() or request.user.email}",
+                    created_by=request.user
+                )
+                
+                logger.info(f"Application created successfully with ID: {application.id}")
+                
+                # Return the created application data using the detail serializer
+                from ..serializers import ApplicationDetailSerializer
+                response_serializer = ApplicationDetailSerializer(
+                    application, 
+                    context={'request': request}
+                )
+                return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+                
+            except Exception as e:
+                logger.error(f"Error creating application with cascade: {str(e)}")
+                import traceback
+                logger.error(f"Traceback: {traceback.format_exc()}")
+                return Response(
+                    {"error": f"Failed to create application: {str(e)}"}, 
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        else:
+            logger.error("Serializer validation failed")
+            logger.error(f"Validation errors: {serializer.errors}")
+            
+            # Enhanced error logging for company borrowers
+            if 'company_borrowers' in serializer.errors:
+                logger.error("Company borrowers validation errors:")
+                for i, company_errors in enumerate(serializer.errors['company_borrowers']):
+                    logger.error(f"Company {i} errors: {company_errors}")
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
     def get_object(self):
         """
         Override get_object to handle archived applications for certain actions.

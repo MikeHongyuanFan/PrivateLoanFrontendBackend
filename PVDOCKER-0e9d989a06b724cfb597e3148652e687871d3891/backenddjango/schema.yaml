@@ -1925,6 +1925,45 @@ paths:
               schema:
                 $ref: '#/components/schemas/ApplicationList'
           description: ''
+  /api/applications/applications/create_with_cascade/:
+    post:
+      operationId: applications_applications_create_with_cascade_create
+      description: |-
+        Create application with cascade support for all related objects.
+
+        This endpoint allows creating an application and its nested related objects:
+        - Borrowers (create)
+        - Guarantors (create)
+        - Company Borrowers (create)
+        - Security Properties (create)
+        - Loan Requirements (create)
+        - Funding Calculation (trigger new calculation)
+
+        This endpoint is optimized for creating complete applications with all related objects
+        in a single request.
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationListRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ApplicationListRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApplicationListRequest'
+      security:
+      - jwtAuth: []
+      - Bearer: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApplicationList'
+          description: ''
   /api/applications/applications/enhanced_applications/:
     get:
       operationId: applications_applications_enhanced_applications_retrieve
@@ -1962,29 +2001,41 @@ paths:
   /api/applications/create-with-cascade/:
     post:
       operationId: applications_create_with_cascade_create
-      description: ViewSet for viewing and editing Application instances.
+      description: |-
+        Create application with cascade support for all related objects.
+
+        This endpoint allows creating an application and its nested related objects:
+        - Borrowers (create)
+        - Guarantors (create)
+        - Company Borrowers (create)
+        - Security Properties (create)
+        - Loan Requirements (create)
+        - Funding Calculation (trigger new calculation)
+
+        This endpoint is optimized for creating complete applications with all related objects
+        in a single request.
       tags:
       - applications
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ApplicationCreateRequest'
+              $ref: '#/components/schemas/ApplicationListRequest'
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/ApplicationCreateRequest'
+              $ref: '#/components/schemas/ApplicationListRequest'
           multipart/form-data:
             schema:
-              $ref: '#/components/schemas/ApplicationCreateRequest'
+              $ref: '#/components/schemas/ApplicationListRequest'
       security:
       - jwtAuth: []
       - Bearer: []
       responses:
-        '201':
+        '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApplicationCreate'
+                $ref: '#/components/schemas/ApplicationList'
           description: ''
   /api/applications/enhanced-applications/:
     get:
@@ -8654,7 +8705,6 @@ components:
       - Credit Card
       - Other Creditor
       - Other
-      - To be refinanced
       type: string
       description: |-
         * `Property` - Property
@@ -8664,7 +8714,6 @@ components:
         * `Credit Card` - Credit Card
         * `Other Creditor` - Other Creditor
         * `Other` - Other
-        * `To be refinanced` - To be refinanced
     BDM:
       type: object
       description: Serializer for BDM information with null/blank handling for minimal
@@ -9866,8 +9915,10 @@ components:
           type: boolean
         is_trustee:
           type: boolean
+          nullable: true
         is_smsf_trustee:
           type: boolean
+          nullable: true
         trustee_name:
           type: string
           nullable: true
@@ -9896,6 +9947,21 @@ components:
           type: string
           nullable: true
           maxLength: 10
+        company_address:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        phone:
+          type: string
+          nullable: true
+          maxLength: 20
+        notes_text:
+          type: string
+          nullable: true
         directors:
           type: array
           items:
@@ -9948,8 +10014,10 @@ components:
           type: boolean
         is_trustee:
           type: boolean
+          nullable: true
         is_smsf_trustee:
           type: boolean
+          nullable: true
         trustee_name:
           type: string
           nullable: true
@@ -9978,6 +10046,21 @@ components:
           type: string
           nullable: true
           maxLength: 10
+        company_address:
+          type: string
+          nullable: true
+        email:
+          type: string
+          format: email
+          nullable: true
+          maxLength: 254
+        phone:
+          type: string
+          nullable: true
+          maxLength: 20
+        notes_text:
+          type: string
+          nullable: true
         directors:
           type: array
           items:
@@ -13511,6 +13594,10 @@ components:
           - $ref: '#/components/schemas/PropertyTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        description_if_applicable:
+          type: string
+          nullable: true
+          description: Additional description required when property_type is 'other'
         occupancy:
           nullable: true
           description: |-
@@ -13654,6 +13741,10 @@ components:
           - $ref: '#/components/schemas/PropertyTypeEnum'
           - $ref: '#/components/schemas/BlankEnum'
           - $ref: '#/components/schemas/NullEnum'
+        description_if_applicable:
+          type: string
+          nullable: true
+          description: Additional description required when property_type is 'other'
         occupancy:
           nullable: true
           description: |-

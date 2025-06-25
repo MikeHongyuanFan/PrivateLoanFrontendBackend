@@ -82,7 +82,7 @@
                                 <p :style="{color: isGuarantorAssetValid ? '#2984DE' : '#272727'}">Guarantor Assets & Liability</p>
                             </div>
                         </template>
-                        <GuarantorAsset :asset="guarantorAsset"></GuarantorAsset>
+                        <GuarantorAsset :guarantors="application.guarantors" @update:guarantors="updateGuarantors"></GuarantorAsset>
                     </el-collapse-item>
                     <el-collapse-item name="7">
                         <template #title>
@@ -329,6 +329,7 @@
             address_state: "",
             address_postcode: "",
             property_type: "",
+            description_if_applicable: "",
             bedrooms: null,
             bathrooms: null,
             car_spaces: null,
@@ -547,6 +548,12 @@
     const removeRequirement = () => {
         application.value.loan_requirements.pop()
     }
+    
+    // Function to handle guarantor updates from the GuarantorAsset component
+    const updateGuarantors = (updatedGuarantors) => {
+        application.value.guarantors = updatedGuarantors;
+        console.log("Guarantors updated:", application.value.guarantors);
+    };
     
     // Broker selection validation and handler
     const isBrokerSelectionValid = computed(() => {
@@ -782,7 +789,7 @@
                 if (company.assets && company.assets.length > 0) {
                     company.assets = company.assets.filter(asset => asset.asset_type || asset.description).map(asset => {
                         // Validate asset_type against schema choices
-                        const validAssetTypes = ["Property", "Vehicle", "Savings", "Investment Shares", "Credit Card", "Other Creditor", "Other", "To be refinanced"];
+                        const validAssetTypes = ["Property", "Vehicle", "Savings", "Investment Shares", "Credit Card", "Other Creditor", "Other"];
                         
                         return {
                             ...asset,
@@ -827,21 +834,23 @@
                 
                 return {
                     ...property,
-                    // Convert string numbers to integers
-                    bedrooms: parseInt(property.bedrooms) || null,
-                    bathrooms: parseInt(property.bathrooms) || null,
-                    car_spaces: parseInt(property.car_spaces) || null,
+                    // Convert string numbers to integers for bedrooms, bathrooms, car_spaces
+                    bedrooms: property.bedrooms === "" || property.bedrooms === null || property.bedrooms === undefined ? null : parseInt(property.bedrooms),
+                    bathrooms: property.bathrooms === "" || property.bathrooms === null || property.bathrooms === undefined ? null : parseInt(property.bathrooms),
+                    car_spaces: property.car_spaces === "" || property.car_spaces === null || property.car_spaces === undefined ? null : parseInt(property.car_spaces),
                     
-                    // Set boolean fields to null if empty string
-                    is_single_story: property.is_single_story === "" ? null : property.is_single_story,
-                    has_garage: property.has_garage === "" ? null : property.has_garage,
-                    has_carport: property.has_carport === "" ? null : property.has_carport,
-                    has_off_street_parking: property.has_off_street_parking === "" ? null : property.has_off_street_parking,
+                    // Set boolean fields to null if empty string or undefined
+                    is_single_story: property.is_single_story === "" || property.is_single_story === undefined ? null : property.is_single_story,
+                    has_garage: property.has_garage === "" || property.has_garage === undefined ? null : property.has_garage,
+                    has_carport: property.has_carport === "" || property.has_carport === undefined ? null : property.has_carport,
+                    has_off_street_parking: property.has_off_street_parking === "" || property.has_off_street_parking === undefined ? null : property.has_off_street_parking,
                     
-                    // Convert string numbers to floats
-                    current_debt_position: parseFloat(property.current_debt_position) || null,
-                    estimated_value: parseFloat(property.estimated_value) || null,
-                    purchase_price: parseFloat(property.purchase_price) || null
+                    // Convert string numbers to floats for decimal fields
+                    current_debt_position: property.current_debt_position === "" || property.current_debt_position === null ? null : parseFloat(property.current_debt_position),
+                    estimated_value: property.estimated_value === "" || property.estimated_value === null ? null : parseFloat(property.estimated_value),
+                    purchase_price: property.purchase_price === "" || property.purchase_price === null ? null : parseFloat(property.purchase_price),
+                    building_size: property.building_size === "" || property.building_size === null ? null : parseFloat(property.building_size),
+                    land_size: property.land_size === "" || property.land_size === null ? null : parseFloat(property.land_size)
                 };
             });
         }

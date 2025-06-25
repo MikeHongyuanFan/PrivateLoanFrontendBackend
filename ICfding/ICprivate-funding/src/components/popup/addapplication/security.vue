@@ -60,6 +60,11 @@
                     </el-select>
                     <span class="hint">Type of property</span>
                 </div>
+                <div class="item" v-if="item.property_type === 'other'">
+                    <p>Description (if applicable) <span class="required">*</span></p>
+                    <el-input v-model="item.description_if_applicable" placeholder="Please describe the property type" />
+                    <span class="hint">Provide a description if property type is 'Other'</span>
+                </div>
                 <div class="item">
                     <p>Bedrooms</p>
                     <el-input-number v-model="item.bedrooms" :min="0" :max="20" placeholder="e.g. 3" />

@@ -170,6 +170,160 @@ class ApplicationCustomActionsTest(BaseApplicationTestCase, ApplicationTestMixin
         self.assertEqual(application.borrowers.count(), 0)
         self.assertEqual(application.guarantors.count(), 0)
     
+    def test_create_with_cascade_company_assets_description_if_applicable(self):
+        """Test create with cascade endpoint with company assets including 'Other' type and description_if_applicable."""
+        url = '/api/applications/create-with-cascade/'
+        
+        data = {
+            'reference_number': 'TEST-ASSET-001',
+            'loan_amount': '500000.00',
+            'loan_term': 12,
+            'interest_rate': '8.5',
+            'purpose': 'Test loan with company assets',
+            'company_borrowers': [
+                {
+                    'company_name': 'Asset Test Company Ltd',
+                    'company_abn': '98765432109',
+                    'company_acn': '987654321',
+                    'industry_type': 'professional',
+                    'contact_number': '0498765432',
+                    'annual_company_income': '750000.00',
+                    'is_trustee': False,
+                    'is_smsf_trustee': False,
+                    'trustee_name': '',
+                    'registered_address_unit': '10',
+                    'registered_address_street_no': '456',
+                    'registered_address_street_name': 'Tech Street',
+                    'registered_address_suburb': 'Tech Suburb',
+                    'registered_address_state': 'VIC',
+                    'registered_address_postcode': '3000',
+                    'directors': [
+                        {
+                            'name': 'Tech Director',
+                            'roles': 'director, secretary',
+                            'director_id': 'TECH123'
+                        }
+                    ],
+                    'assets': [
+                        {
+                            'asset_type': 'Property',
+                            'description': 'Tech Office Building',
+                            'value': '2000000.00',
+                            'amount_owing': '1000000.00',
+                            'to_be_refinanced': True,
+                            'address': '456 Tech Street, Tech Suburb VIC 3000'
+                        },
+                        {
+                            'asset_type': 'Other',
+                            'description': 'Intellectual Property',
+                            'description_if_applicable': 'Patents and trademarks for proprietary software',
+                            'value': '500000.00',
+                            'amount_owing': '0.00',
+                            'to_be_refinanced': False
+                        },
+                        {
+                            'asset_type': 'Investment Shares',
+                            'description': 'Tech Startup Shares',
+                            'value': '300000.00',
+                            'amount_owing': '0.00',
+                            'to_be_refinanced': False
+                        }
+                    ],
+                    'liabilities': [
+                        {
+                            'liability_type': 'other',
+                            'description': 'Software Development Loan',
+                            'amount': '200000.00',
+                            'lender': 'Tech Finance Bank',
+                            'monthly_payment': '5000.00',
+                            'to_be_refinanced': False,
+                            'bg_type': 'bg1'
+                        }
+                    ]
+                }
+            ]
+        }
+        
+        response = self.client.post(url, data, format='json')
+        
+        self.assertResponseSuccess(response, 201)
+        self.assertResponseContains(response, 'id')
+        self.assertResponseContains(response, 'reference_number', 'TEST-ASSET-001')
+        
+        # Verify application was created with company borrower and assets
+        application = Application.objects.get(reference_number='TEST-ASSET-001')
+        self.assertEqual(application.reference_number, 'TEST-ASSET-001')
+        self.assertEqual(application.loan_amount, Decimal('500000.00'))
+        
+        # Verify company borrower was created
+        company_borrowers = application.borrowers.filter(is_company=True)
+        self.assertEqual(company_borrowers.count(), 1)
+        
+        company = company_borrowers.first()
+        self.assertEqual(company.company_name, 'Asset Test Company Ltd')
+        self.assertEqual(company.company_abn, '98765432109')
+        self.assertEqual(company.industry_type, 'professional')
+        
+        # Verify directors were created
+        directors = company.directors.all()
+        self.assertEqual(directors.count(), 1)
+        director = directors.first()
+        self.assertEqual(director.name, 'Tech Director')
+        self.assertEqual(director.roles, 'director, secretary')
+        
+        # Verify assets were created - including the new description_if_applicable field
+        assets = company.assets.all()
+        self.assertEqual(assets.count(), 3)
+        
+        # Check Property asset
+        property_asset = assets.filter(asset_type='Property').first()
+        self.assertIsNotNone(property_asset)
+        self.assertEqual(property_asset.description, 'Tech Office Building')
+        self.assertEqual(property_asset.value, Decimal('2000000.00'))
+        self.assertEqual(property_asset.address, '456 Tech Street, Tech Suburb VIC 3000')
+        
+        # Check Other asset with description_if_applicable
+        other_asset = assets.filter(asset_type='Other').first()
+        self.assertIsNotNone(other_asset)
+        self.assertEqual(other_asset.description, 'Intellectual Property')
+        self.assertEqual(other_asset.description_if_applicable, 'Patents and trademarks for proprietary software')
+        self.assertEqual(other_asset.value, Decimal('500000.00'))
+        
+        # Check Investment Shares asset
+        shares_asset = assets.filter(asset_type='Investment Shares').first()
+        self.assertIsNotNone(shares_asset)
+        self.assertEqual(shares_asset.description, 'Tech Startup Shares')
+        self.assertEqual(shares_asset.value, Decimal('300000.00'))
+        
+        # Verify liabilities were created
+        liabilities = company.liabilities.all()
+        self.assertEqual(liabilities.count(), 1)
+        liability = liabilities.first()
+        self.assertEqual(liability.liability_type, 'other')
+        self.assertEqual(liability.description, 'Software Development Loan')
+        self.assertEqual(liability.amount, Decimal('200000.00'))
+        
+        # Test the retrieve-cascade endpoint to ensure data is returned correctly
+        retrieve_url = f'/api/applications/{application.id}/retrieve-cascade/'
+        retrieve_response = self.client.get(retrieve_url)
+        self.assertResponseSuccess(retrieve_response)
+        
+        retrieve_data = retrieve_response.data
+        returned_company_borrowers = retrieve_data.get('company_borrowers', [])
+        self.assertEqual(len(returned_company_borrowers), 1)
+        
+        returned_company = returned_company_borrowers[0]
+        self.assertEqual(returned_company['company_name'], 'Asset Test Company Ltd')
+        
+        # Check that assets are returned with description_if_applicable
+        returned_assets = returned_company.get('assets', [])
+        self.assertEqual(len(returned_assets), 3)
+        
+        # Check the "Other" asset has description_if_applicable
+        other_asset_returned = next((asset for asset in returned_assets if asset['asset_type'] == 'Other'), None)
+        self.assertIsNotNone(other_asset_returned)
+        self.assertEqual(other_asset_returned['description_if_applicable'], 'Patents and trademarks for proprietary software')
+    
     def test_create_with_cascade_borrower_name_only(self):
         """Test create with cascade endpoint with just borrower name."""
         url = '/api/applications/create-with-cascade/'
@@ -1192,18 +1346,26 @@ class ApplicationPartialUpdateCascadeTest(BaseApplicationTestCase, ApplicationTe
                 {
                     'asset_type': 'Property',
                     'description': 'Office Building',
-                    'value': '750000.00',
-                    'amount_owing': '300000.00',
+                    'value': '1000000.00',
+                    'amount_owing': '500000.00',
                     'to_be_refinanced': True,
-                    'address': '123 Business Street'
+                    'address': '123 Business Street, Business Suburb NSW 2000'
+                },
+                {
+                    'asset_type': 'Other',
+                    'description': 'Special Asset',
+                    'description_if_applicable': 'This is a special asset that requires additional description',
+                    'value': '50000.00',
+                    'amount_owing': '0.00',
+                    'to_be_refinanced': False
                 }
             ],
             'liabilities': [
                 {
                     'liability_type': 'other',
                     'description': 'Equipment Finance',
-                    'amount': '50000.00',
-                    'lender': 'Business Bank',
+                    'amount': '100000.00',
+                    'lender': 'Equipment Finance Co',
                     'monthly_payment': '2000.00',
                     'to_be_refinanced': False,
                     'bg_type': 'bg1'
@@ -1215,17 +1377,19 @@ class ApplicationPartialUpdateCascadeTest(BaseApplicationTestCase, ApplicationTe
             'company_borrowers': [company_borrower_data]
         }
         
-        print(f"\n=== TEST DEBUG: Sending company borrower data ===")
-        print(f"Company borrowers data: {data['company_borrowers']}")
+        print(f"\n=== TEST: Company borrower with assets including 'Other' type ===")
         print(f"Application ID: {self.application.id}")
+        print(f"Company borrower data: {data['company_borrowers']}")
+        print(f"Current borrowers count: {self.application.borrowers.count()}")
         
         # Make the update request
         response = self.client.patch(url, data, format='json')
         
         print(f"Response status: {response.status_code}")
-        print(f"Response data: {response.data}")
+        if response.status_code != 200:
+            print(f"Response data: {response.data}")
         
-        # Should succeed
+        # Check if the request succeeded
         self.assertResponseSuccess(response)
         
         # Refresh application from database
@@ -1233,13 +1397,13 @@ class ApplicationPartialUpdateCascadeTest(BaseApplicationTestCase, ApplicationTe
         
         print(f"\n=== TEST DEBUG: After update ===")
         print(f"Total borrowers count: {self.application.borrowers.count()}")
-        print(f"Individual borrowers count: {self.application.borrowers.filter(is_company=False).count()}")
         print(f"Company borrowers count: {self.application.borrowers.filter(is_company=True).count()}")
         
-        # List all borrowers
+        # List all borrowers to see what actually got saved
         all_borrowers = self.application.borrowers.all()
+        print(f"All borrowers:")
         for borrower in all_borrowers:
-            print(f"Borrower ID: {borrower.id}, is_company: {borrower.is_company}, name: {getattr(borrower, 'company_name', None) or f'{borrower.first_name} {borrower.last_name}'}")
+            print(f"  ID: {borrower.id}, is_company: {borrower.is_company}, name: {getattr(borrower, 'company_name', None) or f'{borrower.first_name} {borrower.last_name}'}")
         
         # The critical assertion - this should pass but currently fails
         company_borrowers = self.application.borrowers.filter(is_company=True)
@@ -1260,12 +1424,22 @@ class ApplicationPartialUpdateCascadeTest(BaseApplicationTestCase, ApplicationTe
             self.assertEqual(director.name, 'John Director')
             self.assertEqual(director.roles, 'director')
             
-            # Check assets
+            # Check assets - including the new description_if_applicable field
             assets = company.assets.all()
-            self.assertEqual(assets.count(), 1)
-            asset = assets.first()
-            self.assertEqual(asset.asset_type, 'Property')
-            self.assertEqual(asset.description, 'Office Building')
+            self.assertEqual(assets.count(), 2)
+            
+            # Check first asset (Property)
+            property_asset = assets.filter(asset_type='Property').first()
+            self.assertIsNotNone(property_asset)
+            self.assertEqual(property_asset.description, 'Office Building')
+            self.assertEqual(property_asset.value, Decimal('1000000.00'))
+            
+            # Check second asset (Other) - with description_if_applicable
+            other_asset = assets.filter(asset_type='Other').first()
+            self.assertIsNotNone(other_asset)
+            self.assertEqual(other_asset.description, 'Special Asset')
+            self.assertEqual(other_asset.description_if_applicable, 'This is a special asset that requires additional description')
+            self.assertEqual(other_asset.value, Decimal('50000.00'))
             
             # Check liabilities
             liabilities = company.liabilities.all()
@@ -1292,6 +1466,15 @@ class ApplicationPartialUpdateCascadeTest(BaseApplicationTestCase, ApplicationTe
             returned_company = retrieve_data['company_borrowers'][0]
             self.assertEqual(returned_company['company_name'], 'Test Company Ltd')
             self.assertEqual(returned_company['company_abn'], '12345678901')
+            
+            # Check that assets are returned with description_if_applicable
+            returned_assets = returned_company.get('assets', [])
+            self.assertEqual(len(returned_assets), 2)
+            
+            # Check the "Other" asset has description_if_applicable
+            other_asset_returned = next((asset for asset in returned_assets if asset['asset_type'] == 'Other'), None)
+            self.assertIsNotNone(other_asset_returned)
+            self.assertEqual(other_asset_returned['description_if_applicable'], 'This is a special asset that requires additional description')
     
     def test_partial_update_company_borrowers_empty_to_populated(self):
         """

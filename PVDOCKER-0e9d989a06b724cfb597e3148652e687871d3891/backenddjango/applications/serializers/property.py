@@ -16,7 +16,7 @@ class SecurityPropertySerializer(serializers.ModelSerializer):
     class Meta:
         model = SecurityProperty
         fields = [
-            'id', 'property_type', 'occupancy',
+            'id', 'property_type', 'description_if_applicable', 'occupancy',
             'address_unit', 'address_street_no', 'address_street_name', 
             'address_suburb', 'address_state', 'address_postcode', 
             'estimated_value', 'purchase_price', 'current_debt_position', 
@@ -27,6 +27,7 @@ class SecurityPropertySerializer(serializers.ModelSerializer):
         extra_kwargs = {
             # Make most fields optional and allow null/blank values for minimal data creation
             'property_type': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'description_if_applicable': {'required': False, 'allow_null': True, 'allow_blank': True},
             'occupancy': {'required': False, 'allow_null': True, 'allow_blank': True},
             'address_unit': {'required': False, 'allow_null': True, 'allow_blank': True},
             'address_street_no': {'required': False, 'allow_null': True, 'allow_blank': True},
@@ -99,6 +100,19 @@ class SecurityPropertySerializer(serializers.ModelSerializer):
                     # Otherwise let parent validation handle it
         
         return super().to_internal_value(data)
+
+    def validate(self, data):
+        """
+        Validate security property data
+        """
+        # Validate description_if_applicable when property_type is "other"
+        if data.get('property_type') == 'other':
+            if not data.get('description_if_applicable'):
+                raise serializers.ValidationError({
+                    'description_if_applicable': 'This field is required when property type is "other".'
+                })
+        
+        return data
 
 
 class LoanRequirementSerializer(serializers.ModelSerializer):

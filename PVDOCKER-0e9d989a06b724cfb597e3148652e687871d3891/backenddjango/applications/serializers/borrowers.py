@@ -113,11 +113,14 @@ class AssetSerializer(serializers.ModelSerializer):
         
         # Remove fields that shouldn't be shown based on context
         if instance.guarantor:
-            # For guarantor assets, don't show to_be_refinanced
+            # For guarantor assets, don't show to_be_refinanced (not applicable)
             data.pop('to_be_refinanced', None)
         elif instance.borrower and instance.borrower.is_company:
-            # For company assets, don't show bg_type
+            # For company assets, keep to_be_refinanced but don't show bg_type
             data.pop('bg_type', None)
+        else:
+            # For individual borrower assets, don't show to_be_refinanced (not applicable)
+            data.pop('to_be_refinanced', None)
         
         return data
 
@@ -158,6 +161,25 @@ class LiabilitySerializer(serializers.ModelSerializer):
             # For guarantor liabilities: set default bg_type if not provided
             if 'bg_type' not in data or not data['bg_type']:
                 data['bg_type'] = 'bg1'  # Default to bg1 if not specified
+        
+        return data
+
+    def to_representation(self, instance):
+        """
+        Customize representation based on liability type
+        """
+        data = super().to_representation(instance)
+        
+        # Remove fields that shouldn't be shown based on context
+        if instance.guarantor:
+            # For guarantor liabilities, don't show to_be_refinanced (not applicable)
+            data.pop('to_be_refinanced', None)
+        elif instance.borrower and instance.borrower.is_company:
+            # For company liabilities, keep to_be_refinanced but don't show bg_type
+            data.pop('bg_type', None)
+        else:
+            # For individual borrower liabilities, don't show to_be_refinanced (not applicable)
+            data.pop('to_be_refinanced', None)
         
         return data
 
@@ -711,6 +733,7 @@ class CompanyBorrowerSerializer(serializers.ModelSerializer):
             'is_trustee', 'is_smsf_trustee', 'trustee_name',
             'registered_address_unit', 'registered_address_street_no', 'registered_address_street_name',
             'registered_address_suburb', 'registered_address_state', 'registered_address_postcode',
+            'company_address', 'email', 'phone', 'notes_text',
             'directors', 'address', 'assets', 'liabilities'
         ]
         extra_kwargs = {
@@ -726,58 +749,39 @@ class CompanyBorrowerSerializer(serializers.ModelSerializer):
             'registered_address_suburb': {'required': False, 'allow_null': True, 'allow_blank': True},
             'registered_address_state': {'required': False, 'allow_null': True, 'allow_blank': True},
             'registered_address_postcode': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'company_address': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'email': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'phone': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'notes_text': {'required': False, 'allow_null': True, 'allow_blank': True},
+            # Trust structure fields
+            'is_trustee': {'required': False, 'allow_null': True},
+            'is_smsf_trustee': {'required': False, 'allow_null': True},
+            'trustee_name': {'required': False, 'allow_null': True, 'allow_blank': True},
         }
     
-    def to_internal_value(self, data):
-        # Filter out empty nested objects before validation
-        if isinstance(data, dict):
-            # Make a copy to avoid modifying the original data
-            data = data.copy()
-            
-            # Filter out empty directors
-            if 'directors' in data and isinstance(data['directors'], list):
-                data['directors'] = [
-                    director for director in data['directors'] 
-                    if isinstance(director, dict) and director.get('name') and str(director.get('name', '')).strip()
-                ]
-            
-            # Filter out empty/invalid assets
-            if 'assets' in data and isinstance(data['assets'], list):
-                valid_assets = []
-                for asset in data['assets']:
-                    if isinstance(asset, dict):
-                        asset_type = asset.get('asset_type', '').strip()
-                        if asset_type and asset_type in [choice[0] for choice in Asset.ASSET_TYPE_CHOICES]:
-                            # Convert to_be_refinanced to proper boolean
-                            to_be_refinanced = asset.get('to_be_refinanced', False)
-                            if isinstance(to_be_refinanced, str):
-                                if to_be_refinanced.lower() in ['true', '1', 'yes']:
-                                    asset['to_be_refinanced'] = True
-                                else:
-                                    asset['to_be_refinanced'] = False
-                            valid_assets.append(asset)
-                data['assets'] = valid_assets
-            
-            # Filter out empty/invalid liabilities
-            if 'liabilities' in data and isinstance(data['liabilities'], list):
-                valid_liabilities = []
-                for liability in data['liabilities']:
-                    if isinstance(liability, dict):
-                        liability_type = liability.get('liability_type', '').strip()
-                        if liability_type and liability_type in [choice[0] for choice in Liability.LIABILITY_TYPE_CHOICES]:
-                            # Convert to_be_refinanced to proper boolean
-                            to_be_refinanced = liability.get('to_be_refinanced', False)
-                            if isinstance(to_be_refinanced, str):
-                                if to_be_refinanced.lower() in ['true', '1', 'yes']:
-                                    liability['to_be_refinanced'] = True
-                                else:
-                                    liability['to_be_refinanced'] = False
-                            valid_liabilities.append(liability)
-                data['liabilities'] = valid_liabilities
-        
-        return super().to_internal_value(data)
-
     def validate(self, data):
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        logger.info("=== COMPANY BORROWER VALIDATION DEBUG ===")
+        logger.info(f"Input data: {data}")
+        
+        # Validate trust structure fields
+        if 'is_trustee' in data:
+            if data['is_trustee'] is None:
+                data['is_trustee'] = False
+                logger.info("Set is_trustee to False (was None)")
+        
+        if 'is_smsf_trustee' in data:
+            if data['is_smsf_trustee'] is None:
+                data['is_smsf_trustee'] = False
+                logger.info("Set is_smsf_trustee to False (was None)")
+        
+        if 'trustee_name' in data:
+            if data['trustee_name'] is None or data['trustee_name'] == '':
+                data['trustee_name'] = None
+                logger.info("Set trustee_name to None (was empty)")
+        
         # Filter out empty nested objects before validation
         # Filter out empty directors
         if 'directors' in data:
@@ -785,6 +789,7 @@ class CompanyBorrowerSerializer(serializers.ModelSerializer):
                 director for director in data['directors'] 
                 if director.get('name') and str(director.get('name', '')).strip()
             ]
+            logger.info(f"Filtered directors: {data['directors']}")
         
         # Filter out empty/invalid assets
         if 'assets' in data:
@@ -801,6 +806,7 @@ class CompanyBorrowerSerializer(serializers.ModelSerializer):
                             asset['to_be_refinanced'] = False
                     valid_assets.append(asset)
             data['assets'] = valid_assets
+            logger.info(f"Filtered assets: {data['assets']}")
         
         # Filter out empty/invalid liabilities
         if 'liabilities' in data:
@@ -817,11 +823,16 @@ class CompanyBorrowerSerializer(serializers.ModelSerializer):
                             liability['to_be_refinanced'] = False
                     valid_liabilities.append(liability)
             data['liabilities'] = valid_liabilities
+            logger.info(f"Filtered liabilities: {data['liabilities']}")
         
         # Use the custom validator for company borrower
+        logger.info("Calling validate_company_borrower...")
         errors = validate_company_borrower(data)
         if errors:
+            logger.error(f"Company borrower validation errors: {errors}")
             raise serializers.ValidationError(errors)
+        
+        logger.info("Company borrower validation passed")
         return data
     
     def create(self, validated_data):
@@ -908,4 +919,87 @@ class CompanyBorrowerSerializer(serializers.ModelSerializer):
                     liability_data['borrower'] = instance
                     Liability.objects.create(**liability_data)
         
-        return instance 
+        return instance
+
+    def to_internal_value(self, data):
+        import logging
+        logger = logging.getLogger(__name__)
+        
+        # Filter out empty nested objects before validation
+        if isinstance(data, dict):
+            # Make a copy to avoid modifying the original data
+            data = data.copy()
+            
+            logger.info("=== COMPANY BORROWER TO_INTERNAL_VALUE DEBUG ===")
+            logger.info(f"Original data: {data}")
+            
+            # Handle trust structure fields - convert empty strings to False for boolean fields
+            if 'is_trustee' in data:
+                logger.info(f"Processing is_trustee: {data['is_trustee']} (type: {type(data['is_trustee'])})")
+                if data['is_trustee'] is None or data['is_trustee'] == '':
+                    data['is_trustee'] = False
+                    logger.info("Converted is_trustee to False")
+                elif isinstance(data['is_trustee'], str):
+                    data['is_trustee'] = data['is_trustee'].lower() in ['true', '1', 'yes']
+                    logger.info(f"Converted is_trustee string to boolean: {data['is_trustee']}")
+            
+            if 'is_smsf_trustee' in data:
+                logger.info(f"Processing is_smsf_trustee: {data['is_smsf_trustee']} (type: {type(data['is_smsf_trustee'])})")
+                if data['is_smsf_trustee'] is None or data['is_smsf_trustee'] == '':
+                    data['is_smsf_trustee'] = False
+                    logger.info("Converted is_smsf_trustee to False")
+                elif isinstance(data['is_smsf_trustee'], str):
+                    data['is_smsf_trustee'] = data['is_smsf_trustee'].lower() in ['true', '1', 'yes']
+                    logger.info(f"Converted is_smsf_trustee string to boolean: {data['is_smsf_trustee']}")
+            
+            # Handle trustee_name - convert empty strings to None
+            if 'trustee_name' in data:
+                logger.info(f"Processing trustee_name: {data['trustee_name']} (type: {type(data['trustee_name'])})")
+                if data['trustee_name'] is None or data['trustee_name'] == '':
+                    data['trustee_name'] = None
+                    logger.info("Converted trustee_name to None")
+            
+            logger.info(f"Processed data: {data}")
+            
+            # Filter out empty directors
+            if 'directors' in data and isinstance(data['directors'], list):
+                data['directors'] = [
+                    director for director in data['directors'] 
+                    if isinstance(director, dict) and director.get('name') and str(director.get('name', '')).strip()
+                ]
+            
+            # Filter out empty/invalid assets
+            if 'assets' in data and isinstance(data['assets'], list):
+                valid_assets = []
+                for asset in data['assets']:
+                    if isinstance(asset, dict):
+                        asset_type = asset.get('asset_type', '').strip()
+                        if asset_type and asset_type in [choice[0] for choice in Asset.ASSET_TYPE_CHOICES]:
+                            # Convert to_be_refinanced to proper boolean
+                            to_be_refinanced = asset.get('to_be_refinanced', False)
+                            if isinstance(to_be_refinanced, str):
+                                if to_be_refinanced.lower() in ['true', '1', 'yes']:
+                                    asset['to_be_refinanced'] = True
+                                else:
+                                    asset['to_be_refinanced'] = False
+                            valid_assets.append(asset)
+                data['assets'] = valid_assets
+            
+            # Filter out empty/invalid liabilities
+            if 'liabilities' in data and isinstance(data['liabilities'], list):
+                valid_liabilities = []
+                for liability in data['liabilities']:
+                    if isinstance(liability, dict):
+                        liability_type = liability.get('liability_type', '').strip()
+                        if liability_type and liability_type in [choice[0] for choice in Liability.LIABILITY_TYPE_CHOICES]:
+                            # Convert to_be_refinanced to proper boolean
+                            to_be_refinanced = liability.get('to_be_refinanced', False)
+                            if isinstance(to_be_refinanced, str):
+                                if to_be_refinanced.lower() in ['true', '1', 'yes']:
+                                    liability['to_be_refinanced'] = True
+                                else:
+                                    liability['to_be_refinanced'] = False
+                            valid_liabilities.append(liability)
+                data['liabilities'] = valid_liabilities
+        
+        return super().to_internal_value(data) 

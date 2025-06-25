@@ -15,6 +15,10 @@
                 <p class="title">Property Type</p>
                 <p>{{ formatPropertyType(property.property_type) || '-' }}</p>
             </div>
+            <div class="item" v-if="property.property_type === 'other'">
+                <p class="title">Description (if applicable)</p>
+                <p>{{ property.description_if_applicable || '-' }}</p>
+            </div>
             <div class="item">
                 <p class="title">Occupancy Type</p>
                 <p>{{ formatOccupancy(property.occupancy) || '-' }}</p>

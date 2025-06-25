@@ -2949,6 +2949,54 @@
                 }
             }
         },
+        "/api/applications/applications/create_with_cascade/": {
+            "post": {
+                "operationId": "applications_applications_create_with_cascade_create",
+                "description": "Create application with cascade support for all related objects.\n\nThis endpoint allows creating an application and its nested related objects:\n- Borrowers (create)\n- Guarantors (create)\n- Company Borrowers (create)\n- Security Properties (create)\n- Loan Requirements (create)\n- Funding Calculation (trigger new calculation)\n\nThis endpoint is optimized for creating complete applications with all related objects\nin a single request.",
+                "tags": [
+                    "applications"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApplicationListRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApplicationListRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApplicationListRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ApplicationList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/applications/applications/enhanced_applications/": {
             "get": {
                 "operationId": "applications_applications_enhanced_applications_retrieve",
@@ -3010,7 +3058,7 @@
         "/api/applications/create-with-cascade/": {
             "post": {
                 "operationId": "applications_create_with_cascade_create",
-                "description": "ViewSet for viewing and editing Application instances.",
+                "description": "Create application with cascade support for all related objects.\n\nThis endpoint allows creating an application and its nested related objects:\n- Borrowers (create)\n- Guarantors (create)\n- Company Borrowers (create)\n- Security Properties (create)\n- Loan Requirements (create)\n- Funding Calculation (trigger new calculation)\n\nThis endpoint is optimized for creating complete applications with all related objects\nin a single request.",
                 "tags": [
                     "applications"
                 ],
@@ -3018,17 +3066,17 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/ApplicationCreateRequest"
+                                "$ref": "#/components/schemas/ApplicationListRequest"
                             }
                         },
                         "application/x-www-form-urlencoded": {
                             "schema": {
-                                "$ref": "#/components/schemas/ApplicationCreateRequest"
+                                "$ref": "#/components/schemas/ApplicationListRequest"
                             }
                         },
                         "multipart/form-data": {
                             "schema": {
-                                "$ref": "#/components/schemas/ApplicationCreateRequest"
+                                "$ref": "#/components/schemas/ApplicationListRequest"
                             }
                         }
                     }
@@ -3042,11 +3090,11 @@
                     }
                 ],
                 "responses": {
-                    "201": {
+                    "200": {
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/ApplicationCreate"
+                                    "$ref": "#/components/schemas/ApplicationList"
                                 }
                             }
                         },
@@ -13315,11 +13363,10 @@
                     "Investment Shares",
                     "Credit Card",
                     "Other Creditor",
-                    "Other",
-                    "To be refinanced"
+                    "Other"
                 ],
                 "type": "string",
-                "description": "* `Property` - Property\n* `Vehicle` - Vehicle\n* `Savings` - Savings\n* `Investment Shares` - Investment Shares\n* `Credit Card` - Credit Card\n* `Other Creditor` - Other Creditor\n* `Other` - Other\n* `To be refinanced` - To be refinanced"
+                "description": "* `Property` - Property\n* `Vehicle` - Vehicle\n* `Savings` - Savings\n* `Investment Shares` - Investment Shares\n* `Credit Card` - Credit Card\n* `Other Creditor` - Other Creditor\n* `Other` - Other"
             },
             "BDM": {
                 "type": "object",
@@ -14973,10 +15020,12 @@
                         "type": "boolean"
                     },
                     "is_trustee": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "nullable": true
                     },
                     "is_smsf_trustee": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "nullable": true
                     },
                     "trustee_name": {
                         "type": "string",
@@ -15012,6 +15061,25 @@
                         "type": "string",
                         "nullable": true,
                         "maxLength": 10
+                    },
+                    "company_address": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "nullable": true,
+                        "maxLength": 254
+                    },
+                    "phone": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 20
+                    },
+                    "notes_text": {
+                        "type": "string",
+                        "nullable": true
                     },
                     "directors": {
                         "type": "array",
@@ -15087,10 +15155,12 @@
                         "type": "boolean"
                     },
                     "is_trustee": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "nullable": true
                     },
                     "is_smsf_trustee": {
-                        "type": "boolean"
+                        "type": "boolean",
+                        "nullable": true
                     },
                     "trustee_name": {
                         "type": "string",
@@ -15126,6 +15196,25 @@
                         "type": "string",
                         "nullable": true,
                         "maxLength": 10
+                    },
+                    "company_address": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "nullable": true,
+                        "maxLength": 254
+                    },
+                    "phone": {
+                        "type": "string",
+                        "nullable": true,
+                        "maxLength": 20
+                    },
+                    "notes_text": {
+                        "type": "string",
+                        "nullable": true
                     },
                     "directors": {
                         "type": "array",
@@ -19612,6 +19701,11 @@
                             }
                         ]
                     },
+                    "description_if_applicable": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Additional description required when property_type is 'other'"
+                    },
                     "occupancy": {
                         "nullable": true,
                         "description": "How the property is occupied\n\n* `owner_occupied` - Owner Occupied\n* `investment` - Investment Property",
@@ -19780,6 +19874,11 @@
                                 "$ref": "#/components/schemas/NullEnum"
                             }
                         ]
+                    },
+                    "description_if_applicable": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Additional description required when property_type is 'other'"
                     },
                     "occupancy": {
                         "nullable": true,

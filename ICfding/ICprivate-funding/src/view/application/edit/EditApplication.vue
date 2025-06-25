@@ -88,7 +88,10 @@
                                 <p :style="{color: isGuarantorAssetValid ? '#2984DE' : '#272727'}">Guarantor Assets & Liability</p>
                             </div>
                         </template>
-                        <GuarantorAsset :asset="guarantorAsset"></GuarantorAsset>
+                        <GuarantorAsset 
+                            :guarantors="application.guarantors" 
+                            @update:guarantors="updateGuarantors">
+                        </GuarantorAsset>
                     </el-collapse-item>
                     <el-collapse-item name="7">
                         <template #title>
@@ -154,7 +157,6 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { ElMessage } from 'element-plus';
 import { Close, SuccessFilled, Loading } from '@element-plus/icons-vue';
 import { api } from '@/api';
-import { transformGuarantorAssets, reverseTransformGuarantorAssets } from '@/utils/guarantorAssetTransformer';
 
 // Import components
 import Company from '@/components/popup/addapplication/company.vue';
@@ -193,23 +195,18 @@ const application = ref({
     funding_calculation_input: {}
 });
 
-const guarantorAsset = ref({
-    address1: "", address1Value: "", address1Owing: "", address1G1: false, address1G2: false,
-    address2: "", address2Value: "", address2Owing: "", address2G1: false, address2G2: false,
-    address3: "", address3Value: "", address3Owing: "", address3G1: false, address3G2: false,
-    address4: "", address4Value: "", address4Owing: "", address4G1: false, address4G2: false,
-    vehicleValue: "", vehicleOwing: "", vehicleG1: false, vehicleG2: false,
-    savingValue: "", savingOwing: "", savingG1: false, savingG2: false,
-    shareValue: "", shareOwing: "", shareG1: false, shareG2: false,
-    cardValue: "", cardOwing: "", cardG1: false, cardG2: false,
-    creditorValue: "", creditorOwing: "", creditorG1: false, creditorG2: false,
-    otherValue: "", otherOwing: "", otherG1: false, otherG2: false,
-    totalValue: "", totalOwing: ""
-});
-
 // Add a watcher to track changes to application data
 watch(() => application.value.company_borrowers, (newVal, oldVal) => {
     console.log("Application company_borrowers changed:", {
+        old: oldVal?.length || 0,
+        new: newVal?.length || 0,
+        data: newVal
+    });
+}, { deep: true });
+
+// Add a watcher to track changes to guarantors data
+watch(() => application.value.guarantors, (newVal, oldVal) => {
+    console.log("Application guarantors changed:", {
         old: oldVal?.length || 0,
         new: newVal?.length || 0,
         data: newVal
@@ -287,6 +284,11 @@ onMounted(async () => {
         console.log("borrowers value:", res.borrowers);
         console.log("borrowers type:", typeof res.borrowers);
         console.log("borrowers length:", res.borrowers?.length);
+        console.log("=== GUARANTORS CHECK ===");
+        console.log("guarantors field exists:", 'guarantors' in res);
+        console.log("guarantors value:", res.guarantors);
+        console.log("guarantors type:", typeof res.guarantors);
+        console.log("guarantors length:", res.guarantors?.length);
         
         // Ensure company_borrowers is initialized as an array with proper structure
         if (!res.company_borrowers) {
@@ -316,9 +318,22 @@ onMounted(async () => {
             console.log("✅ Found borrowers in API response:", res.borrowers);
         }
         
-        // Ensure guarantors is initialized as an array
+        // Ensure guarantors is initialized as an array with proper structure
         if (!res.guarantors) {
             res.guarantors = [];
+        } else {
+            console.log("✅ Found guarantors in API response:", res.guarantors);
+            // Ensure each guarantor has the required fields
+            res.guarantors.forEach((guarantor, index) => {
+                console.log(`Guarantor ${index}:`, guarantor);
+                if (!guarantor.assets) guarantor.assets = [];
+                if (!guarantor.liabilities) guarantor.liabilities = [];
+                
+                // Convert numeric fields from strings to numbers for el-input-number components
+                if (guarantor.annual_income && typeof guarantor.annual_income === 'string') {
+                    guarantor.annual_income = parseFloat(guarantor.annual_income) || 0;
+                }
+            });
         }
         
         // Ensure security_properties is initialized as an array
@@ -387,33 +402,37 @@ onMounted(async () => {
         }
         
         application.value = res;
-        console.log("Application data loaded:", application.value);
-        
-        // Transform guarantor assets from backend format to frontend format for editing
-        if (res.guarantors && res.guarantors.length > 0) {
-            try {
-                console.log("Loading existing guarantor assets for editing:", res.guarantors);
-                const frontendAssets = reverseTransformGuarantorAssets(res.guarantors);
-                guarantorAsset.value = frontendAssets;
-                console.log("Guarantor assets loaded into frontend format:", guarantorAsset.value);
-            } catch (error) {
-                console.error("Error reverse transforming guarantor assets:", error);
-                // Initialize with empty form if transformation fails
-                guarantorAsset.value = {
-                    address1: "", address1Value: "", address1Owing: "", address1G1: false, address1G2: false,
-                    address2: "", address2Value: "", address2Owing: "", address2G1: false, address2G2: false,
-                    address3: "", address3Value: "", address3Owing: "", address3G1: false, address3G2: false,
-                    address4: "", address4Value: "", address4Owing: "", address4G1: false, address4G2: false,
-                    vehicleValue: "", vehicleOwing: "", vehicleG1: false, vehicleG2: false,
-                    savingValue: "", savingOwing: "", savingG1: false, savingG2: false,
-                    shareValue: "", shareOwing: "", shareG1: false, shareG2: false,
-                    cardValue: "", cardOwing: "", cardG1: false, cardG2: false,
-                    creditorValue: "", creditorOwing: "", creditorG1: false, creditorG2: false,
-                    otherValue: "", otherOwing: "", otherG1: false, otherG2: false,
-                    totalValue: "", totalOwing: ""
-                };
-            }
+        // Ensure at least one security property exists for editing
+        if (!application.value.security_properties || application.value.security_properties.length === 0) {
+            application.value.security_properties = [{
+                address_unit: "",
+                address_street_no: "",
+                address_street_name: "",
+                address_suburb: "",
+                address_state: "",
+                address_postcode: "",
+                property_type: "",
+                description_if_applicable: "",
+                bedrooms: null,
+                bathrooms: null,
+                car_spaces: null,
+                building_size: null,
+                land_size: null,
+                has_garage: null,
+                has_carport: null,
+                is_single_story: null,
+                has_off_street_parking: null,
+                current_mortgagee: "",
+                first_mortgage: "",
+                second_mortgage: "",
+                current_debt_position: null,
+                occupancy: "",
+                estimated_value: null,
+                purchase_price: null
+            }];
+            console.log("Initialized blank security property for editing.");
         }
+        console.log("Application data loaded:", application.value);
         
         ElMessage.success('Application data loaded successfully');
     } catch (error) {
@@ -579,6 +598,17 @@ const handleSave = async () => {
             });
         }
         
+        // Add debug logging for guarantors
+        console.log("guarantors in save data:", applicationData.guarantors);
+        console.log("guarantors length:", applicationData.guarantors?.length);
+        if (applicationData.guarantors && applicationData.guarantors.length > 0) {
+            applicationData.guarantors.forEach((guarantor, index) => {
+                console.log(`Guarantor ${index}:`, guarantor);
+                console.log(`Guarantor ${index} assets:`, guarantor.assets);
+                console.log(`Guarantor ${index} liabilities:`, guarantor.liabilities);
+            });
+        }
+        
         // Clean and validate company borrowers data before sending
         if (applicationData.company_borrowers && applicationData.company_borrowers.length > 0) {
             applicationData.company_borrowers.forEach((company, index) => {
@@ -611,6 +641,34 @@ const handleSave = async () => {
                 }
                 
                 console.log(`Cleaned company borrower ${index}:`, company);
+            });
+        }
+        
+        // Clean and validate guarantors data before sending
+        if (applicationData.guarantors && applicationData.guarantors.length > 0) {
+            applicationData.guarantors.forEach((guarantor, index) => {
+                // Filter out empty assets (assets with no asset_type or description)
+                if (guarantor.assets) {
+                    guarantor.assets = guarantor.assets.filter(asset => 
+                        asset.asset_type && asset.asset_type.trim() !== '' &&
+                        asset.description && asset.description.trim() !== ''
+                    );
+                }
+                
+                // Filter out empty liabilities (liabilities with no liability_type or description)
+                if (guarantor.liabilities) {
+                    guarantor.liabilities = guarantor.liabilities.filter(liability => 
+                        liability.liability_type && liability.liability_type.trim() !== '' &&
+                        liability.description && liability.description.trim() !== ''
+                    );
+                }
+                
+                // Ensure numeric fields are properly formatted
+                if (guarantor.annual_income === '') {
+                    guarantor.annual_income = null;
+                }
+                
+                console.log(`Cleaned guarantor ${index}:`, guarantor);
             });
         }
         
@@ -648,14 +706,23 @@ const handleSave = async () => {
             });
         }
         
-        // Only transform guarantor assets if they exist
-        if (applicationData.guarantors && applicationData.guarantors.length > 0) {
-            try {
-                applicationData.guarantors = transformGuarantorAssets(guarantorAsset.value, applicationData.guarantors);
-            } catch (error) {
-                console.error("Error transforming guarantor assets for save:", error);
-                // Continue with save even if transformation fails
-            }
+        // Before calling api.updateApplicationWithCascade(props.applicationId, applicationData):
+        if (applicationData.company_borrowers && applicationData.company_borrowers.length > 0) {
+            applicationData.company_borrowers.forEach(company => {
+                if (company.assets && company.assets.length > 0) {
+                    company.assets.forEach(asset => {
+                        if (asset.asset_type === 'Other') {
+                            if (!asset.description_if_applicable || asset.description_if_applicable.trim() === "") {
+                                ElMessage.error('Description (if applicable) is required for assets of type "Other".');
+                                throw new Error('Validation failed: description_if_applicable required for Other asset');
+                            }
+                        } else {
+                            // Remove the field if not needed
+                            delete asset.description_if_applicable;
+                        }
+                    });
+                }
+            });
         }
         
         // Update application using partial update with cascade
@@ -682,9 +749,23 @@ const handleSave = async () => {
                     }
                 }
                 
+                // Handle guarantor validation errors
+                if (err.data.guarantors) {
+                    errorMessage += 'Guarantor errors:\n';
+                    if (Array.isArray(err.data.guarantors)) {
+                        err.data.guarantors.forEach((guarantorErrors, index) => {
+                            if (guarantorErrors && typeof guarantorErrors === 'object') {
+                                Object.keys(guarantorErrors).forEach(field => {
+                                    errorMessage += `- Guarantor ${index + 1} ${field}: ${guarantorErrors[field]}\n`;
+                                });
+                            }
+                        });
+                    }
+                }
+                
                 // Handle other validation errors
                 Object.keys(err.data).forEach(field => {
-                    if (field !== 'company_borrowers' && err.data[field]) {
+                    if (field !== 'company_borrowers' && field !== 'guarantors' && err.data[field]) {
                         errorMessage += `- ${field}: ${err.data[field]}\n`;
                     }
                 });
@@ -932,6 +1013,7 @@ const addSecurity = () => {
         address_state: "",
         address_postcode: "",
         property_type: "",
+        description_if_applicable: "",
         bedrooms: null,  // Initialize as null instead of empty string
         bathrooms: null, // Initialize as null instead of empty string
         car_spaces: null, // Initialize as null instead of empty string
@@ -1013,6 +1095,12 @@ const getStageTagType = (stage) => {
         'discharged': 'info'
     };
     return stageTypes[stage] || 'info';
+};
+
+// Function to handle guarantor updates from the GuarantorAsset component
+const updateGuarantors = (updatedGuarantors) => {
+    application.value.guarantors = updatedGuarantors;
+    console.log("Guarantors updated:", application.value.guarantors);
 };
 </script>
 

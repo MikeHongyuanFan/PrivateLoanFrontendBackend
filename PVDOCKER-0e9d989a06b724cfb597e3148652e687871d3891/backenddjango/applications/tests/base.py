@@ -31,14 +31,16 @@ class BaseApplicationTestCase(APITestCase):
             first_name='Admin',
             last_name='User',
             is_staff=True,
-            is_superuser=True
+            is_superuser=True,
+            role='admin'
         )
         
         self.broker_user = User.objects.create_user(
             email='broker@test.com',
             password='testpass123',
             first_name='Broker',
-            last_name='User'
+            last_name='User',
+            role='broker'
         )
         
         self.bd_user = User.objects.create_user(

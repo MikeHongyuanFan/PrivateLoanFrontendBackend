@@ -25,7 +25,7 @@ urlpatterns = [
     path('enhanced-applications-alt/', ApplicationViewSet.as_view({'get': 'enhanced_applications'}), name='enhanced-applications-alt'),
     
     # Application creation with cascade
-    path('create-with-cascade/', ApplicationViewSet.as_view({'post': 'create'}), name='application-list-create'),
+    path('create-with-cascade/', ApplicationViewSet.as_view({'post': 'create_with_cascade'}), name='application-create-with-cascade'),
     
     # Application validation
     path('validate-schema/', ApplicationViewSet.as_view({'post': 'validate_schema'}), name='validate-application-schema'),

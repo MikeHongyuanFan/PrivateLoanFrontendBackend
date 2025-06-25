@@ -264,6 +264,35 @@ class TestAssetAPI(AssetLiabilityAPITestBase):
         # Verify asset was created in database
         self.assertTrue(Asset.objects.filter(description=data['description']).exists())
     
+    def test_create_asset_with_other_type_requires_description_if_applicable(self):
+        """Test that creating an asset with type 'Other' requires description_if_applicable."""
+        self.client.force_authenticate(user=self.admin_user)
+        
+        # Test without description_if_applicable - should fail
+        data = {
+            'borrower': self.admin_borrower.id,
+            'asset_type': 'Other',
+            'description': 'Some asset',
+            'value': '10000.00'
+        }
+        
+        response = self.client.post(self.get_asset_list_url(), data)
+        
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIn('description_if_applicable', response.data)
+        
+        # Test with description_if_applicable - should succeed
+        data['description_if_applicable'] = 'Detailed description for other asset type'
+        
+        response = self.client.post(self.get_asset_list_url(), data)
+        
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(response.data['description_if_applicable'], data['description_if_applicable'])
+        
+        # Verify asset was created in database
+        asset = Asset.objects.get(description=data['description'])
+        self.assertEqual(asset.description_if_applicable, data['description_if_applicable'])
+    
     def test_update_asset_admin(self):
         """Test that admin can update any asset."""
         self.client.force_authenticate(user=self.admin_user)

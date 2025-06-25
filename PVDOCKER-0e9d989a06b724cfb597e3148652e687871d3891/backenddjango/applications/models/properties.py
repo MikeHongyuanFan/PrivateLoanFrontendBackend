@@ -130,6 +130,11 @@ class SecurityProperty(BaseApplicationModel):
         blank=True,
         help_text="Type of property"
     )
+    description_if_applicable = models.TextField(
+        null=True,
+        blank=True,
+        help_text="Additional description required when property_type is 'other'"
+    )
     occupancy = models.CharField(
         max_length=20,
         choices=OCCUPANCY_CHOICES,
