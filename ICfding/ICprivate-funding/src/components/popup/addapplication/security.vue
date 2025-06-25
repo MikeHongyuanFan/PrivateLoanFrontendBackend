@@ -116,19 +116,29 @@
                     <span class="hint">Current mortgage holder</span>
                 </div>
                 <div class="item">
-                    <p>First Mortgage</p>
-                    <el-input v-model="item.first_mortgage" placeholder="e.g. XYZ Bank" />
-                    <span class="hint">First mortgage holder</span>
+                    <p>First Mortgage ($)</p>
+                    <el-input-number v-model="item.first_mortgage" :min="0" :precision="2" placeholder="e.g. 200000" />
+                    <span class="hint">First mortgage amount</span>
                 </div>
                 <div class="item">
-                    <p>Second Mortgage</p>
-                    <el-input v-model="item.second_mortgage" placeholder="e.g. DEF Bank" />
-                    <span class="hint">Second mortgage holder (if applicable)</span>
+                    <p>Second Mortgage ($)</p>
+                    <el-input-number v-model="item.second_mortgage" :min="0" :precision="2" placeholder="e.g. 50000" />
+                    <span class="hint">Second mortgage amount (if applicable)</span>
                 </div>
                 <div class="item">
                     <p>Current Debt Position ($)</p>
                     <el-input v-model="item.current_debt_position" type="number" placeholder="e.g. 250000" />
                     <span class="hint">Current debt on the property</span>
+                </div>
+                <div class="item">
+                    <p>1st Mortgage Debt ($)</p>
+                    <el-input v-model="item.first_mortgage_debt" type="number" placeholder="e.g. 150000" />
+                    <span class="hint">Outstanding debt for the first mortgage</span>
+                </div>
+                <div class="item">
+                    <p>2nd Mortgage Debt ($)</p>
+                    <el-input v-model="item.second_mortgage_debt" type="number" placeholder="e.g. 50000" />
+                    <span class="hint">Outstanding debt for the second mortgage (if any)</span>
                 </div>
                 <div class="item">
                     <p>Estimated Value ($) <span class="required">*</span></p>

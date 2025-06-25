@@ -186,7 +186,8 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
             'stage', 'broker', 'branch_id', 'bd_id', 'valuer', 'quantity_surveyor', 'borrowers', 'guarantors',
             'company_borrowers', 'security_properties', 'loan_requirements',
             'loan_purpose', 'additional_comments', 'prior_application',
-            'prior_application_details', 'exit_strategy', 'exit_strategy_details',
+            'prior_application_details', 'has_other_credit_providers', 'other_credit_providers_details',
+            'exit_strategy', 'exit_strategy_details',
             'valuer_company_name', 'valuer_contact_name', 'valuer_phone',
             'valuer_email', 'qs_company_name', 'qs_contact_name', 'qs_phone', 'qs_email',
             'funding_calculation_input',
@@ -218,6 +219,8 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
             'additional_comments': {'required': False, 'allow_null': True, 'allow_blank': True},
             'prior_application': {'required': False, 'allow_null': True},
             'prior_application_details': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'has_other_credit_providers': {'required': False, 'allow_null': True},
+            'other_credit_providers_details': {'required': False, 'allow_null': True, 'allow_blank': True},
             'exit_strategy': {'required': False, 'allow_null': True, 'allow_blank': True},
             'exit_strategy_details': {'required': False, 'allow_null': True, 'allow_blank': True},
             'valuer_company_name': {'required': False, 'allow_null': True, 'allow_blank': True},
@@ -494,7 +497,7 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
             
             # Loan purpose details
             'loan_purpose', 'additional_comments', 'prior_application',
-            'prior_application_details',
+            'prior_application_details', 'has_other_credit_providers', 'other_credit_providers_details',
             
             # Exit strategy
             'exit_strategy', 'exit_strategy_details',
@@ -856,7 +859,7 @@ class ApplicationPartialUpdateSerializer(serializers.ModelSerializer):
             'stage', 'broker', 'branch_id', 'bd_id', 'valuer', 'quantity_surveyor', 'borrowers', 'guarantors',
             'company_borrowers', 'security_properties', 'loan_requirements',
             'loan_purpose', 'additional_comments', 'prior_application',
-            'prior_application_details', 'exit_strategy', 'exit_strategy_details',
+            'prior_application_details', 'has_other_credit_providers', 'other_credit_providers_details', 'exit_strategy', 'exit_strategy_details',
             'valuer_company_name', 'valuer_contact_name', 'valuer_phone',
             'valuer_email', 'qs_company_name', 'qs_contact_name', 'qs_phone', 'qs_email',
             'funding_calculation_input',

@@ -20,6 +20,7 @@ class SecurityPropertySerializer(serializers.ModelSerializer):
             'address_unit', 'address_street_no', 'address_street_name', 
             'address_suburb', 'address_state', 'address_postcode', 
             'estimated_value', 'purchase_price', 'current_debt_position', 
+            'first_mortgage_debt', 'second_mortgage_debt',
             'current_mortgagee', 'first_mortgage', 'second_mortgage', 
             'bedrooms', 'bathrooms', 'car_spaces', 'building_size', 'land_size',
             'is_single_story', 'has_garage', 'has_carport', 'has_off_street_parking'
@@ -38,9 +39,11 @@ class SecurityPropertySerializer(serializers.ModelSerializer):
             'estimated_value': {'required': False, 'allow_null': True},
             'purchase_price': {'required': False, 'allow_null': True},
             'current_debt_position': {'required': False, 'allow_null': True},
+            'first_mortgage_debt': {'required': False, 'allow_null': True},
+            'second_mortgage_debt': {'required': False, 'allow_null': True},
             'current_mortgagee': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'first_mortgage': {'required': False, 'allow_null': True, 'allow_blank': True},
-            'second_mortgage': {'required': False, 'allow_null': True, 'allow_blank': True},
+            'first_mortgage': {'required': False, 'allow_null': True},
+            'second_mortgage': {'required': False, 'allow_null': True},
             'bedrooms': {'required': False, 'allow_null': True},
             'bathrooms': {'required': False, 'allow_null': True},
             'car_spaces': {'required': False, 'allow_null': True},
@@ -74,7 +77,7 @@ class SecurityPropertySerializer(serializers.ModelSerializer):
                         pass
         
         # Convert decimal fields from string to decimal or null
-        for field in ['estimated_value', 'purchase_price', 'current_debt_position', 'building_size', 'land_size']:
+        for field in ['estimated_value', 'purchase_price', 'current_debt_position', 'first_mortgage_debt', 'second_mortgage_debt', 'first_mortgage', 'second_mortgage', 'building_size', 'land_size']:
             if field in data:
                 value = data[field]
                 if value == "" or value is None:

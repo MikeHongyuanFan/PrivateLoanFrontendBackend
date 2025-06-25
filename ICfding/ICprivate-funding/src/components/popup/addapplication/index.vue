@@ -340,9 +340,11 @@
             is_single_story: null,
             has_off_street_parking: null,
             current_mortgagee: "",
-            first_mortgage: "",
-            second_mortgage: "",
+            first_mortgage: null,
+            second_mortgage: null,
             current_debt_position: null,
+            first_mortgage_debt: null,
+            second_mortgage_debt: null,
             occupancy: "",
             estimated_value: null,
             purchase_price: null
@@ -378,6 +380,8 @@
         additional_comments: "",
         prior_application: true,
         prior_application_details: "",
+        has_other_credit_providers: null,
+        other_credit_providers_details: "",
         exit_strategy: "",
         exit_strategy_details: "",
         valuer_company_name: "",
@@ -847,6 +851,10 @@
                     
                     // Convert string numbers to floats for decimal fields
                     current_debt_position: property.current_debt_position === "" || property.current_debt_position === null ? null : parseFloat(property.current_debt_position),
+                    first_mortgage_debt: property.first_mortgage_debt === "" || property.first_mortgage_debt === null ? null : parseFloat(property.first_mortgage_debt),
+                    second_mortgage_debt: property.second_mortgage_debt === "" || property.second_mortgage_debt === null ? null : parseFloat(property.second_mortgage_debt),
+                    first_mortgage: property.first_mortgage === "" || property.first_mortgage === null ? null : parseFloat(property.first_mortgage),
+                    second_mortgage: property.second_mortgage === "" || property.second_mortgage === null ? null : parseFloat(property.second_mortgage),
                     estimated_value: property.estimated_value === "" || property.estimated_value === null ? null : parseFloat(property.estimated_value),
                     purchase_price: property.purchase_price === "" || property.purchase_price === null ? null : parseFloat(property.purchase_price),
                     building_size: property.building_size === "" || property.building_size === null ? null : parseFloat(property.building_size),

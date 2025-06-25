@@ -66,11 +66,11 @@
             </div>
             <div class="item">
                 <p class="title">1st Mortgage</p>
-                <p>{{ property.first_mortgage || '-' }}</p>
+                <p>{{ formatCurrency(property.first_mortgage) || '-' }}</p>
             </div>
             <div class="item">
                 <p class="title">2nd Mortgage</p>
-                <p>{{ property.second_mortgage || '-' }}</p>
+                <p>{{ formatCurrency(property.second_mortgage) || '-' }}</p>
             </div>
             
             <!-- Financial Information Section -->
@@ -78,6 +78,14 @@
             <div class="item">
                 <p class="title">Current Debt Position</p>
                 <p>{{ formatCurrency(property.current_debt_position) || '-' }}</p>
+            </div>
+            <div class="item">
+                <p class="title">1st Mortgage Debt</p>
+                <p>{{ formatCurrency(property.first_mortgage_debt) || '-' }}</p>
+            </div>
+            <div class="item">
+                <p class="title">2nd Mortgage Debt</p>
+                <p>{{ formatCurrency(property.second_mortgage_debt) || '-' }}</p>
             </div>
             <div class="item">
                 <p class="title">Estimated Value</p>

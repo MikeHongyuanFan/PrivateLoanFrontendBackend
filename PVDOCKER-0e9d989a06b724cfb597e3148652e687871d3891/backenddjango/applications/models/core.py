@@ -218,6 +218,17 @@ class Application(BaseApplicationModel):
         blank=True,
         help_text="Details about prior applications"
     )
+    has_other_credit_providers = models.BooleanField(
+        null=True,
+        blank=True,
+        default=None,
+        help_text="Has any application in respect of this loan been submitted by you or any other person to other credit providers?"
+    )
+    other_credit_providers_details = models.TextField(
+        null=True,
+        blank=True,
+        help_text="Details about applications submitted to other credit providers"
+    )
     application_already_submitted = models.BooleanField(
         default=False,
         help_text="Whether the application has already been submitted"

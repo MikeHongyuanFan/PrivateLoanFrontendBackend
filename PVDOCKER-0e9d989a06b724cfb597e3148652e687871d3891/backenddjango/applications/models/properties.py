@@ -98,17 +98,21 @@ class SecurityProperty(BaseApplicationModel):
         blank=True,
         help_text="Current mortgage holder"
     )
-    first_mortgage = models.CharField(
-        max_length=255,
+    first_mortgage = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
         null=True,
         blank=True,
-        help_text="First mortgage details"
+        validators=[MinValueValidator(0)],
+        help_text="First mortgage amount"
     )
-    second_mortgage = models.CharField(
-        max_length=255,
+    second_mortgage = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
         null=True,
         blank=True,
-        help_text="Second mortgage details"
+        validators=[MinValueValidator(0)],
+        help_text="Second mortgage amount"
     )
     current_debt_position = models.DecimalField(
         max_digits=12,
@@ -117,6 +121,22 @@ class SecurityProperty(BaseApplicationModel):
         blank=True,
         validators=[MinValueValidator(0)],
         help_text="Current outstanding debt amount"
+    )
+    first_mortgage_debt = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        help_text="First mortgage debt amount"
+    )
+    second_mortgage_debt = models.DecimalField(
+        max_digits=12,
+        decimal_places=2,
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(0)],
+        help_text="Second mortgage debt amount"
     )
     
     # ============================================================================

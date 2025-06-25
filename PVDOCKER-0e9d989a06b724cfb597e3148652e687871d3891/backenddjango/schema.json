@@ -11971,6 +11971,16 @@
                         "nullable": true,
                         "description": "Details about prior applications"
                     },
+                    "has_other_credit_providers": {
+                        "type": "boolean",
+                        "nullable": true,
+                        "description": "Has any application in respect of this loan been submitted by you or any other person to other credit providers?"
+                    },
+                    "other_credit_providers_details": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Details about applications submitted to other credit providers"
+                    },
                     "exit_strategy": {
                         "nullable": true,
                         "description": "Planned exit strategy for the loan\n\n* `sale` - Sale of Property\n* `refinance` - Refinance\n* `income` - Income/Cash Flow\n* `other` - Other",
@@ -12277,6 +12287,16 @@
                         "nullable": true,
                         "description": "Details about prior applications"
                     },
+                    "has_other_credit_providers": {
+                        "type": "boolean",
+                        "nullable": true,
+                        "description": "Has any application in respect of this loan been submitted by you or any other person to other credit providers?"
+                    },
+                    "other_credit_providers_details": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Details about applications submitted to other credit providers"
+                    },
                     "exit_strategy": {
                         "nullable": true,
                         "description": "Planned exit strategy for the loan\n\n* `sale` - Sale of Property\n* `refinance` - Refinance\n* `income` - Income/Cash Flow\n* `other` - Other",
@@ -12529,6 +12549,16 @@
                         "type": "string",
                         "nullable": true,
                         "description": "Details about prior applications"
+                    },
+                    "has_other_credit_providers": {
+                        "type": "boolean",
+                        "nullable": true,
+                        "description": "Has any application in respect of this loan been submitted by you or any other person to other credit providers?"
+                    },
+                    "other_credit_providers_details": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Details about applications submitted to other credit providers"
                     },
                     "exit_strategy": {
                         "nullable": true,
@@ -19778,6 +19808,20 @@
                         "nullable": true,
                         "description": "Current outstanding debt amount"
                     },
+                    "first_mortgage_debt": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
+                        "description": "First mortgage debt amount"
+                    },
+                    "second_mortgage_debt": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
+                        "description": "Second mortgage debt amount"
+                    },
                     "current_mortgagee": {
                         "type": "string",
                         "nullable": true,
@@ -19786,15 +19830,17 @@
                     },
                     "first_mortgage": {
                         "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
                         "nullable": true,
-                        "description": "First mortgage details",
-                        "maxLength": 255
+                        "description": "First mortgage amount"
                     },
                     "second_mortgage": {
                         "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
                         "nullable": true,
-                        "description": "Second mortgage details",
-                        "maxLength": 255
+                        "description": "Second mortgage amount"
                     },
                     "bedrooms": {
                         "type": "integer",
@@ -19952,6 +19998,20 @@
                         "nullable": true,
                         "description": "Current outstanding debt amount"
                     },
+                    "first_mortgage_debt": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
+                        "description": "First mortgage debt amount"
+                    },
+                    "second_mortgage_debt": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
+                        "nullable": true,
+                        "description": "Second mortgage debt amount"
+                    },
                     "current_mortgagee": {
                         "type": "string",
                         "nullable": true,
@@ -19960,15 +20020,17 @@
                     },
                     "first_mortgage": {
                         "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
                         "nullable": true,
-                        "description": "First mortgage details",
-                        "maxLength": 255
+                        "description": "First mortgage amount"
                     },
                     "second_mortgage": {
                         "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,10}(?:\\.\\d{0,2})?$",
                         "nullable": true,
-                        "description": "Second mortgage details",
-                        "maxLength": 255
+                        "description": "Second mortgage amount"
                     },
                     "bedrooms": {
                         "type": "integer",

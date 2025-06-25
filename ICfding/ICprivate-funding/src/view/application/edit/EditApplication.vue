@@ -426,6 +426,8 @@ onMounted(async () => {
                 first_mortgage: "",
                 second_mortgage: "",
                 current_debt_position: null,
+                first_mortgage_debt: null,
+                second_mortgage_debt: null,
                 occupancy: "",
                 estimated_value: null,
                 purchase_price: null
@@ -698,6 +700,10 @@ const handleSave = async () => {
                     
                     // Convert string numbers to floats for decimal fields
                     current_debt_position: property.current_debt_position === "" || property.current_debt_position === null ? null : parseFloat(property.current_debt_position),
+                    first_mortgage_debt: property.first_mortgage_debt === "" || property.first_mortgage_debt === null ? null : parseFloat(property.first_mortgage_debt),
+                    second_mortgage_debt: property.second_mortgage_debt === "" || property.second_mortgage_debt === null ? null : parseFloat(property.second_mortgage_debt),
+                    first_mortgage: property.first_mortgage === "" || property.first_mortgage === null ? null : parseFloat(property.first_mortgage),
+                    second_mortgage: property.second_mortgage === "" || property.second_mortgage === null ? null : parseFloat(property.second_mortgage),
                     estimated_value: property.estimated_value === "" || property.estimated_value === null ? null : parseFloat(property.estimated_value),
                     purchase_price: property.purchase_price === "" || property.purchase_price === null ? null : parseFloat(property.purchase_price),
                     building_size: property.building_size === "" || property.building_size === null ? null : parseFloat(property.building_size),
@@ -1027,6 +1033,8 @@ const addSecurity = () => {
         first_mortgage: "",
         second_mortgage: "",
         current_debt_position: null,
+        first_mortgage_debt: null,
+        second_mortgage_debt: null,
         occupancy: "",
         estimated_value: null,
         purchase_price: null

@@ -77,6 +77,11 @@
             <el-input v-model="detail.prior_application_details" placeholder="Details of prior application" :disabled="!detail.prior_application"/>
             <span class="hint">Check if this is related to a previous application</span>
         </div>
+        <div class="prior">
+            <el-checkbox v-model="detail.has_other_credit_providers">Has any application in respect of this loan been submitted by you or any other person to other credit providers?</el-checkbox>
+            <el-input v-if="detail.has_other_credit_providers" v-model="detail.other_credit_providers_details" placeholder="Please provide details" />
+            <span class="hint">If yes, provide details of other credit provider applications</span>
+        </div>
         <div class="long_item">
             <h1>Valuer</h1>
         </div>

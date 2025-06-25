@@ -58,6 +58,14 @@
                 <p class="title">Prior Application</p>
                 <p>{{ detail.prior_application_details || 'Yes' }}</p>
             </div>
+            <div class="item" v-if="detail.has_other_credit_providers">
+                <p class="title">Has Application to Other Credit Providers?</p>
+                <p>Yes</p>
+            </div>
+            <div class="item" v-if="detail.has_other_credit_providers">
+                <p class="title">Other Credit Providers Details</p>
+                <p>{{ detail.other_credit_providers_details || '-' }}</p>
+            </div>
         </div>
     </div>
 </template>
