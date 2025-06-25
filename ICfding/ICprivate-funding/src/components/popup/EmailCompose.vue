@@ -9,6 +9,12 @@
             </div>
             
             <form @submit.prevent="sendEmail" class="email-form">
+                <!-- Error display -->
+                <div v-if="error" class="error-message">
+                    <i class="icon-error"></i>
+                    <span>{{ error }}</span>
+                </div>
+
                 <div class="form-section">
                     <div class="form-row">
                         <div class="form-group">
@@ -36,12 +42,26 @@
                         <div class="form-group">
                             <label for="related_application">Application ID (Optional)</label>
                             <input 
-                                v-model="emailData.related_application" 
+                                v-model.number="emailData.related_application" 
                                 type="number" 
                                 id="related_application" 
                                 placeholder="Enter application ID"
+                                min="1"
                             />
                         </div>
+                        <div class="form-group">
+                            <label for="related_borrower">Borrower ID (Optional)</label>
+                            <input 
+                                v-model.number="emailData.related_borrower" 
+                                type="number" 
+                                id="related_borrower" 
+                                placeholder="Enter borrower ID"
+                                min="1"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="form-row">
                         <div class="form-group">
                             <label for="send_datetime">Send Date & Time</label>
                             <input 
@@ -50,6 +70,15 @@
                                 id="send_datetime"
                                 :min="minDateTime"
                             />
+                        </div>
+                        <div class="form-group">
+                            <label for="send_as_user">Send As User (Optional)</label>
+                            <select v-model="emailData.send_as_user" id="send_as_user">
+                                <option value="">Send as myself</option>
+                                <option v-for="user in availableUsers" :key="user.id" :value="user.id">
+                                    {{ user.name }} ({{ user.email }})
+                                </option>
+                            </select>
                         </div>
                     </div>
 
@@ -61,6 +90,7 @@
                             id="subject" 
                             placeholder="Enter email subject"
                             required
+                            maxlength="255"
                         />
                     </div>
                 </div>
@@ -86,7 +116,7 @@
                     </div>
                     
                     <div class="form-group">
-                        <label for="email_body">Message</label>
+                        <label>Message</label>
                         <div 
                             ref="emailBodyEditor"
                             class="email-editor"
@@ -132,6 +162,7 @@
     // Reactive data
     const emailBodyEditor = ref(null)
     const loading = ref(false)
+    const error = ref(null)
     const emailData = ref({
         recipient_type: 'custom',
         recipient_email: '',
@@ -145,7 +176,10 @@
     })
 
     // Email API composable
-    const { sendEmail: apiSendEmail, error } = useEmailApi()
+    const { sendEmail: apiSendEmail, error: apiError, fetchAvailableUsers } = useEmailApi()
+
+    // Available users for send_as_user (this would typically come from an API)
+    const availableUsers = ref([])
 
     // Computed properties
     const minDateTime = computed(() => {
@@ -158,10 +192,69 @@
     })
 
     const isFormValid = computed(() => {
-        return emailData.value.recipient_email && 
-               emailData.value.subject && 
-               emailData.value.email_body.trim()
+        const data = emailData.value
+        return data.recipient_email && 
+               data.subject && 
+               data.email_body.trim() &&
+               data.recipient_type &&
+               data.send_datetime
     })
+
+    const validationErrors = computed(() => {
+        const errors = []
+        const data = emailData.value
+
+        if (!data.recipient_email) {
+            errors.push('Recipient email is required')
+        } else if (!isValidEmail(data.recipient_email)) {
+            errors.push('Please enter a valid email address')
+        }
+
+        if (!data.subject) {
+            errors.push('Subject is required')
+        } else if (data.subject.length > 255) {
+            errors.push('Subject must be 255 characters or less')
+        }
+
+        if (!data.email_body.trim()) {
+            errors.push('Message content is required')
+        }
+
+        if (!data.recipient_type) {
+            errors.push('Recipient type is required')
+        }
+
+        if (!data.send_datetime) {
+            errors.push('Send date and time is required')
+        } else if (new Date(data.send_datetime) < new Date()) {
+            errors.push('Send date and time must be in the future')
+        }
+
+        if (data.related_application && data.related_application <= 0) {
+            errors.push('Application ID must be a positive number')
+        }
+
+        if (data.related_borrower && data.related_borrower <= 0) {
+            errors.push('Borrower ID must be a positive number')
+        }
+
+        return errors
+    })
+
+    // Utility functions
+    const isValidEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+        return emailRegex.test(email)
+    }
+
+    const loadAvailableUsers = async () => {
+        try {
+            // Fetch available users from the API
+            availableUsers.value = await fetchAvailableUsers()
+        } catch (err) {
+            console.error('Failed to load users:', err)
+        }
+    }
 
     // Methods
     const updateEmailBody = () => {
@@ -245,15 +338,27 @@
     }
 
     const sendEmail = async () => {
+        // Check validation errors first
+        if (validationErrors.value.length > 0) {
+            error.value = validationErrors.value[0]
+            return
+        }
+
         if (!isFormValid.value) return
 
         try {
             loading.value = true
+            error.value = null
             
             // Prepare email data
             const emailPayload = {
                 ...emailData.value,
-                send_datetime: emailData.value.send_datetime || new Date().toISOString()
+                send_datetime: emailData.value.send_datetime || new Date().toISOString(),
+                // Convert empty strings to null for optional fields
+                related_application: emailData.value.related_application || null,
+                related_borrower: emailData.value.related_borrower || null,
+                send_as_user: emailData.value.send_as_user || null,
+                reply_to_user: emailData.value.reply_to_user || null
             }
 
             // Send email
@@ -269,8 +374,7 @@
             closePopup()
         } catch (err) {
             console.error('Failed to send email:', err)
-            // You can add error notification here
-            alert('Failed to send email. Please try again.')
+            error.value = err.response?.data?.message || err.message || 'Failed to send email. Please try again.'
         } finally {
             loading.value = false
         }
@@ -283,6 +387,9 @@
         
         // Load any existing draft
         loadDraft()
+        
+        // Load available users
+        loadAvailableUsers()
         
         // Focus on recipient email field
         nextTick(() => {
@@ -583,4 +690,23 @@
     .icon-save::before { content: "💾"; }
     .icon-send::before { content: "📤"; }
     .icon-loading::before { content: "⏳"; }
+    .icon-error::before { content: "⚠"; color: #DC3545; }
+
+    /* Error message styling */
+    .error-message {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        margin-bottom: 16px;
+        background: #FEF2F2;
+        border: 1px solid #FECACA;
+        border-radius: 6px;
+        color: #DC2626;
+        font-size: 0.875rem;
+    }
+
+    .error-message i {
+        font-size: 1rem;
+    }
 </style> 

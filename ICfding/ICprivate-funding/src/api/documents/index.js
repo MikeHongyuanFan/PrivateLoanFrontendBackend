@@ -27,6 +27,15 @@ export const documentsApi = {
     });
   },
 
+  // Preview a document
+  previewDocument: async (id) => {
+    return sendRequest({
+      url: `/api/documents/documents/${id}/preview/`,
+      method: 'get',
+      responseType: 'blob'
+    });
+  },
+
   // Create a new document
   createDocument: async (formData) => {
     return sendRequest({

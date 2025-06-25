@@ -23,29 +23,80 @@
                 </button>
             </div>
             <div class="email-list">
-                <div 
-                    v-for="(email, index) in filteredEmails" 
-                    :key="email.id" 
-                    :class="['email-item', { selected: selectedEmail?.id === email.id, unread: !email.is_sent }]"
-                    @click="selectEmail(email)"
-                >
-                    <div class="email-info">
-                        <div class="email-header">
-                            <h3>{{ email.sender_name || email.recipient_email }}</h3>
-                            <span class="email-time">{{ formatTime(email.created_at) }}</span>
+                <!-- Error state -->
+                <div v-if="error" class="error-state">
+                    <i class="icon-error"></i>
+                    <p>{{ error }}</p>
+                    <button @click="loadEmails(true)" class="retry-btn">Retry</button>
+                </div>
+
+                <!-- Loading state -->
+                <div v-else-if="loading" class="loading-state">
+                    <i class="icon-loading"></i>
+                    <p>Loading emails...</p>
+                </div>
+
+                <!-- Empty state -->
+                <div v-else-if="filteredEmails.length === 0" class="empty-state">
+                    <i class="icon-inbox-empty"></i>
+                    <p>No emails found</p>
+                    <p v-if="search || activeFilter !== 'all'" class="empty-hint">
+                        Try adjusting your search or filters
+                    </p>
+                </div>
+
+                <!-- Email list -->
+                <div v-else>
+                    <div 
+                        v-for="(email, index) in filteredEmails" 
+                        :key="email.id" 
+                        :class="['email-item', { selected: selectedEmail?.id === email.id, unread: !email.is_sent }]"
+                        @click="selectEmail(email)"
+                    >
+                        <div class="email-info">
+                            <div class="email-header">
+                                <h3>{{ email.created_by_name || email.recipient_email }}</h3>
+                                <span class="email-time">{{ formatTime(email.created_at) }}</span>
+                            </div>
+                            <div class="email-subject">{{ email.subject }}</div>
+                            <div class="email-preview">{{ truncateText(email.email_body, 60) }}</div>
+                            <div class="email-meta">
+                                <span v-if="email.related_application" class="app-id">
+                                    App ID: {{ email.related_application }}
+                                </span>
+                                <span :class="['status', email.is_sent ? 'sent' : 'pending']">
+                                    {{ email.is_sent ? 'Sent' : 'Pending' }}
+                                </span>
+                            </div>
                         </div>
-                        <div class="email-subject">{{ email.subject }}</div>
-                        <div class="email-preview">{{ truncateText(email.email_body, 60) }}</div>
-                        <div class="email-meta">
-                            <span v-if="email.related_application" class="app-id">
-                                App ID: {{ email.related_application }}
-                            </span>
-                            <span :class="['status', email.is_sent ? 'sent' : 'pending']">
-                                {{ email.is_sent ? 'Sent' : 'Pending' }}
-                            </span>
+                        <el-badge v-if="!email.is_sent" :value="1" class="unread-badge"></el-badge>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div v-if="totalCount > pageSize" class="pagination">
+                        <div class="pagination-info">
+                            Showing {{ (currentPage - 1) * pageSize + 1 }} to {{ Math.min(currentPage * pageSize, totalCount) }} of {{ totalCount }} emails
+                        </div>
+                        <div class="pagination-controls">
+                            <button 
+                                @click="previousPage" 
+                                :disabled="!hasPreviousPage || loading"
+                                class="pagination-btn"
+                            >
+                                <i class="icon-chevron-left"></i>
+                                Previous
+                            </button>
+                            <span class="page-info">Page {{ currentPage }}</span>
+                            <button 
+                                @click="nextPage" 
+                                :disabled="!hasNextPage || loading"
+                                class="pagination-btn"
+                            >
+                                Next
+                                <i class="icon-chevron-right"></i>
+                            </button>
                         </div>
                     </div>
-                    <el-badge v-if="!email.is_sent" :value="1" class="unread-badge"></el-badge>
                 </div>
             </div>
         </div>
@@ -142,6 +193,14 @@
     const selectedEmail = ref(null)
     const activeFilter = ref('all')
     const loading = ref(false)
+    const error = ref(null)
+    
+    // Pagination
+    const currentPage = ref(1)
+    const pageSize = ref(20)
+    const totalCount = ref(0)
+    const hasNextPage = ref(false)
+    const hasPreviousPage = ref(false)
 
     // Popup states
     const showComposePopup = ref(false)
@@ -162,50 +221,68 @@
 
     // Computed properties
     const filteredEmails = computed(() => {
-        let filtered = emails.value
+        return emails.value.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+    })
 
-        // Apply search filter
-        if (search.value) {
-            const searchTerm = search.value.toLowerCase()
-            filtered = filtered.filter(email => 
-                email.subject.toLowerCase().includes(searchTerm) ||
-                email.email_body.toLowerCase().includes(searchTerm) ||
-                email.recipient_email.toLowerCase().includes(searchTerm)
-            )
+    // Build API query parameters
+    const buildQueryParams = () => {
+        const params = {
+            page: currentPage.value,
+            page_size: pageSize.value
         }
 
-        // Apply status filter
+        // Add search parameter
+        if (search.value.trim()) {
+            params.search = search.value.trim()
+        }
+
+        // Add filter parameters
         switch (activeFilter.value) {
             case 'sent':
-                filtered = filtered.filter(email => email.is_sent)
+                params.is_sent = true
                 break
             case 'pending':
-                filtered = filtered.filter(email => !email.is_sent)
+                params.is_sent = false
                 break
             case 'applications':
-                filtered = filtered.filter(email => email.related_application)
+                // Filter for emails with related applications
+                // This will be handled by the backend
                 break
             default:
                 // 'all' - no additional filtering
                 break
         }
 
-        return filtered.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-    })
+        return params
+    }
 
     // Methods
-    const loadEmails = async () => {
+    const loadEmails = async (resetPage = false) => {
         try {
             loading.value = true
-            const response = await fetchReminders()
+            error.value = null
+            
+            if (resetPage) {
+                currentPage.value = 1
+            }
+            
+            const params = buildQueryParams()
+            const response = await fetchReminders(params)
+            
             emails.value = response.results || []
+            totalCount.value = response.count || 0
+            hasNextPage.value = !!response.next
+            hasPreviousPage.value = !!response.previous
+            
+            // Select first email if none selected and emails exist
             if (emails.value.length > 0 && !selectedEmail.value) {
                 selectedEmail.value = emails.value[0]
             }
-        } catch (error) {
-            console.error('Error loading emails:', error)
-            // Show empty state instead of error
+        } catch (err) {
+            console.error('Error loading emails:', err)
+            error.value = 'Failed to load emails. Please try again.'
             emails.value = []
+            totalCount.value = 0
         } finally {
             loading.value = false
         }
@@ -217,11 +294,38 @@
 
     const setActiveFilter = (filterKey) => {
         activeFilter.value = filterKey
+        loadEmails(true) // Reset to first page when changing filters
     }
 
     const filterEmails = () => {
-        // This method is called when search input changes
-        // The actual filtering is handled by the computed property
+        // Debounce search to avoid too many API calls
+        clearTimeout(searchTimeout.value)
+        searchTimeout.value = setTimeout(() => {
+            loadEmails(true)
+        }, 300)
+    }
+
+    // Search debouncing
+    const searchTimeout = ref(null)
+
+    // Pagination methods
+    const nextPage = () => {
+        if (hasNextPage.value) {
+            currentPage.value++
+            loadEmails()
+        }
+    }
+
+    const previousPage = () => {
+        if (hasPreviousPage.value && currentPage.value > 1) {
+            currentPage.value--
+            loadEmails()
+        }
+    }
+
+    const goToPage = (page) => {
+        currentPage.value = page
+        loadEmails()
     }
 
     // Popup methods
@@ -667,4 +771,116 @@
     .icon-preview::before { content: "👁"; }
     .icon-app::before { content: "📄"; }
     .icon-inbox-large::before { content: "📥"; font-size: 3rem; }
+    .icon-error::before { content: "⚠"; color: #DC3545; font-size: 2rem; }
+    .icon-loading::before { content: "⏳"; color: #007BFF; font-size: 2rem; animation: spin 1s linear infinite; }
+    .icon-inbox-empty::before { content: "📭"; font-size: 3rem; color: #7A858E; }
+    .icon-chevron-left::before { content: "‹"; }
+    .icon-chevron-right::before { content: "›"; }
+
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+
+    /* Error, Loading, and Empty States */
+    .error-state,
+    .loading-state,
+    .empty-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+        text-align: center;
+        color: #7A858E;
+    }
+
+    .error-state i,
+    .loading-state i,
+    .empty-state i {
+        margin-bottom: 16px;
+    }
+
+    .error-state p,
+    .loading-state p,
+    .empty-state p {
+        margin: 8px 0;
+        font-size: 0.875rem;
+    }
+
+    .empty-hint {
+        font-size: 0.75rem !important;
+        color: #9CA3AF !important;
+    }
+
+    .retry-btn {
+        margin-top: 16px;
+        padding: 8px 16px;
+        background: #007BFF;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .retry-btn:hover {
+        background: #0056B3;
+    }
+
+    /* Pagination */
+    .pagination {
+        padding: 16px 20px;
+        border-top: 1px solid #E8EBEE;
+        background: #FAFBFC;
+    }
+
+    .pagination-info {
+        text-align: center;
+        color: #7A858E;
+        font-size: 0.75rem;
+        margin-bottom: 12px;
+    }
+
+    .pagination-controls {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+    }
+
+    .pagination-btn {
+        padding: 6px 12px;
+        border: 1px solid #E8EBEE;
+        border-radius: 4px;
+        background: #FFF;
+        color: #384144;
+        font-size: 0.875rem;
+        font-weight: 500;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        transition: all 0.2s;
+    }
+
+    .pagination-btn:hover:not(:disabled) {
+        background: #F8F9FA;
+        border-color: #D1D5DB;
+    }
+
+    .pagination-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .page-info {
+        color: #7A858E;
+        font-size: 0.875rem;
+        font-weight: 500;
+        min-width: 60px;
+        text-align: center;
+    }
 </style>

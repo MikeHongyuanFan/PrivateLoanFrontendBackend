@@ -207,6 +207,25 @@
                         />
                     </el-select>
                 </el-form-item>
+                <el-form-item label="File" prop="file">
+                    <el-upload
+                        class="upload-demo"
+                        action="#"
+                        :auto-upload="false"
+                        :limit="1"
+                        :on-change="handleFileChange"
+                        :on-exceed="() => ElMessage.warning('Only one file can be uploaded')"
+                    >
+                        <template #trigger>
+                            <el-button type="primary">Select File</el-button>
+                        </template>
+                        <template #tip>
+                            <div style="color: #606266; font-size: 12px; margin-top: 7px;">
+                                Please select a file to upload
+                            </div>
+                        </template>
+                    </el-upload>
+                </el-form-item>
                 <el-form-item label="Application" prop="application">
                     <el-select 
                         v-model="documentForm.application" 
@@ -241,9 +260,68 @@
             <template #footer>
                 <span class="dialog-footer">
                     <el-button @click="editDialogVisible = false">Cancel</el-button>
-                    <el-button type="primary" @click="handleEdit(editFormRef)">Save</el-button>
+                    <el-button type="primary" @click="handleEdit(editFormRef)">Update</el-button>
                 </span>
             </template>
+        </el-dialog>
+
+        <!-- Document Preview Dialog -->
+        <el-dialog
+            v-model="previewDialogVisible"
+            title="Document Preview"
+            width="80%"
+            :fullscreen="isFullscreen"
+            class="document-preview-dialog"
+            @close="closePreviewDialog"
+        >
+            <div class="preview-header">
+                <div class="document-info">
+                    <h3>{{ previewDocument?.title || previewDocument?.file_name }}</h3>
+                    <p v-if="previewDocument?.description">{{ previewDocument.description }}</p>
+                    <p class="file-meta">
+                        Type: {{ previewDocument?.document_type_display }} | 
+                        Size: {{ formatFileSize(previewDocument?.file_size) }} | 
+                        Uploaded: {{ formatDate(previewDocument?.created_at) }}
+                    </p>
+                </div>
+                <div class="preview-actions">
+                    <el-button @click="toggleFullscreen" :icon="isFullscreen ? 'Close' : 'FullScreen'">
+                        {{ isFullscreen ? 'Exit Fullscreen' : 'Fullscreen' }}
+                    </el-button>
+                    <el-button type="primary" @click="downloadPreviewDocument" :icon="'Download'">
+                        Download
+                    </el-button>
+                </div>
+            </div>
+            
+            <div class="preview-content" v-loading="previewLoading">
+                <!-- PDF Preview -->
+                <iframe 
+                    v-if="previewUrl && isPdfFile" 
+                    :src="previewUrl" 
+                    class="pdf-preview"
+                    frameborder="0"
+                ></iframe>
+                
+                <!-- Image Preview -->
+                <img 
+                    v-else-if="previewUrl && isImageFile" 
+                    :src="previewUrl" 
+                    class="image-preview"
+                    alt="Document preview"
+                />
+                
+                <!-- Unsupported File Type -->
+                <div v-else-if="!previewLoading" class="unsupported-file">
+                    <i class="el-icon-document"></i>
+                    <h4>Preview Not Available</h4>
+                    <p>This file type cannot be previewed in the browser.</p>
+                    <p>File type: {{ getFileExtension(previewDocument?.file_name) }}</p>
+                    <el-button type="primary" @click="downloadPreviewDocument">
+                        Download File
+                    </el-button>
+                </div>
+            </div>
         </el-dialog>
     </div>
 </template>
@@ -420,6 +498,45 @@
     const selectAll = ref(false);
     const isSelected = ref(false);
 
+    // Preview-related reactive data
+    const previewDialogVisible = ref(false);
+    const previewDocument = ref(null);
+    const previewUrl = ref(null);
+    const previewLoading = ref(false);
+    const isFullscreen = ref(false);
+
+    // Computed properties for preview
+    const isPdfFile = computed(() => {
+        if (!previewDocument.value?.file_name) return false;
+        const extension = getFileExtension(previewDocument.value.file_name);
+        return extension === 'pdf';
+    });
+
+    const isImageFile = computed(() => {
+        if (!previewDocument.value?.file_name) return false;
+        const extension = getFileExtension(previewDocument.value.file_name);
+        return ['jpg', 'jpeg', 'png', 'gif'].includes(extension);
+    });
+
+    // Utility functions
+    const getFileExtension = (filename) => {
+        if (!filename) return '';
+        return filename.split('.').pop().toLowerCase();
+    };
+
+    const formatFileSize = (bytes) => {
+        if (!bytes) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    };
+
+    const formatDate = (dateString) => {
+        if (!dateString) return '';
+        return new Date(dateString).toLocaleDateString();
+    };
+
     const paginatedData = computed(() => {
         const start = (currentPage.value - 1) * pageSize;
         return docs.value.slice(start, start + pageSize);
@@ -441,11 +558,40 @@
     };
     
     // View document
-    const handleView = (row) => {
-        if (row && row.file_url) {
-            window.open(row.file_url, '_blank');
-        } else {
-            ElMessage.warning('Document URL not available');
+    const handleView = async (row) => {
+        try {
+            previewLoading.value = true;
+            previewDocument.value = row;
+            previewDialogVisible.value = true;
+            
+            // Get file extension to determine if preview is supported
+            const fileExtension = getFileExtension(row.file_name);
+            const previewableTypes = ['pdf', 'jpg', 'jpeg', 'png', 'gif'];
+            
+            if (previewableTypes.includes(fileExtension)) {
+                // Use preview endpoint for supported file types
+                const [error, data] = await documentsApi.previewDocument(row.id);
+                
+                if (error) {
+                    ElMessage.error('Failed to preview document');
+                    console.error('Error previewing document:', error);
+                    return;
+                }
+                
+                // Create blob URL for preview
+                const blob = new Blob([data], { 
+                    type: fileExtension === 'pdf' ? 'application/pdf' : `image/${fileExtension}` 
+                });
+                previewUrl.value = window.URL.createObjectURL(blob);
+            } else {
+                // For unsupported file types, clear the URL
+                previewUrl.value = null;
+            }
+        } catch (error) {
+            console.error('Error viewing document:', error);
+            ElMessage.error('Failed to view document');
+        } finally {
+            previewLoading.value = false;
         }
     };
 
@@ -476,6 +622,27 @@
             loading.value = false
         }
     }
+
+    // Preview dialog methods
+    const toggleFullscreen = () => {
+        isFullscreen.value = !isFullscreen.value;
+    };
+
+    const downloadPreviewDocument = async () => {
+        if (previewDocument.value) {
+            await handleDownload(previewDocument.value);
+        }
+    };
+
+    const closePreviewDialog = () => {
+        previewDialogVisible.value = false;
+        previewDocument.value = null;
+        if (previewUrl.value) {
+            window.URL.revokeObjectURL(previewUrl.value);
+            previewUrl.value = null;
+        }
+        isFullscreen.value = false;
+    };
 
     // Upload new version
     const handleUpload = async (row) => {
@@ -765,5 +932,109 @@
         display: flex;
         flex-direction: row;
         gap: 10px;
+    }
+
+    /* Document Preview Dialog Styles */
+    .document-preview-dialog {
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #E8EBEE;
+        }
+
+        .document-info {
+            flex: 1;
+            margin-right: 20px;
+
+            h3 {
+                margin: 0 0 8px 0;
+                color: #384144;
+                font-size: 1.25rem;
+                font-weight: 600;
+            }
+
+            p {
+                margin: 4px 0;
+                color: #7A858E;
+                font-size: 0.875rem;
+            }
+
+            .file-meta {
+                font-size: 0.75rem;
+                color: #9CA3AF;
+                margin-top: 8px;
+            }
+        }
+
+        .preview-actions {
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .preview-content {
+            min-height: 400px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #FAFBFC;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .pdf-preview {
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
+
+        .image-preview {
+            max-width: 100%;
+            max-height: 600px;
+            object-fit: contain;
+            border-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .unsupported-file {
+            text-align: center;
+            padding: 40px;
+            color: #7A858E;
+
+            i {
+                font-size: 3rem;
+                margin-bottom: 16px;
+                display: block;
+            }
+
+            h4 {
+                margin: 16px 0 8px 0;
+                color: #384144;
+                font-size: 1.125rem;
+            }
+
+            p {
+                margin: 8px 0;
+                font-size: 0.875rem;
+            }
+        }
+    }
+
+    /* Fullscreen styles */
+    .el-dialog.is-fullscreen {
+        .preview-content {
+            height: calc(100vh - 200px);
+        }
+
+        .pdf-preview {
+            height: 100%;
+        }
+
+        .image-preview {
+            max-height: 100%;
+        }
     }
 </style>

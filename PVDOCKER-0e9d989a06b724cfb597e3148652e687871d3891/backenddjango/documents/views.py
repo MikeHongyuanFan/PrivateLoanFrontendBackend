@@ -125,6 +125,49 @@ class DocumentViewSet(viewsets.ModelViewSet):
         else:
             return Response({'error': 'File not found'}, status=status.HTTP_404_NOT_FOUND)
 
+    @action(detail=True, methods=['get'])
+    def preview(self, request, pk=None):
+        """
+        Preview a document in the browser
+        """
+        document = self.get_object()
+        file_path = document.file.path
+        
+        if not os.path.exists(file_path):
+            return Response({'error': 'File not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        # Get file extension to determine content type
+        file_extension = os.path.splitext(document.file_name)[1].lower()
+        
+        # Define content types for different file types
+        content_types = {
+            '.pdf': 'application/pdf',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.png': 'image/png',
+            '.gif': 'image/gif',
+            '.txt': 'text/plain',
+            '.html': 'text/html',
+            '.htm': 'text/html',
+        }
+        
+        content_type = content_types.get(file_extension, 'application/octet-stream')
+        
+        # For PDFs and images, serve directly for preview
+        if file_extension in ['.pdf', '.jpg', '.jpeg', '.png', '.gif']:
+            return FileResponse(
+                open(file_path, 'rb'),
+                content_type=content_type,
+                filename=document.file_name
+            )
+        
+        # For other file types, return a message suggesting download
+        return Response({
+            'error': 'Preview not available for this file type',
+            'file_type': file_extension,
+            'suggestion': 'Use the download function for this file type'
+        }, status=status.HTTP_400_BAD_REQUEST)
+
 
 class DocumentCreateVersionView(GenericAPIView):
     """

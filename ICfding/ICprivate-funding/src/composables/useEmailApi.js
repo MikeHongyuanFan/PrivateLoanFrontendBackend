@@ -54,7 +54,7 @@ export function useEmailApi() {
             loading.value = true
             error.value = null
             
-            const response = await apiClient.get('/api/reminders/', { params })
+            const response = await apiClient.get('/reminders/', { params })
             return response.data
         } catch (err) {
             error.value = err.response?.data?.detail || 'Failed to fetch emails'
@@ -74,7 +74,7 @@ export function useEmailApi() {
             loading.value = true
             error.value = null
             
-            const response = await apiClient.post('/api/reminders/', reminderData)
+            const response = await apiClient.post('/reminders/', reminderData)
             return response.data
         } catch (err) {
             error.value = err.response?.data?.detail || 'Failed to send email'
@@ -94,7 +94,7 @@ export function useEmailApi() {
             loading.value = true
             error.value = null
             
-            const response = await apiClient.get(`/api/reminders/${id}/`)
+            const response = await apiClient.get(`/reminders/${id}/`)
             return response.data
         } catch (err) {
             error.value = err.response?.data?.detail || 'Failed to fetch email'
@@ -115,7 +115,7 @@ export function useEmailApi() {
             loading.value = true
             error.value = null
             
-            const response = await apiClient.patch(`/api/reminders/${id}/`, reminderData)
+            const response = await apiClient.patch(`/reminders/${id}/`, reminderData)
             return response.data
         } catch (err) {
             error.value = err.response?.data?.detail || 'Failed to update email'
@@ -135,7 +135,7 @@ export function useEmailApi() {
             loading.value = true
             error.value = null
             
-            const response = await apiClient.delete(`/api/reminders/${id}/`)
+            const response = await apiClient.delete(`/reminders/${id}/`)
             return response.data
         } catch (err) {
             error.value = err.response?.data?.detail || 'Failed to delete email'
@@ -154,7 +154,7 @@ export function useEmailApi() {
             loading.value = true
             error.value = null
             
-            const response = await apiClient.get('/api/users/email-preview/')
+            const response = await apiClient.get('/users/email-preview/')
             return response.data
         } catch (err) {
             error.value = err.response?.data?.detail || 'Failed to preview email'
@@ -173,10 +173,29 @@ export function useEmailApi() {
             loading.value = true
             error.value = null
             
-            const response = await apiClient.get('/api/users/download-email-logs/')
+            const response = await apiClient.get('/users/download-email-logs/')
             return response.data
         } catch (err) {
             error.value = err.response?.data?.detail || 'Failed to download email logs'
+            throw err
+        } finally {
+            loading.value = false
+        }
+    }
+
+    /**
+     * Fetch available users for send_as_user field
+     * @returns {Promise} API response with users list
+     */
+    const fetchAvailableUsers = async () => {
+        try {
+            loading.value = true
+            error.value = null
+            
+            const response = await apiClient.get('/users/')
+            return response.data
+        } catch (err) {
+            error.value = err.response?.data?.detail || 'Failed to fetch users'
             throw err
         } finally {
             loading.value = false
@@ -217,6 +236,7 @@ export function useEmailApi() {
         deleteReminder,
         previewEmail,
         downloadEmailLogs,
+        fetchAvailableUsers,
         sendEmail
     }
 } 

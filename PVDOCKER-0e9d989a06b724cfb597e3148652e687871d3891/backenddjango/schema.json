@@ -7658,6 +7658,46 @@
                 }
             }
         },
+        "/api/documents/documents/{id}/preview/": {
+            "get": {
+                "operationId": "documents_documents_preview_retrieve",
+                "description": "Preview a document in the browser",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "A unique integer value identifying this document.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "documents"
+                ],
+                "security": [
+                    {
+                        "jwtAuth": []
+                    },
+                    {
+                        "Bearer": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Document"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/documents/fees/": {
             "get": {
                 "operationId": "documents_fees_list",
