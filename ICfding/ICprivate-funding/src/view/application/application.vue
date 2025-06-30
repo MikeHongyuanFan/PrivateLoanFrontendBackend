@@ -161,7 +161,8 @@
         <Security v-if="activeInfo === 5" :detail="application" :total_value="totalSecurityValue"></Security>
         <LoanDetail v-if="activeInfo === 6" :detail="application" :total_amount="totalLoanAmount"></LoanDetail>
         <LoanRequirement v-if="activeInfo === 7" :detail="application" :total_amount="totalLoanAmount"></LoanRequirement>
-        <Exit v-if="activeInfo === 8" :detail="application"></Exit>
+        <FundingCalculation v-if="activeInfo === 8" :detail="application" @open-calculator="showCalculator"></FundingCalculation>
+        <Exit v-if="activeInfo === 9" :detail="application"></Exit>
         <transition name="slide-right-popup">
             <Calculator
                 v-if="calculator"
@@ -204,6 +205,7 @@
     import Security from '@/components/application/security.vue';
     import LoanDetail from '@/components/application/loandetail.vue';
     import LoanRequirement from '@/components/application/loanrequirement.vue';
+    import FundingCalculation from '@/components/application/fundingcalculation.vue';
     import Exit from '@/components/application/exit.vue';
     import Calculator from '@/components/popup/calculator.vue';
     import Note from '@/components/popup/note.vue';
@@ -341,6 +343,7 @@
         {name: "Proposed Security Details", count: 0},
         {name: "Loan Details & Purpose", count: 0},
         {name: "Loan Requirements", count: 0},
+        {name: "Funding Calculation", count: 0},
         {name: "Proposed Exit Strategy", count: 0}
     ])
     const activeInfo = ref(0)
@@ -463,7 +466,8 @@
         infos.value[5].count = totalSecurityProperties.value // Proposed Security Details
         infos.value[6].count = 1 // Loan Details & Purpose (always 1 set)
         infos.value[7].count = totalLoanRequirements.value // Loan Requirements
-        infos.value[8].count = 1 // Proposed Exit Strategy (always 1 set)
+        infos.value[8].count = 1 // Funding Calculation (always 1 set)
+        infos.value[9].count = 1 // Proposed Exit Strategy (always 1 set)
     }
 
     const updateStages = (currentStageName) => {

@@ -261,6 +261,10 @@ def calculate_funding(application, calculation_input, user):
         created_by=user
     )
     
+    # Update the application's funding_result field with the latest calculation
+    application.funding_result = calculation_result
+    application.save(update_fields=['funding_result'])
+    
     return calculation_result, funding_history
 
 

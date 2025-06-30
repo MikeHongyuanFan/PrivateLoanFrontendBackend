@@ -23,7 +23,15 @@
                     <div class="form">
                         <div class="item">
                             <p>Repayment Amount</p>
-                            <el-input v-model="repayment.amount" />
+                            <el-input 
+                                v-model="repayment.amount" 
+                                type="number"
+                                placeholder="0.00"
+                                step="0.01"
+                                min="0"
+                            >
+                                <template #prepend>$</template>
+                            </el-input>
                         </div>
                         <div class="item">
                             <p>Repayment Due Date</p>
@@ -77,6 +85,7 @@
     import { api } from '@/api'
     import Cancel from '../buttons/cancel.vue';
     import Save from '../buttons/save.vue';
+    import { ElMessage } from 'element-plus';
 
     const { action } = defineProps({
         action: String
@@ -99,7 +108,10 @@
     })
 
     const isRepaymentValid = computed(() => {
-        return Object.values(repayment.value).every(value => value !== '')
+        // Check required fields: amount and application
+        return repayment.value.amount && 
+               repayment.value.amount > 0 && 
+               repayment.value.application
     })
 
     const handleClose = () => {
@@ -124,22 +136,75 @@
             console.log(applications.value);
         } else {
             console.log(err)
+            ElMessage.error('Failed to load applications')
         }
     }
     const handleAdd = async () => {
+        // Validate required fields
+        if (!repayment.value.amount || repayment.value.amount <= 0) {
+            ElMessage.error('Amount is required and must be greater than 0')
+            return
+        }
+        
+        if (!repayment.value.application) {
+            ElMessage.error('Application is required')
+            return
+        }
+
         const formData = new FormData()
-        formData.append('amount', repayment.value.amount)
-        formData.append('due_date', repayment.value.due_date)
-        formData.append('paid_date', repayment.value.paid_date)
-        formData.append('application', repayment.value.application)
-        formData.append('invoice', repayment.value.invoice)
+        formData.append('amount', repayment.value.amount.toString())
+        
+        if (repayment.value.due_date) {
+            formData.append('due_date', repayment.value.due_date)
+        }
+        
+        if (repayment.value.paid_date) {
+            formData.append('paid_date', repayment.value.paid_date)
+        }
+        
+        formData.append('application', repayment.value.application.toString())
+        
+        if (repayment.value.invoice && repayment.value.invoice instanceof File) {
+            formData.append('invoice', repayment.value.invoice)
+        }
+        
+        // Debug: Log what we're sending
+        console.log('Sending repayment data:')
+        console.log('Amount:', repayment.value.amount)
+        console.log('Application:', repayment.value.application)
+        console.log('Due date:', repayment.value.due_date)
+        console.log('Paid date:', repayment.value.paid_date)
+        console.log('Invoice:', repayment.value.invoice)
+        
+        // Log FormData contents
+        for (let [key, value] of formData.entries()) {
+            console.log(`${key}:`, value)
+        }
+        
         const [err, res] = await api.addRepayments(formData)
         if (!err) {
             console.log(res);
+            ElMessage.success('Repayment created successfully')
+            emit('close')
         } else {
-            console.log(err)
+            console.log('Error response:', err)
+            // Show more specific error messages
+            if (err.response && err.response.data) {
+                const errorData = err.response.data
+                console.log('Error data:', errorData)
+                if (errorData.amount) {
+                    ElMessage.error(`Amount error: ${errorData.amount.join(', ')}`)
+                } else if (errorData.application) {
+                    ElMessage.error(`Application error: ${errorData.application.join(', ')}`)
+                } else if (errorData.invoice) {
+                    ElMessage.error(`Invoice error: ${errorData.invoice.join(', ')}`)
+                } else {
+                    ElMessage.error('Failed to create repayment. Please check your input.')
+                }
+            } else {
+                ElMessage.error('Failed to create repayment. Please try again.')
+            }
         }
-        emit('close')
     }
 </script>
 

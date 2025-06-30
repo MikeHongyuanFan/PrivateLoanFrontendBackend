@@ -156,11 +156,14 @@ console.log("GuarantorAsset component received props:", props);
 console.log("GuarantorAsset component localGuarantors:", localGuarantors.value);
 
 // Watch for changes in props and update local data
-watch(() => props.guarantors, (newGuarantors) => {
-    console.log("GuarantorAsset props.guarantors changed:", newGuarantors);
-    localGuarantors.value = initializeLocalGuarantors(newGuarantors);
-    console.log("GuarantorAsset localGuarantors updated:", localGuarantors.value);
-}, { deep: true });
+watch(() => props.guarantors, (newGuarantors, oldGuarantors) => {
+    // Only update if there's an actual change in structure
+    if (newGuarantors && (!oldGuarantors || newGuarantors.length !== oldGuarantors?.length)) {
+        console.log("GuarantorAsset props.guarantors changed:", newGuarantors);
+        localGuarantors.value = initializeLocalGuarantors(newGuarantors);
+        console.log("GuarantorAsset localGuarantors updated:", localGuarantors.value);
+    }
+}, { deep: false, immediate: false });
 
 // Helper functions
 const formatNumber = (value) => {

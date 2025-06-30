@@ -138,8 +138,16 @@ class BorrowerDetailSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         # Set the created_by field to the current user
-        user = self.context['request'].user
-        validated_data['created_by'] = user
+        # Handle cases where request context might not be available (e.g., when called from other serializers)
+        if 'request' in self.context and self.context['request'].user:
+            user = self.context['request'].user
+            validated_data['created_by'] = user
+        elif 'created_by' in validated_data:
+            # If created_by is already provided in the data, use it
+            pass
+        else:
+            # Fallback: try to get user from context or use None
+            validated_data['created_by'] = self.context.get('user', None)
         return super().create(validated_data)
 
 
@@ -203,8 +211,16 @@ class GuarantorSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         # Set the created_by field to the current user
-        user = self.context['request'].user
-        validated_data['created_by'] = user
+        # Handle cases where request context might not be available (e.g., when called from other serializers)
+        if 'request' in self.context and self.context['request'].user:
+            user = self.context['request'].user
+            validated_data['created_by'] = user
+        elif 'created_by' in validated_data:
+            # If created_by is already provided in the data, use it
+            pass
+        else:
+            # Fallback: try to get user from context or use None
+            validated_data['created_by'] = self.context.get('user', None)
         return super().create(validated_data)
     
     def validate(self, data):

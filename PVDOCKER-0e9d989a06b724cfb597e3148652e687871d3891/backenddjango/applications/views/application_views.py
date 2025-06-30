@@ -848,14 +848,6 @@ class ApplicationViewSet(viewsets.ModelViewSet):
                 logger.info("Serializer validation passed, creating application...")
                 application = serializer.save()
                 
-                # Create a note about the cascade creation for audit purposes
-                from documents.models import Note
-                Note.objects.create(
-                    application=application,
-                    content=f"Application created with cascade by {request.user.get_full_name() or request.user.email}",
-                    created_by=request.user
-                )
-                
                 logger.info(f"Application created successfully with ID: {application.id}")
                 
                 # Return the created application data using the detail serializer

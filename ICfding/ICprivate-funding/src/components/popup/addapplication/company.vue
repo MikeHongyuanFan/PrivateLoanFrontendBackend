@@ -139,11 +139,11 @@
                     <span class="hint">Official director identification number</span>
                 </div>
                 <div class="buttons">
-                    <el-button type="danger" @click="$emit('remove', idx)" :disabled="item.directors.length <= 1">Remove</el-button>
+                    <el-button type="danger" @click="$emit('remove', index, idx)" :disabled="item.directors.length <= 1">Remove</el-button>
                 </div>
             </div>
             <div class="add">
-                <el-button type="primary" @click="$emit('add')">Add Director</el-button>
+                <el-button type="primary" @click="$emit('add', index)">Add Director</el-button>
             </div>
         </div>
         <div v-if="companyList.length > 0" class="add-company">
@@ -197,17 +197,20 @@
     });
 
     // Watch for changes in the company array (e.g., when adding new directors or companies)
-    watch(() => props.company, (newCompany) => {
-        console.log("Company data changed:", newCompany);
-        if (newCompany) {
+    watch(() => props.company, (newCompany, oldCompany) => {
+        // Only log and initialize if there's an actual change in structure
+        if (newCompany && (!oldCompany || newCompany.length !== oldCompany?.length)) {
+            console.log("Company data changed:", newCompany);
             initializeDirectorRoles();
         }
-    }, { deep: true, immediate: true });
+    }, { deep: false, immediate: false });
 
     // Watch for changes in company array length to detect additions/removals
     watch(() => props.company?.length, (newLength, oldLength) => {
-        console.log(`Company array length changed from ${oldLength} to ${newLength}`);
-    });
+        if (newLength !== oldLength) {
+            console.log(`Company array length changed from ${oldLength} to ${newLength}`);
+        }
+    }, { immediate: false });
 </script>
 
 <style scoped>

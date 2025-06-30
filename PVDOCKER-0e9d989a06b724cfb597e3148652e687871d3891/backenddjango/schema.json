@@ -13068,11 +13068,13 @@
                         "nullable": true,
                         "description": "Uploaded signed application form"
                     },
+                    "funding_calculation_input": {
+                        "type": "string",
+                        "readOnly": true
+                    },
                     "funding_result": {
-                        "type": "object",
-                        "additionalProperties": {},
-                        "nullable": true,
-                        "description": "Stores the current funding calculation result"
+                        "type": "string",
+                        "readOnly": true
                     },
                     "created_by_details": {
                         "allOf": [
@@ -13093,6 +13095,8 @@
                     "documents",
                     "fees",
                     "funding_calculation_history",
+                    "funding_calculation_input",
+                    "funding_result",
                     "guarantors",
                     "id",
                     "ledger_entries",

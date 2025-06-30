@@ -44,7 +44,15 @@ class ValuerSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         # Set the created_by field to the current user
-        validated_data['created_by'] = self.context['request'].user
+        # Handle cases where request context might not be available
+        if 'request' in self.context and self.context['request'].user:
+            validated_data['created_by'] = self.context['request'].user
+        elif 'created_by' in validated_data:
+            # If created_by is already provided in the data, use it
+            pass
+        else:
+            # Fallback: try to get user from context or use None
+            validated_data['created_by'] = self.context.get('user', None)
         return super().create(validated_data)
 
 
@@ -82,7 +90,15 @@ class QuantitySurveyorSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         # Set the created_by field to the current user
-        validated_data['created_by'] = self.context['request'].user
+        # Handle cases where request context might not be available
+        if 'request' in self.context and self.context['request'].user:
+            validated_data['created_by'] = self.context['request'].user
+        elif 'created_by' in validated_data:
+            # If created_by is already provided in the data, use it
+            pass
+        else:
+            # Fallback: try to get user from context or use None
+            validated_data['created_by'] = self.context.get('user', None)
         return super().create(validated_data)
 
 

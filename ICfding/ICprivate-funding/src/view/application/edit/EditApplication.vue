@@ -31,8 +31,8 @@
                         <Company 
                             :key="`company-${application.company_borrowers.length}`"
                             :company="application.company_borrowers" 
-                            @add="addDirector" 
-                            @remove="removeDirector"
+                            @add="(companyIndex) => addDirector(companyIndex)" 
+                            @remove="(companyIndex, directorIndex) => removeDirector(companyIndex, directorIndex)"
                             @addCompany="addCompanyBorrower"
                             @removeCompany="removeCompanyBorrower">
                         </Company>
@@ -131,7 +131,7 @@
                                 <p :style="{color: isExitValid ? '#2984DE' : '#272727'}">Funding Calculation Input</p>
                             </div>
                         </template>
-                        <Calculation :detail="application.funding_calculation_input"></Calculation>
+                        <Calculation :detail="fundingCalculationData" @update:detail="updateFundingCalculation"></Calculation>
                     </el-collapse-item>
                     <el-collapse-item name="11">
                         <template #title>
@@ -212,6 +212,61 @@ watch(() => application.value.guarantors, (newVal, oldVal) => {
         data: newVal
     });
 }, { deep: true });
+
+// NEW: Calculate total loan amount from loan requirements
+const totalLoanRequirements = computed(() => {
+    if (!application.value?.loan_requirements) {
+        return 0;
+    }
+    return application.value.loan_requirements
+        .map(req => parseFloat(req.amount) || 0)
+        .reduce((sum, val) => sum + val, 0);
+});
+
+// NEW: Auto-update loan_amount when loan requirements change
+watch(totalLoanRequirements, (newValue) => {
+    if (newValue > 0) {
+        application.value.loan_amount = newValue.toString();
+    }
+}, { immediate: true });
+
+// NEW: Computed property for funding calculation data with calculated loan amount
+const fundingCalculationData = computed(() => {
+    // Ensure funding_calculation_input exists
+    if (!application.value.funding_calculation_input) {
+        application.value.funding_calculation_input = {};
+    }
+    
+    // Ensure all required fields exist with default values
+    const defaults = {
+        establishment_fee_rate: 0,
+        capped_interest_months: 9,
+        monthly_line_fee_rate: 0,
+        brokerage_fee_rate: 0,
+        application_fee: 0,
+        due_diligence_fee: 0,
+        legal_fee_before_gst: 0,
+        valuation_fee: 0,
+        monthly_account_fee: 0,
+        working_fee: 0
+    };
+    
+    // Merge defaults with existing values
+    Object.keys(defaults).forEach(key => {
+        if (application.value.funding_calculation_input[key] === undefined || 
+            application.value.funding_calculation_input[key] === null) {
+            application.value.funding_calculation_input[key] = defaults[key];
+        }
+    });
+    
+    return {
+        ...application.value.funding_calculation_input,
+        calculated_loan_amount: totalLoanRequirements.value.toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        })
+    };
+});
 
 // Helper function to create a new company borrower
 const createCompanyBorrower = () => {
@@ -486,12 +541,104 @@ const handleClose = () => {
     emit('close');
 };
 
+// Helper function to convert Decimal objects to numbers for JSON serialization
+const convertDecimalsToNumbers = (obj) => {
+    if (obj === null || obj === undefined) {
+        return obj;
+    }
+    
+    if (typeof obj === 'object' && obj.constructor && obj.constructor.name === 'Decimal') {
+        return parseFloat(obj.toString());
+    }
+    
+    if (Array.isArray(obj)) {
+        return obj.map(item => convertDecimalsToNumbers(item));
+    }
+    
+    if (typeof obj === 'object') {
+        const result = {};
+        for (const key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                result[key] = convertDecimalsToNumbers(obj[key]);
+            }
+        }
+        return result;
+    }
+    
+    return obj;
+};
+
 const handleSave = async () => {
     try {
         isSubmitting.value = true;
         
-        // Create a deep copy and transform data
-        const applicationData = JSON.parse(JSON.stringify(application.value));
+        // Create a deep copy of the application data
+        let applicationData = JSON.parse(JSON.stringify(application.value));
+        
+        // Convert any Decimal objects to numbers for JSON serialization
+        applicationData = convertDecimalsToNumbers(applicationData);
+        
+        // Remove the id from the data being sent (it's in the URL)
+        delete applicationData.id;
+        
+        // Ensure funding_calculation_input exists and is properly formatted
+        if (!applicationData.funding_calculation_input) {
+            applicationData.funding_calculation_input = {};
+        }
+        
+        // Convert funding calculation input values to numbers
+        if (applicationData.funding_calculation_input) {
+            Object.keys(applicationData.funding_calculation_input).forEach(key => {
+                const value = applicationData.funding_calculation_input[key];
+                if (value !== null && value !== undefined && value !== '') {
+                    applicationData.funding_calculation_input[key] = parseFloat(value);
+                }
+            });
+        }
+        
+        // Convert loan requirements amounts to numbers
+        if (applicationData.loan_requirements && applicationData.loan_requirements.length > 0) {
+            applicationData.loan_requirements.forEach(requirement => {
+                if (requirement.amount !== null && requirement.amount !== undefined && requirement.amount !== '') {
+                    requirement.amount = parseFloat(requirement.amount);
+                }
+            });
+        }
+        
+        // Convert main application numeric fields
+        const numericFields = [
+            'loan_amount', 'loan_term', 'capitalised_interest_term', 'interest_rate',
+            'annual_income', 'annual_company_income'
+        ];
+        
+        numericFields.forEach(field => {
+            if (applicationData[field] !== null && applicationData[field] !== undefined && applicationData[field] !== '') {
+                applicationData[field] = parseFloat(applicationData[field]);
+            }
+        });
+        
+        // NEW: Ensure loan_amount is set from loan requirements total
+        if (totalLoanRequirements.value > 0) {
+            applicationData.loan_amount = totalLoanRequirements.value.toString();
+        }
+        
+        // NEW: Additional validation for loan amount and funding calculation integration
+        if (totalLoanRequirements.value > 0 && !applicationData.loan_amount) {
+            ElMessage.warning('Loan amount should be calculated from loan requirements. Please check your loan requirements.');
+            return;
+        }
+        
+        // NEW: Validate that funding calculation has required loan amount
+        if (applicationData.funding_calculation_input && 
+            Object.keys(applicationData.funding_calculation_input).some(key => 
+                applicationData.funding_calculation_input[key] && 
+                applicationData.funding_calculation_input[key] !== '' && 
+                applicationData.funding_calculation_input[key] !== 0
+            ) && 
+            !applicationData.loan_amount) {
+            ElMessage.warning('Funding calculation parameters are provided but no loan amount is set. Please complete loan requirements first.');
+            return;
+        }
         
         // Validate stage value
         const validStages = [
@@ -551,6 +698,29 @@ const handleSave = async () => {
                     address_postcode: borrower.address_postcode
                 });
                 
+                // Convert borrower assets numeric fields
+                if (borrower.assets && borrower.assets.length > 0) {
+                    borrower.assets = borrower.assets.map(asset => ({
+                        ...asset,
+                        value: asset.value !== null && asset.value !== undefined && asset.value !== '' ? parseFloat(asset.value) : null,
+                        owing: asset.owing !== null && asset.owing !== undefined && asset.owing !== '' ? parseFloat(asset.owing) : null
+                    }));
+                }
+                
+                // Convert borrower liabilities numeric fields
+                if (borrower.liabilities && borrower.liabilities.length > 0) {
+                    borrower.liabilities = borrower.liabilities.map(liability => ({
+                        ...liability,
+                        amount: liability.amount !== null && liability.amount !== undefined && liability.amount !== '' ? parseFloat(liability.amount) : null,
+                        monthly_payment: liability.monthly_payment !== null && liability.monthly_payment !== undefined && liability.monthly_payment !== '' ? parseFloat(liability.monthly_payment) : null
+                    }));
+                }
+                
+                // Convert borrower annual_income
+                if (borrower.annual_income !== null && borrower.annual_income !== undefined && borrower.annual_income !== '') {
+                    borrower.annual_income = parseFloat(borrower.annual_income);
+                }
+                
                 // Ensure unified field names are preserved - no transformation needed
                 // The backend expects these field names directly
             });
@@ -596,7 +766,11 @@ const handleSave = async () => {
                     company.assets = company.assets.filter(asset => 
                         asset.asset_type && asset.asset_type.trim() !== '' &&
                         asset.description && asset.description.trim() !== ''
-                    );
+                    ).map(asset => ({
+                        ...asset,
+                        value: asset.value !== null && asset.value !== undefined && asset.value !== '' ? parseFloat(asset.value) : null,
+                        owing: asset.owing !== null && asset.owing !== undefined && asset.owing !== '' ? parseFloat(asset.owing) : null
+                    }));
                 }
                 
                 // Filter out empty liabilities (liabilities with no liability_type or description)
@@ -604,12 +778,18 @@ const handleSave = async () => {
                     company.liabilities = company.liabilities.filter(liability => 
                         liability.liability_type && liability.liability_type.trim() !== '' &&
                         liability.description && liability.description.trim() !== ''
-                    );
+                    ).map(liability => ({
+                        ...liability,
+                        amount: liability.amount !== null && liability.amount !== undefined && liability.amount !== '' ? parseFloat(liability.amount) : null,
+                        monthly_payment: liability.monthly_payment !== null && liability.monthly_payment !== undefined && liability.monthly_payment !== '' ? parseFloat(liability.monthly_payment) : null
+                    }));
                 }
                 
                 // Ensure numeric fields are properly formatted
                 if (company.annual_company_income === '') {
                     company.annual_company_income = null;
+                } else if (company.annual_company_income !== null && company.annual_company_income !== undefined) {
+                    company.annual_company_income = parseFloat(company.annual_company_income);
                 }
                 
                 console.log(`Cleaned company borrower ${index}:`, company);
@@ -624,7 +804,11 @@ const handleSave = async () => {
                     guarantor.assets = guarantor.assets.filter(asset => 
                         asset.asset_type && asset.asset_type.trim() !== '' &&
                         asset.description && asset.description.trim() !== ''
-                    );
+                    ).map(asset => ({
+                        ...asset,
+                        value: asset.value !== null && asset.value !== undefined && asset.value !== '' ? parseFloat(asset.value) : null,
+                        owing: asset.owing !== null && asset.owing !== undefined && asset.owing !== '' ? parseFloat(asset.owing) : null
+                    }));
                 }
                 
                 // Filter out empty liabilities (liabilities with no liability_type or description)
@@ -632,12 +816,18 @@ const handleSave = async () => {
                     guarantor.liabilities = guarantor.liabilities.filter(liability => 
                         liability.liability_type && liability.liability_type.trim() !== '' &&
                         liability.description && liability.description.trim() !== ''
-                    );
+                    ).map(liability => ({
+                        ...liability,
+                        amount: liability.amount !== null && liability.amount !== undefined && liability.amount !== '' ? parseFloat(liability.amount) : null,
+                        monthly_payment: liability.monthly_payment !== null && liability.monthly_payment !== undefined && liability.monthly_payment !== '' ? parseFloat(liability.monthly_payment) : null
+                    }));
                 }
                 
                 // Ensure numeric fields are properly formatted
                 if (guarantor.annual_income === '') {
                     guarantor.annual_income = null;
+                } else if (guarantor.annual_income !== null && guarantor.annual_income !== undefined) {
+                    guarantor.annual_income = parseFloat(guarantor.annual_income);
                 }
                 
                 console.log(`Cleaned guarantor ${index}:`, guarantor);
@@ -769,12 +959,15 @@ const handleSave = async () => {
 // Add/remove handlers for company borrowers
 const addCompanyBorrower = () => {
     console.log("Adding company borrower...");
+    console.log("Current company_borrowers before add:", application.value.company_borrowers);
     const newCompany = createCompanyBorrower();
+    console.log("New company object created:", newCompany);
     application.value.company_borrowers.push(newCompany);
     
     // Force reactivity update
     application.value = { ...application.value };
     console.log("Company borrowers after add:", application.value.company_borrowers);
+    console.log("Company borrowers length after add:", application.value.company_borrowers.length);
 };
 
 const removeCompanyBorrower = (idx) => {
@@ -786,17 +979,24 @@ const removeCompanyBorrower = (idx) => {
     console.log("Company borrowers after remove:", application.value.company_borrowers);
 };
 
-const addDirector = () => {
-    console.log("Adding director...");
-    // Ensure company_borrowers array exists and has at least one element
-    if (!application.value.company_borrowers || application.value.company_borrowers.length === 0) {
-        application.value.company_borrowers = [createCompanyBorrower()];
+const addDirector = (companyIndex = 0) => {
+    console.log("Adding director to company index:", companyIndex);
+    console.log("Current company_borrowers:", application.value.company_borrowers);
+    console.log("Company borrowers length:", application.value.company_borrowers?.length);
+    
+    // Ensure company_borrowers array exists and has the requested element
+    if (!application.value.company_borrowers || application.value.company_borrowers.length <= companyIndex) {
+        console.error("Invalid company index or no company borrowers available");
+        return;
     }
     
-    if (!application.value.company_borrowers[0].directors) {
-        application.value.company_borrowers[0].directors = [];
+    console.log("Target company:", application.value.company_borrowers[companyIndex]);
+    console.log("Current directors:", application.value.company_borrowers[companyIndex].directors);
+    
+    if (!application.value.company_borrowers[companyIndex].directors) {
+        application.value.company_borrowers[companyIndex].directors = [];
     }
-    application.value.company_borrowers[0].directors.push({
+    application.value.company_borrowers[companyIndex].directors.push({
         name: "",
         roles: "director",
         director_id: ""
@@ -804,19 +1004,24 @@ const addDirector = () => {
     
     // Force reactivity update
     application.value = { ...application.value };
-    console.log("Directors after add:", application.value.company_borrowers[0].directors);
+    console.log("Directors after add:", application.value.company_borrowers[companyIndex].directors);
+    console.log("Directors length after add:", application.value.company_borrowers[companyIndex].directors.length);
 };
 
-const removeDirector = (idx) => {
-    console.log("Removing director at index:", idx);
+const removeDirector = (companyIndex = 0, directorIndex) => {
+    console.log("Removing director from company index:", companyIndex, "director index:", directorIndex);
     if (application.value.company_borrowers && 
-        application.value.company_borrowers[0] && 
-        application.value.company_borrowers[0].directors) {
-        application.value.company_borrowers[0].directors.splice(idx, 1);
+        application.value.company_borrowers[companyIndex] && 
+        application.value.company_borrowers[companyIndex].directors) {
+        if (directorIndex !== undefined) {
+            application.value.company_borrowers[companyIndex].directors.splice(directorIndex, 1);
+        } else {
+            application.value.company_borrowers[companyIndex].directors.pop();
+        }
         
         // Force reactivity update
         application.value = { ...application.value };
-        console.log("Directors after remove:", application.value.company_borrowers[0].directors);
+        console.log("Directors after remove:", application.value.company_borrowers[companyIndex].directors);
     }
 };
 
@@ -1102,6 +1307,16 @@ const getStageTagType = (stage) => {
 const updateGuarantors = (updatedGuarantors) => {
     application.value.guarantors = updatedGuarantors;
     console.log("Guarantors updated:", application.value.guarantors);
+};
+
+const updateFundingCalculation = (updatedFundingCalculation) => {
+    console.log('Funding calculation updated:', updatedFundingCalculation);
+    // Update the application's funding calculation input
+    application.value.funding_calculation_input = {
+        ...application.value.funding_calculation_input,
+        ...updatedFundingCalculation
+    };
+    console.log("Funding calculation updated:", application.value.funding_calculation_input);
 };
 </script>
 

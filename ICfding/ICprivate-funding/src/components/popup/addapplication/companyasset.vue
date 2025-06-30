@@ -95,23 +95,26 @@
     // Computed property to ensure reactivity and filter out empty companies
     const companyList = computed(() => {
         const companies = props.company || [];
-        console.log("CompanyAssets: Raw company data:", companies);
         
         // Simply return all companies - don't filter out empty ones as they may be in the process of being filled
-        console.log("CompanyAssets: Using companies:", companies);
         return companies;
     });
 
     // Watch for changes in the company array
-    watch(() => props.company, (newCompany) => {
-        console.log("CompanyAssets: Company data changed:", newCompany);
-        console.log("CompanyAssets: Company array length:", newCompany?.length || 0);
-    }, { deep: true, immediate: true });
+    watch(() => props.company, (newCompany, oldCompany) => {
+        // Only log if there's a significant change
+        if (newCompany && (!oldCompany || newCompany.length !== oldCompany?.length)) {
+            console.log("CompanyAssets: Company data changed:", newCompany);
+            console.log("CompanyAssets: Company array length:", newCompany?.length || 0);
+        }
+    }, { deep: false, immediate: false });
 
     // Watch for changes in company array length
     watch(() => props.company?.length, (newLength, oldLength) => {
-        console.log(`CompanyAssets: Company array length changed from ${oldLength} to ${newLength}`);
-    });
+        if (newLength !== oldLength) {
+            console.log(`CompanyAssets: Company array length changed from ${oldLength} to ${newLength}`);
+        }
+    }, { immediate: false });
 
     // Helper functions to calculate totals
     const calculateTotalAssets = (company) => {

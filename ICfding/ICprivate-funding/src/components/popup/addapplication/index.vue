@@ -37,7 +37,13 @@
                                 <p :style="{color: isCompanyValid ? '#2984DE' : '#272727'}">Company Borrower Details</p>
                             </div>
                         </template>
-                        <Company :company="application.company_borrowers" @add="addCompany" @remove="removeCompany"></Company>
+                        <Company 
+                            :company="application.company_borrowers" 
+                            @add="(companyIndex) => addDirector(companyIndex)" 
+                            @remove="(companyIndex, directorIndex) => removeDirector(companyIndex, directorIndex)"
+                            @addCompany="addCompany"
+                            @removeCompany="removeCompany">
+                        </Company>
                     </el-collapse-item>
                     <el-collapse-item name="2">
                         <template #title>
@@ -114,11 +120,11 @@
                     <el-collapse-item name="10">
                         <template #title>
                             <div class="title">
-                                <el-icon style="font-size: 20px" :color="true ? '#2984DE' : '#E1E1E1'"><SuccessFilled /></el-icon>
-                                <p :style="{color: true ? '#2984DE' : '#272727'}">Funding Calculation</p>
+                                <el-icon style="font-size: 20px" :color="isFundingCalculationValid && totalLoanRequirements > 0 ? '#2984DE' : '#E1E1E1'"><SuccessFilled /></el-icon>
+                                <p :style="{color: isFundingCalculationValid && totalLoanRequirements > 0 ? '#2984DE' : '#272727'}">Funding Calculation</p>
                             </div>
                         </template>
-                        <Calculation :detail="application.funding_calculation_input"></Calculation>
+                        <Calculation :detail="fundingCalculationData" @update:detail="updateFundingCalculation"></Calculation>
                     </el-collapse-item>
                     <el-collapse-item name="11">
                         <template #title>
@@ -203,7 +209,7 @@
     const createDirector = () => {
         return {
             name: "",
-            roles: "",
+            roles: "director",
             director_id: ""
         }
     }
@@ -455,6 +461,61 @@
             .map(a => parseFloat(a.amount) || 0)
             .reduce((sum, v) => sum + v, 0);
     })
+
+    // NEW: Calculate total loan amount from loan requirements
+    const totalLoanRequirements = computed(() => {
+        if (!application.value?.loan_requirements) {
+            return 0;
+        }
+        return application.value.loan_requirements
+            .map(req => parseFloat(req.amount) || 0)
+            .reduce((sum, val) => sum + val, 0);
+    })
+
+    // NEW: Auto-update loan_amount when loan requirements change
+    watch(totalLoanRequirements, (newValue) => {
+        if (newValue > 0) {
+            application.value.loan_amount = newValue.toString();
+        }
+    }, { immediate: true });
+    
+    // NEW: Computed property for funding calculation data with calculated loan amount
+    const fundingCalculationData = computed(() => {
+        // Ensure funding_calculation_input exists
+        if (!application.value.funding_calculation_input) {
+            application.value.funding_calculation_input = {};
+        }
+        
+        // Ensure all required fields exist with default values
+        const defaults = {
+            establishment_fee_rate: 0,
+            capped_interest_months: 9,
+            monthly_line_fee_rate: 0,
+            brokerage_fee_rate: 0,
+            application_fee: 0,
+            due_diligence_fee: 0,
+            legal_fee_before_gst: 0,
+            valuation_fee: 0,
+            monthly_account_fee: 0,
+            working_fee: 0
+        };
+        
+        // Merge defaults with existing values
+        Object.keys(defaults).forEach(key => {
+            if (application.value.funding_calculation_input[key] === undefined || 
+                application.value.funding_calculation_input[key] === null) {
+                application.value.funding_calculation_input[key] = defaults[key];
+            }
+        });
+        
+        return {
+            ...application.value.funding_calculation_input,
+            calculated_loan_amount: totalLoanRequirements.value.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            })
+        };
+    });
     
     // Watch for changes in computed totals and update financial_info
     watch(totalAsset, (newValue) => {
@@ -531,6 +592,38 @@
     const removeCompany = (idx) => {
         application.value.company_borrowers.splice(idx, 1)
     }
+    const addDirector = (companyIndex = 0) => {
+        console.log("Adding director to company index:", companyIndex);
+        
+        // Ensure company_borrowers array exists and has the requested element
+        if (!application.value.company_borrowers || application.value.company_borrowers.length <= companyIndex) {
+            console.error("Invalid company index or no company borrowers available");
+            return;
+        }
+        
+        if (!application.value.company_borrowers[companyIndex].directors) {
+            application.value.company_borrowers[companyIndex].directors = [];
+        }
+        application.value.company_borrowers[companyIndex].directors.push(createDirector());
+        
+        console.log("Directors after add:", application.value.company_borrowers[companyIndex].directors);
+    };
+
+    const removeDirector = (companyIndex = 0, directorIndex) => {
+        console.log("Removing director from company index:", companyIndex, "director index:", directorIndex);
+        if (application.value.company_borrowers && 
+            application.value.company_borrowers[companyIndex] && 
+            application.value.company_borrowers[companyIndex].directors) {
+            if (directorIndex !== undefined) {
+                application.value.company_borrowers[companyIndex].directors.splice(directorIndex, 1);
+            } else {
+                application.value.company_borrowers[companyIndex].directors.pop();
+            }
+            
+            console.log("Directors after remove:", application.value.company_borrowers[companyIndex].directors);
+        }
+    };
+
     const addAsset = (companyIndex = 0) => {
         if (application.value.company_borrowers[companyIndex]) {
             application.value.company_borrowers[companyIndex].assets.push(createCompanyAsset())
@@ -641,6 +734,12 @@
         return true; // Loan requirement section is always valid since all fields are optional
     })
     
+    // NEW: Enhanced validation for funding calculation step
+    const isFundingCalculationValid = computed(() => {
+        // Funding calculation is always valid, but we can add logic here if needed
+        return true;
+    })
+    
     const isExitValid = computed(() => {
         // All fields are now optional - always return true
         return true; // Exit strategy section is always valid since all fields are optional
@@ -711,6 +810,11 @@
         
         // Transform empty strings to null for optional fields
         application.value = transformEmptyToNull(application.value);
+        
+        // NEW: Ensure loan_amount is set from loan requirements total
+        if (totalLoanRequirements.value > 0) {
+            application.value.loan_amount = totalLoanRequirements.value.toString();
+        }
         
         // Validate repayment_frequency against schema choices
         const validRepaymentFrequencies = ["weekly", "fortnightly", "monthly", "quarterly", "annually"];
@@ -971,6 +1075,24 @@
                 return;
             }
             
+            // NEW: Additional validation for loan amount and funding calculation integration
+            if (totalLoanRequirements.value > 0 && !application.value.loan_amount) {
+                ElMessage.warning('Loan amount should be calculated from loan requirements. Please check your loan requirements.');
+                return;
+            }
+            
+            // NEW: Validate that funding calculation has required loan amount
+            if (application.value.funding_calculation_input && 
+                Object.keys(application.value.funding_calculation_input).some(key => 
+                    application.value.funding_calculation_input[key] && 
+                    application.value.funding_calculation_input[key] !== '' && 
+                    application.value.funding_calculation_input[key] !== 0
+                ) && 
+                !application.value.loan_amount) {
+                ElMessage.warning('Funding calculation parameters are provided but no loan amount is set. Please complete loan requirements first.');
+                return;
+            }
+            
             isSubmitting.value = true;
             
             // Create a deep copy of the application to avoid proxy issues
@@ -1111,6 +1233,15 @@
             isSubmitting.value = false;
         }
     }
+
+    const updateFundingCalculation = (updatedFundingCalculation) => {
+        console.log('Funding calculation updated:', updatedFundingCalculation);
+        // Update the application's funding calculation input
+        application.value.funding_calculation_input = {
+            ...application.value.funding_calculation_input,
+            ...updatedFundingCalculation
+        };
+    };
 </script>
 
 <style scoped>

@@ -372,8 +372,11 @@ class BorrowerSerializer(serializers.ModelSerializer):
         validated_data['is_company'] = False
         
         # Set created_by if not already provided and available from context
-        if 'created_by' not in validated_data and hasattr(self, 'context') and 'request' in self.context:
-            validated_data['created_by'] = self.context['request'].user
+        if 'created_by' not in validated_data:
+            if hasattr(self, 'context') and 'request' in self.context and self.context['request'].user:
+                validated_data['created_by'] = self.context['request'].user
+            elif hasattr(self, 'context') and 'user' in self.context:
+                validated_data['created_by'] = self.context['user']
         
         logger.info(f"Final validated_data for borrower creation: {validated_data}")
         
@@ -616,8 +619,8 @@ class GuarantorSerializer(serializers.ModelSerializer):
             
             # Get created_by for nested objects
             created_by = validated_data.get('created_by') or (
-                self.context['request'].user if hasattr(self, 'context') and 'request' in self.context else None
-            )
+                self.context.get('request').user if hasattr(self, 'context') and 'request' in self.context and self.context['request'].user else None
+            ) or self.context.get('user', None)
             
             # Create the guarantor first
             guarantor = Guarantor.objects.create(**validated_data)
@@ -665,8 +668,8 @@ class GuarantorSerializer(serializers.ModelSerializer):
             
             # Get created_by for nested objects
             created_by = validated_data.get('created_by') or (
-                self.context['request'].user if hasattr(self, 'context') and 'request' in self.context else None
-            )
+                self.context.get('request').user if hasattr(self, 'context') and 'request' in self.context and self.context['request'].user else None
+            ) or self.context.get('user', None)
             
             # Update guarantor fields
             for attr, value in validated_data.items():
@@ -846,16 +849,19 @@ class CompanyBorrowerSerializer(serializers.ModelSerializer):
             validated_data['is_company'] = True
             
             # Set created_by if not already provided and available from context
-            if 'created_by' not in validated_data and hasattr(self, 'context') and 'request' in self.context:
-                validated_data['created_by'] = self.context['request'].user
+            if 'created_by' not in validated_data:
+                if hasattr(self, 'context') and 'request' in self.context and self.context['request'].user:
+                    validated_data['created_by'] = self.context['request'].user
+                elif hasattr(self, 'context') and 'user' in self.context:
+                    validated_data['created_by'] = self.context['user']
             
             # Create the borrower
             borrower = Borrower.objects.create(**validated_data)
             
             # Get created_by for nested objects
             created_by = validated_data.get('created_by') or (
-                self.context['request'].user if hasattr(self, 'context') and 'request' in self.context else None
-            )
+                self.context.get('request').user if hasattr(self, 'context') and 'request' in self.context and self.context['request'].user else None
+            ) or self.context.get('user', None)
             
             # Create directors (already filtered in validate method)
             for director_data in directors_data:

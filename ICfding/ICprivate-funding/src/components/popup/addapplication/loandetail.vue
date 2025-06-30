@@ -335,8 +335,13 @@
             const [err, data] = await api.addValuer(newValuer.value);
             if (!err && data) {
                 ElMessage.success('Valuer saved successfully');
+                // Add display_name field to match the list serializer format
+                const valuerWithDisplayName = {
+                    ...data,
+                    display_name: `${data.company_name} - ${data.contact_name}`
+                };
                 // Add to list and select it
-                valuers.value.push(data);
+                valuers.value.push(valuerWithDisplayName);
                 props.detail.valuer = data.id;
                 // Reset form
                 newValuer.value = {
@@ -373,8 +378,13 @@
             const [err, data] = await api.addQuantitySurveyor(newQs.value);
             if (!err && data) {
                 ElMessage.success('Quantity Surveyor saved successfully');
+                // Add display_name field to match the list serializer format
+                const qsWithDisplayName = {
+                    ...data,
+                    display_name: `${data.company_name} - ${data.contact_name}`
+                };
                 // Add to list and select it
-                quantitySurveyors.value.push(data);
+                quantitySurveyors.value.push(qsWithDisplayName);
                 props.detail.quantity_surveyor = data.id;
                 // Reset form
                 newQs.value = {

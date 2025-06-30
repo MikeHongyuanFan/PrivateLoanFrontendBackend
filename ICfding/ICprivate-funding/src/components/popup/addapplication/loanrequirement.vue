@@ -24,7 +24,10 @@
         </div>
         <div class="total">
             <p>Total Amount: ${{ totalAmount }}</p>
-            <span class="hint">Sum of all loan requirements</span>
+            <span class="hint">Sum of all loan requirements - this will be used for funding calculation</span>
+        </div>
+        <div class="integration-note" v-if="totalAmount !== '0'">
+            <p class="note-text">💡 This total amount will automatically be used in the Funding Calculation step</p>
         </div>
     </div>
 </template>
@@ -118,5 +121,19 @@
     .required {
         color: #f56c6c;
         margin-left: 2px;
+    }
+    .integration-note {
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+        padding: 10px;
+        background-color: #f0f0f0;
+        border-radius: 5px;
+    }
+    .note-text {
+        color: #8c8c8c;
+        font-size: 0.7rem;
+        font-style: italic;
+        margin: 0;
     }
 </style>

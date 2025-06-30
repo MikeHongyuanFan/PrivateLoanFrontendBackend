@@ -307,6 +307,12 @@ class Application(BaseApplicationModel):
     # FUNDING CALCULATION
     # ============================================================================
     
+    funding_calculation_input = JSONField(
+        null=True,
+        blank=True,
+        help_text="Stores the funding calculation input parameters"
+    )
+    
     funding_result = JSONField(
         null=True,
         blank=True,

@@ -304,6 +304,9 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
         return value
 
     def create(self, validated_data):
+        import logging
+        logger = logging.getLogger(__name__)
+        
         borrowers_data = validated_data.pop('borrowers', [])
         guarantors_data = validated_data.pop('guarantors', [])
         company_borrowers_data = validated_data.pop('company_borrowers', [])
@@ -350,107 +353,169 @@ class ApplicationCreateSerializer(serializers.ModelSerializer):
             cleaned_company_borrowers.append(company_data)
         
         # Use transaction to ensure all related entities are created or none
-        with transaction.atomic():
-            # Create the application
-            application = Application.objects.create(**validated_data)
-            
-            # Create borrowers and link to application
-            for borrower_data in borrowers_data:
-                borrower_serializer = BorrowerSerializer(data=borrower_data)
-                borrower_serializer.is_valid(raise_exception=True)
-                borrower = borrower_serializer.save()
-                application.borrowers.add(borrower)
-            
-            # Process new_borrowers if present
-            for new_borrower_data in new_borrowers:
-                # Create a new borrower
-                borrower = Borrower.objects.create(
-                    first_name=new_borrower_data.get('first_name', ''),
-                    last_name=new_borrower_data.get('last_name', ''),
-                    date_of_birth=new_borrower_data.get('date_of_birth'),
-                    email=new_borrower_data.get('email', ''),
-                    phone=new_borrower_data.get('phone', ''),
-                    residential_address=new_borrower_data.get('residential_address', ''),
-                    marital_status=new_borrower_data.get('marital_status', ''),
-                    residency_status=new_borrower_data.get('residency_status', ''),
-                    employment_type=new_borrower_data.get('employment_type', ''),
-                    employer_name=new_borrower_data.get('employer_name', ''),
-                    annual_income=new_borrower_data.get('annual_income', 0),
-                    created_by=validated_data.get('created_by')
-                )
-                # Add the borrower to the application
-                application.borrowers.add(borrower)
-            
-            # Create guarantors and link to application
-            for guarantor_data in guarantors_data:
-                guarantor_serializer = GuarantorSerializer(data=guarantor_data)
-                guarantor_serializer.is_valid(raise_exception=True)
-                guarantor = guarantor_serializer.save(application=application)
-                application.guarantors.add(guarantor)
-            
-            # Process guarantor_data if present
-            guarantor_data_list = validated_data.pop('guarantor_data', [])
-            for guarantor_data in guarantor_data_list:
-                # Create a new guarantor
-                guarantor = Guarantor.objects.create(
-                    guarantor_type=guarantor_data.get('guarantor_type', ''),
-                    first_name=guarantor_data.get('first_name', ''),
-                    last_name=guarantor_data.get('last_name', ''),
-                    email=guarantor_data.get('email', ''),
-                    mobile=guarantor_data.get('mobile', ''),
-                    date_of_birth=guarantor_data.get('date_of_birth'),
-                    application=application,
-                    created_by=validated_data.get('created_by')
-                )
-                # Add the guarantor to the application
-                application.guarantors.add(guarantor)
-            
-            # Create company borrowers and link to application
-            for company_borrower_data in cleaned_company_borrowers:
-                try:
-                    company_borrower_serializer = CompanyBorrowerSerializer(data=company_borrower_data)
-                    if company_borrower_serializer.is_valid():
-                        company_borrower = company_borrower_serializer.save()
-                        application.borrowers.add(company_borrower)
-                    else:
-                        # Log validation errors but don't fail the entire transaction
-                        import logging
-                        logger = logging.getLogger(__name__)
-                        logger.warning(f"Company borrower validation errors: {company_borrower_serializer.errors}")
-                except Exception as e:
-                    # Log the error but continue with other company borrowers
-                    import logging
-                    logger = logging.getLogger(__name__)
-                    logger.error(f"Error creating company borrower: {str(e)}")
-            
-            # Create security properties
-            for security_property_data in security_properties_data:
-                security_property_serializer = SecurityPropertySerializer(data=security_property_data)
-                security_property_serializer.is_valid(raise_exception=True)
-                security_property = security_property_serializer.save(application=application)
-            
-            # Create loan requirements
-            for loan_requirement_data in loan_requirements_data:
-                loan_requirement_serializer = LoanRequirementSerializer(data=loan_requirement_data)
-                loan_requirement_serializer.is_valid(raise_exception=True)
-                loan_requirement = loan_requirement_serializer.save(application=application)
-            
-            # Handle funding calculation if provided and loan amount is available
-            if funding_calculation_input and application.loan_amount:
-                try:
-                    from ..services import calculate_funding
-                    calculation_result, funding_history = calculate_funding(
-                        application=application,
-                        calculation_input=funding_calculation_input,
-                        user=validated_data.get('created_by')
+        try:
+            with transaction.atomic():
+                logger.info("Starting application creation transaction...")
+                
+                # Create the application
+                logger.info("Creating application...")
+                application = Application.objects.create(**validated_data)
+                logger.info(f"Application created with ID: {application.id}")
+                
+                # Create borrowers and link to application
+                logger.info(f"Creating {len(borrowers_data)} borrowers...")
+                for i, borrower_data in enumerate(borrowers_data):
+                    logger.info(f"Creating borrower {i+1}/{len(borrowers_data)}...")
+                    borrower_serializer = BorrowerSerializer(data=borrower_data, context={'user': validated_data.get('created_by')})
+                    borrower_serializer.is_valid(raise_exception=True)
+                    borrower = borrower_serializer.save()
+                    application.borrowers.add(borrower)
+                
+                # Process new_borrowers if present
+                logger.info(f"Processing {len(new_borrowers)} new borrowers...")
+                for i, new_borrower_data in enumerate(new_borrowers):
+                    logger.info(f"Creating new borrower {i+1}/{len(new_borrowers)}...")
+                    # Create a new borrower
+                    borrower = Borrower.objects.create(
+                        first_name=new_borrower_data.get('first_name', ''),
+                        last_name=new_borrower_data.get('last_name', ''),
+                        date_of_birth=new_borrower_data.get('date_of_birth'),
+                        email=new_borrower_data.get('email', ''),
+                        phone=new_borrower_data.get('phone', ''),
+                        residential_address=new_borrower_data.get('residential_address', ''),
+                        marital_status=new_borrower_data.get('marital_status', ''),
+                        residency_status=new_borrower_data.get('residency_status', ''),
+                        employment_type=new_borrower_data.get('employment_type', ''),
+                        employer_name=new_borrower_data.get('employer_name', ''),
+                        annual_income=new_borrower_data.get('annual_income', 0),
+                        created_by=validated_data.get('created_by')
                     )
+                    # Add the borrower to the application
+                    application.borrowers.add(borrower)
+                
+                # Create guarantors and link to application
+                logger.info(f"Creating {len(guarantors_data)} guarantors...")
+                for i, guarantor_data in enumerate(guarantors_data):
+                    logger.info(f"Creating guarantor {i+1}/{len(guarantors_data)}...")
+                    guarantor_serializer = GuarantorSerializer(data=guarantor_data, context={'user': validated_data.get('created_by')})
+                    guarantor_serializer.is_valid(raise_exception=True)
+                    guarantor = guarantor_serializer.save(application=application)
+                    application.guarantors.add(guarantor)
+                
+                # Process guarantor_data if present
+                guarantor_data_list = validated_data.pop('guarantor_data', [])
+                logger.info(f"Processing {len(guarantor_data_list)} additional guarantors...")
+                for i, guarantor_data in enumerate(guarantor_data_list):
+                    logger.info(f"Creating additional guarantor {i+1}/{len(guarantor_data_list)}...")
+                    # Create a new guarantor
+                    guarantor = Guarantor.objects.create(
+                        guarantor_type=guarantor_data.get('guarantor_type', ''),
+                        first_name=guarantor_data.get('first_name', ''),
+                        last_name=guarantor_data.get('last_name', ''),
+                        email=guarantor_data.get('email', ''),
+                        mobile=guarantor_data.get('mobile', ''),
+                        date_of_birth=guarantor_data.get('date_of_birth'),
+                        application=application,
+                        created_by=validated_data.get('created_by')
+                    )
+                    # Add the guarantor to the application
+                    application.guarantors.add(guarantor)
+                
+                # Create company borrowers and link to application
+                logger.info(f"Creating {len(cleaned_company_borrowers)} company borrowers...")
+                for i, company_borrower_data in enumerate(cleaned_company_borrowers):
+                    logger.info(f"Creating company borrower {i+1}/{len(cleaned_company_borrowers)}...")
+                    try:
+                        company_borrower_serializer = CompanyBorrowerSerializer(data=company_borrower_data, context={'user': validated_data.get('created_by')})
+                        if company_borrower_serializer.is_valid():
+                            company_borrower = company_borrower_serializer.save()
+                            application.borrowers.add(company_borrower)
+                        else:
+                            # Log validation errors but don't fail the entire transaction
+                            logger.warning(f"Company borrower validation errors: {company_borrower_serializer.errors}")
+                    except Exception as e:
+                        # Log the error but continue with other company borrowers
+                        logger.error(f"Error creating company borrower: {str(e)}")
+                
+                # Create security properties
+                logger.info(f"Creating {len(security_properties_data)} security properties...")
+                for i, security_property_data in enumerate(security_properties_data):
+                    logger.info(f"Creating security property {i+1}/{len(security_properties_data)}...")
+                    security_property_serializer = SecurityPropertySerializer(data=security_property_data)
+                    security_property_serializer.is_valid(raise_exception=True)
+                    security_property = security_property_serializer.save(application=application)
+                
+                # Create loan requirements
+                logger.info(f"Creating {len(loan_requirements_data)} loan requirements...")
+                for i, loan_requirement_data in enumerate(loan_requirements_data):
+                    logger.info(f"Creating loan requirement {i+1}/{len(loan_requirements_data)}...")
+                    loan_requirement_serializer = LoanRequirementSerializer(data=loan_requirement_data)
+                    loan_requirement_serializer.is_valid(raise_exception=True)
+                    loan_requirement = loan_requirement_serializer.save(application=application)
+                
+                # Handle funding calculation if provided and loan amount is available
+                if funding_calculation_input and application.loan_amount:
+                    logger.info("Performing funding calculation...")
+                    try:
+                        # CRITICAL FIX: Convert funding_calculation_input to JSON-serializable format
+                        from ..services.financial import make_json_serializable
+                        json_serializable_input = make_json_serializable(funding_calculation_input)
+                        
+                        # Save the funding calculation input to the application
+                        application.funding_calculation_input = json_serializable_input
+                        application.save(update_fields=['funding_calculation_input'])
+                        
+                        from ..services import calculate_funding
+                        calculation_result, funding_history = calculate_funding(
+                            application=application,
+                            calculation_input=json_serializable_input,
+                            user=validated_data.get('created_by')
+                        )
+                        logger.info("Funding calculation completed successfully")
+                    except Exception as e:
+                        # Log the error but don't fail the application creation
+                        logger.error(f"Error performing funding calculation during create: {type(e).__name__}: {str(e)}")
+                        # Continue without funding calculation - application creation should still succeed
+                else:
+                    logger.info("Skipping funding calculation - no input or loan amount")
+                
+                # Create a note about the cascade creation for audit purposes
+                # This is now inside the transaction to ensure it's part of the same atomic operation
+                logger.info("Creating audit note...")
+                try:
+                    from documents.models import Note
+                    from django.contrib.auth import get_user_model
+                    User = get_user_model()
+                    
+                    # Get the user from the context or validated_data
+                    user = None
+                    if 'request' in self.context:
+                        user = self.context['request'].user
+                    elif 'created_by' in validated_data:
+                        user = validated_data['created_by']
+                    
+                    if user:
+                        Note.objects.create(
+                            application=application,
+                            content=f"Application created with cascade by {user.get_full_name() or user.email}",
+                            created_by=user
+                        )
+                        logger.info("Audit note created successfully")
+                    else:
+                        logger.warning("No user found for audit note creation")
                 except Exception as e:
                     # Log the error but don't fail the application creation
-                    import logging
-                    logger = logging.getLogger(__name__)
-                    logger.error(f"Error performing funding calculation during create: {type(e).__name__}: {str(e)}")
-            
-            return application
+                    logger.error(f"Error creating audit note: {type(e).__name__}: {str(e)}")
+                    # Continue without note creation - application creation should still succeed
+                
+                logger.info("Application creation transaction completed successfully")
+                return application
+                
+        except Exception as e:
+            logger.error(f"Error in application creation transaction: {type(e).__name__}: {str(e)}")
+            import traceback
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            raise
 
 
 class ApplicationDetailSerializer(serializers.ModelSerializer):
@@ -489,6 +554,10 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
     
     # Product information
     product_name = serializers.SerializerMethodField()
+    
+    # Funding calculation
+    funding_calculation_input = serializers.SerializerMethodField()
+    funding_result = serializers.SerializerMethodField()
     
     class Meta:
         model = Application
@@ -536,6 +605,7 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
             'signed_by', 'signature_date', 'uploaded_pdf_path',
             
             # Funding calculation
+            'funding_calculation_input',
             'funding_result',
             
             # Metadata
@@ -622,6 +692,14 @@ class ApplicationDetailSerializer(serializers.ModelSerializer):
             except:
                 return f"Product {obj.product_id}"
         return ""
+    
+    def get_funding_calculation_input(self, obj):
+        """Get the funding calculation input parameters"""
+        return obj.funding_calculation_input or {}
+    
+    def get_funding_result(self, obj):
+        """Get the current funding calculation result"""
+        return obj.funding_result or {}
         
     def to_representation(self, instance):
         data = super().to_representation(instance)
@@ -1273,11 +1351,19 @@ class ApplicationPartialUpdateSerializer(serializers.ModelSerializer):
             
             # Perform funding calculation if input is provided and loan amount is available
             if funding_calculation_input and instance.loan_amount:
+                # CRITICAL FIX: Convert funding_calculation_input to JSON-serializable format
+                from ..services.financial import make_json_serializable
+                json_serializable_input = make_json_serializable(funding_calculation_input)
+                
+                # Save the funding calculation input to the application
+                instance.funding_calculation_input = json_serializable_input
+                instance.save(update_fields=['funding_calculation_input'])
+                
                 from ..services import calculate_funding
                 try:
                     calculation_result, funding_history = calculate_funding(
                         application=instance,
-                        calculation_input=funding_calculation_input,
+                        calculation_input=json_serializable_input,
                         user=self.context['request'].user if 'request' in self.context else None
                     )
                     

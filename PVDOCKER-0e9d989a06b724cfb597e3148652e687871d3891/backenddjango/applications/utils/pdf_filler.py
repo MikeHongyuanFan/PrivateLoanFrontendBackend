@@ -1,621 +1,375 @@
+"""
+PDF Form Filler Utility
+
+This module contains functions to fill PDF forms with application data.
+"""
+
 import os
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from datetime import datetime, date
 from pdfrw import PdfReader, PdfWriter, PdfDict, PdfName
 from django.conf import settings
-from ..models import Application
-from .pdf_constants import FIELD_MAP, CHECKBOX_MAP, PDF_CONFIG, ERROR_MESSAGES, SUCCESS_MESSAGES
+from .pdf_field_mapping import generate_pdf_field_mapping_from_json
 
 logger = logging.getLogger(__name__)
 
 
-class PDFFormFiller:
+def fill_pdf_form(application, output_path: str) -> List[str]:
     """
-    Main PDF form filler class that handles filling PDF forms with application data.
-    
-    This class provides methods to:
-    1. Extract application data and map it to PDF form fields
-    2. Fill PDF forms with the extracted data
-    3. Handle errors and validation
-    """
-    
-    def __init__(self, application: Application):
-        """
-        Initialize the PDF form filler with an application instance.
-        
-        Args:
-            application: The Application model instance to extract data from
-        """
-        self.application = application
-        self.logger = logging.getLogger(f"{__name__}.{self.__class__.__name__}")
-    
-    def fill_form(self, output_path: str) -> List[str]:
-        """
-        Fill PDF form with application data.
-        
-        Args:
-            output_path: Path where the filled PDF should be saved
-            
-        Returns:
-            List of error messages, empty if successful
-        """
-        try:
-            return fill_pdf_form(self.application, output_path)
-        except Exception as e:
-            self.logger.error(f"Error filling PDF form: {str(e)}")
-            return [f"Error filling PDF form: {str(e)}"]
-    
-    def extract_data(self) -> Dict[str, Any]:
-        """
-        Extract application data for PDF form filling.
-        
-        Returns:
-            Dictionary containing application data mapped to PDF field names
-        """
-        try:
-            return extract_application_data(self.application)
-        except Exception as e:
-            self.logger.error(f"Error extracting application data: {str(e)}")
-            return {}
-    
-    def extract_checkbox_data(self) -> Dict[str, bool]:
-        """
-        Extract checkbox data from application.
-        
-        Returns:
-            Dictionary containing checkbox states mapped to PDF checkbox field names
-        """
-        try:
-            return extract_checkbox_data(self.application)
-        except Exception as e:
-            self.logger.error(f"Error extracting checkbox data: {str(e)}")
-            return {}
-
-
-def fill_pdf_form(application: Application, output_path: str) -> List[str]:
-    """
-    Fill a PDF form with application data.
+    Fill a PDF form with application data using the correct field mapping.
     
     Args:
-        application: Application instance containing the data
+        application: The Application instance
         output_path: Path where the filled PDF should be saved
-        
-    Returns:
-        List of error messages, empty if successful
-    """
-    errors = []
     
+    Returns:
+        List of missing fields that couldn't be filled
+    """
     try:
-        # Get the PDF template path
-        template_path = os.path.join(
-            settings.BASE_DIR, 
-            'applications', 
-            'ApplicationTemplate', 
-            'Loan Application Form.pdf'
-        )
+        # Get the cascade data for the application
+        from ..serializers.application import ApplicationDetailSerializer
+        from rest_framework.test import APIRequestFactory
         
-        if not os.path.exists(template_path):
-            error_msg = f"{ERROR_MESSAGES['pdf_not_found']}: {template_path}"
-            logger.error(error_msg)
-            return [error_msg]
+        # Create a mock request for the serializer
+        factory = APIRequestFactory()
+        request = factory.get('/')
         
-        # Read the PDF template
-        try:
-            reader = PdfReader(template_path)
-        except Exception as e:
-            error_msg = f"{ERROR_MESSAGES['pdf_read_error']}: {str(e)}"
-            logger.error(error_msg)
-            return [error_msg]
+        # Serialize the application with cascade data
+        serializer = ApplicationDetailSerializer(application, context={'request': request})
+        cascade_data = serializer.data
         
-        # Extract application data
-        try:
-            text_data = extract_application_data(application)
-            checkbox_data = extract_checkbox_data(application)
-        except Exception as e:
-            error_msg = f"{ERROR_MESSAGES['invalid_application']}: {str(e)}"
-            logger.error(error_msg)
-            return [error_msg]
+        # Generate the PDF field mapping using our tested utility
+        field_mapping = generate_pdf_field_mapping_from_json(cascade_data)
         
-        # Combine all data
-        all_data = {**text_data, **checkbox_data}
+        # Log the mapping for debugging
+        logger.info(f"Generated PDF field mapping with {len(field_mapping)} fields")
+        logger.debug(f"Field mapping: {field_mapping}")
         
-        # Log data mapping for debugging
-        logger.info(f"Filling PDF for application {application.id} with {len(all_data)} fields")
+        # Get the template PDF path
+        template_path = get_pdf_template_path()
         
-        # Fill the form fields
-        filled_fields = 0
-        skipped_fields = 0
+        # Fill the PDF using the field mapping
+        missing_fields = fill_pdf_with_mapping(template_path, field_mapping, output_path)
         
-        for page in reader.pages:
-            if '/Annots' in page:
-                for annotation in page['/Annots']:
-                    if annotation is None:
-                        continue
-                    
-                    annotation = annotation.getObject()
-                    
-                    if '/Subtype' in annotation and annotation['/Subtype'] == '/Widget':
-                        if '/T' in annotation:
-                            field_name = annotation['/T']
-                            
-                            # Remove parentheses from field name if present
-                            if field_name.startswith('(') and field_name.endswith(')'):
-                                field_name = field_name[1:-1]
-                            
-                            # Find corresponding data key
-                            data_key = None
-                            for key, pdf_field in FIELD_MAP.items():
-                                if pdf_field == field_name:
-                                    data_key = key
-                                    break
-                            
-                            # Check checkbox mapping if not found in text fields
-                            if not data_key:
-                                for key, pdf_field in CHECKBOX_MAP.items():
-                                    if pdf_field == field_name:
-                                        data_key = key
-                                        break
-                            
-                            # Fill the field if we have data
-                            if data_key and data_key in all_data:
-                                value = all_data[data_key]
-                                
-                                # Handle different field types
-                                if isinstance(value, bool):
-                                    # Checkbox field
-                                    if value:
-                                        annotation.update(PdfDict(V=PdfName.Yes, AS=PdfName.Yes))
-                                    else:
-                                        annotation.update(PdfDict(V=PdfName.Off, AS=PdfName.Off))
-                                else:
-                                    # Text field
-                                    annotation.update(PdfDict(V=str(value)))
-                                
-                                filled_fields += 1
-                                logger.debug(f"Filled field {field_name} ({data_key}) with value: {value}")
-                            else:
-                                skipped_fields += 1
-                                if data_key:
-                                    logger.debug(f"No data for field {field_name} ({data_key})")
-                                else:
-                                    logger.debug(f"Unknown field: {field_name}")
-        
-        logger.info(f"PDF filling completed: {filled_fields} fields filled, {skipped_fields} fields skipped")
-        
-        # Write the filled PDF
-        try:
-            writer = PdfWriter()
-            writer.trailer = reader.trailer
-            writer.pages = reader.pages
-            
-            os.makedirs(os.path.dirname(output_path), exist_ok=True)
-            writer.write(output_path)
-            
-            logger.info(f"{SUCCESS_MESSAGES['pdf_generated']}: {output_path}")
-            
-        except Exception as e:
-            error_msg = f"{ERROR_MESSAGES['pdf_write_error']}: {str(e)}"
-            logger.error(error_msg)
-            errors.append(error_msg)
+        logger.info(f"PDF form filled successfully: {output_path}")
+        return missing_fields
         
     except Exception as e:
-        error_msg = f"Unexpected error during PDF generation: {str(e)}"
-        logger.error(error_msg)
-        errors.append(error_msg)
-    
-    return errors
+        logger.error(f"Error filling PDF form: {str(e)}")
+        raise
 
 
-def extract_application_data(application: Application) -> Dict[str, Any]:
+def fill_pdf_with_mapping(template_path: str, field_mapping: Dict[str, Any], output_path: str) -> List[str]:
     """
-    Extract data from Application model and related models for PDF form filling
-    Based on corrected field mappings
+    Fill PDF form with field mapping data using pdfrw library.
+    
+    Args:
+        template_path: Path to the PDF template
+        field_mapping: Dictionary mapping field IDs to values
+        output_path: Path where the filled PDF should be saved
+    
+    Returns:
+        List of missing fields that couldn't be filled
     """
-    data = {}
+    if not os.path.exists(template_path):
+        raise FileNotFoundError(f"Template PDF not found at: {template_path}")
     
-    # Basic loan details
-    if application.loan_amount:
-        data["loan_amount"] = str(application.loan_amount)
-    if application.loan_term:
-        data["loan_term"] = str(application.loan_term)
-    if application.interest_rate:
-        data["expected_rate"] = str(application.interest_rate)
-    
-    # Settlement date
-    if application.estimated_settlement_date:
-        settlement_date = application.estimated_settlement_date
-        data["settlement_date_day"] = str(settlement_date.day)
-        data["settlement_date_month"] = str(settlement_date.month)
-        data["settlement_date_year"] = str(settlement_date.year)
-    
-    # Additional comments
-    if application.additional_comments:
-        data["additional_comments"] = application.additional_comments
-    
-    # Get company borrowers
-    company_borrowers = application.borrowers.filter(is_company=True)
-    if company_borrowers.exists():
-        company = company_borrowers.first()
+    try:
+        # Read the template PDF
+        template_pdf = PdfReader(template_path)
         
-        # Basic company info
-        if company.company_name:
-            data["company_name"] = company.company_name
-        if company.company_abn:
-            data["company_abn_acn"] = company.company_abn
-        elif company.company_acn:
-            data["company_abn_acn"] = company.company_acn
-        if company.industry_type:
-            data["company_industry_type"] = company.industry_type.title()
-        if company.contact_number:
-            data["company_contact_number"] = company.contact_number
-        if company.annual_company_income:
-            data["annual_company_income"] = str(company.annual_company_income)
-        if company.trustee_name:
-            data["trustee_name"] = company.trustee_name
+        # Create a new PDF writer
+        writer = PdfWriter()
         
-        # Company address
-        if company.registered_address_unit:
-            data["company_address_unit"] = company.registered_address_unit
-        if company.registered_address_street_no:
-            data["company_address_street_no"] = company.registered_address_street_no
-        if company.registered_address_street_name:
-            data["company_address_street_name"] = company.registered_address_street_name
-        if company.registered_address_suburb:
-            data["company_address_suburb"] = company.registered_address_suburb
-        if company.registered_address_state:
-            data["company_address_state"] = company.registered_address_state
-        if company.registered_address_postcode:
-            data["company_address_postcode"] = company.registered_address_postcode
+        missing_fields = []
+        all_checkbox_fields = []  # Collect all checkbox field names
         
-        # Directors (if available)
-        directors = company.directors.all()
-        if directors.exists():
-            director1 = directors[0] if len(directors) >= 1 else None
-            director2 = directors[1] if len(directors) >= 2 else None
+        # Process each page
+        for page_num, page in enumerate(template_pdf.pages):
+            # Get form annotations
+            if '/Annots' in page:
+                annotations = page['/Annots']
+                if annotations:
+                    logger.debug(f"Page {page_num + 1} has {len(annotations)} annotations")
+                    for annotation in annotations:
+                        if annotation and '/T' in annotation:
+                            field_name = str(annotation['/T']).strip('()/')
+                            
+                            # Log all field names to see the exact format
+                            if field_name.startswith('Check Box'):
+                                all_checkbox_fields.append(field_name)
+                                logger.debug(f"Found checkbox field: '{field_name}'")
+                            
+                            # Handle text fields (text1, text2, etc.)
+                            if field_name.startswith('Text') and field_name[4:].isdigit():
+                                field_id = f"text{field_name[4:]}"
+                                if field_id in field_mapping:
+                                    value = str(field_mapping[field_id])
+                                    annotation.update(PdfDict(V=value, AS=value))
+                                    logger.debug(f"Filling text field {field_name} with value: {value}")
+                                else:
+                                    logger.debug(f"Missing text field data for {field_id} -> {field_name}")
+                                    missing_fields.append(field_id)
+                            
+                            # Handle checkbox fields (Check Box20, Check Box21, etc.)
+                            elif field_name.startswith('Check Box') and field_name[9:].isdigit():
+                                checkbox_num = field_name[9:]
+                                field_id = f"checkbox{checkbox_num}"
+                                
+                                # Extra debugging for employment checkboxes (124-127)
+                                if checkbox_num in ['124', '125', '126', '127']:
+                                    logger.info(f"EMPLOYMENT CHECKBOX: Processing {field_name} -> {field_id}")
+                                    logger.info(f"EMPLOYMENT CHECKBOX: Raw field name from PDF: '{field_name}'")
+                                    logger.info(f"EMPLOYMENT CHECKBOX: Extracted number: '{checkbox_num}'")
+                                    logger.info(f"EMPLOYMENT CHECKBOX: Mapped field ID: '{field_id}'")
+                                    
+                                    # Check for parent ID in the annotation
+                                    parent_id = None
+                                    if '/Parent' in annotation:
+                                        parent_id = str(annotation['/Parent']).strip('()/').split(',')[0]
+                                        logger.info(f"EMPLOYMENT CHECKBOX: Parent ID: {parent_id}")
+                                        
+                                        # Try to map using parent ID
+                                        parent_field_id = f"parent{parent_id}"
+                                        if parent_field_id in field_mapping:
+                                            logger.info(f"EMPLOYMENT CHECKBOX: Found mapping by parent ID: {parent_field_id} = {field_mapping[parent_field_id]}")
+                                            if field_mapping[parent_field_id]:
+                                                annotation.update(PdfDict(AS=PdfName.Yes, V=PdfName.Yes))
+                                                logger.info(f"EMPLOYMENT CHECKBOX: Setting checkbox {field_name} to checked via parent ID")
+                                            else:
+                                                annotation.update(PdfDict(AS=PdfName.Off, V=PdfName.Off))
+                                                logger.info(f"EMPLOYMENT CHECKBOX: Setting checkbox {field_name} to unchecked via parent ID")
+                                            continue
+                                    
+                                    # Try direct field name mapping
+                                    if field_name in field_mapping:
+                                        logger.info(f"EMPLOYMENT CHECKBOX: Found mapping by exact name: {field_name} = {field_mapping[field_name]}")
+                                        if field_mapping[field_name]:
+                                            annotation.update(PdfDict(AS=PdfName.Yes, V=PdfName.Yes))
+                                            logger.info(f"EMPLOYMENT CHECKBOX: Setting checkbox {field_name} to checked via exact name")
+                                        else:
+                                            annotation.update(PdfDict(AS=PdfName.Off, V=PdfName.Off))
+                                            logger.info(f"EMPLOYMENT CHECKBOX: Setting checkbox {field_name} to unchecked via exact name")
+                                        continue
+                                    
+                                    if field_id in field_mapping:
+                                        logger.info(f"EMPLOYMENT CHECKBOX: Value in mapping: {field_mapping[field_id]}")
+                                    else:
+                                        logger.info(f"EMPLOYMENT CHECKBOX: NOT FOUND IN MAPPING!")
+                                        # Try alternative formats
+                                        alt_formats = [
+                                            f"checkbox{int(checkbox_num)}",  # Without leading zeros
+                                            f"checkbox{checkbox_num.zfill(3)}",  # With leading zeros
+                                            f"checkbox{checkbox_num.lstrip('0')}",  # Strip leading zeros
+                                            f"Check Box{checkbox_num}",  # Original PDF format
+                                            f"Check Box {checkbox_num}"  # With space
+                                        ]
+                                        logger.info(f"EMPLOYMENT CHECKBOX: Trying alternative formats: {alt_formats}")
+                                        for alt_format in alt_formats:
+                                            if alt_format in field_mapping:
+                                                logger.info(f"EMPLOYMENT CHECKBOX: Found in alternative format: {alt_format} = {field_mapping[alt_format]}")
+                                
+                                logger.debug(f"Processing checkbox field: {field_name} -> {field_id}")
+                                if field_id in field_mapping:
+                                    checkbox_value = field_mapping[field_id]
+                                    logger.debug(f"Checkbox {field_id} value: {checkbox_value} (type: {type(checkbox_value)})")
+                                    if field_mapping[field_id]:
+                                        annotation.update(PdfDict(AS=PdfName.Yes, V=PdfName.Yes))
+                                        logger.debug(f"Setting checkbox {field_name} to checked")
+                                    else:
+                                        annotation.update(PdfDict(AS=PdfName.Off, V=PdfName.Off))
+                                        logger.debug(f"Setting checkbox {field_name} to unchecked")
+                                else:
+                                    logger.debug(f"Checkbox {field_id} not found in field mapping")
+                                    logger.debug(f"Missing checkbox data for {field_id} -> {field_name}")
+                                    missing_fields.append(field_id)
             
-            if director1:
-                data["director1_name"] = director1.name
-                if director1.director_id:
-                    # Split director ID into individual digits (up to 12 characters)
-                    director_id = str(director1.director_id).ljust(12, ' ')
-                    for i in range(12):
-                        if i < len(director_id) and director_id[i] != ' ':
-                            data[f"director1_id_{i+1}"] = director_id[i]
+            # Add the page to writer
+            writer.addPage(page)
+        
+        # Ensure output directory exists
+        os.makedirs(os.path.dirname(output_path), exist_ok=True)
+        
+        # Write the filled PDF
+        with open(output_path, 'wb') as output_file:
+            writer.write(output_file)
+        
+        # Log all checkbox fields found in the template
+        logger.info(f"All checkbox fields found in PDF template: {sorted(all_checkbox_fields)}")
+        
+        # Look for employment-related checkboxes (around 120-130 range)
+        employment_checkboxes = [field for field in all_checkbox_fields if any(str(i) in field for i in range(120, 131))]
+        logger.info(f"Employment-related checkboxes (120-130 range): {sorted(employment_checkboxes)}")
+        
+        # Look for checkboxes that might be for first individual (around 100-130 range)
+        first_individual_checkboxes = [field for field in all_checkbox_fields if any(str(i) in field for i in range(100, 131))]
+        logger.info(f"Potential first individual checkboxes (100-130 range): {sorted(first_individual_checkboxes)}")
+        
+        # Look for checkboxes that might be for employment types (any range)
+        employment_keywords = ['full', 'part', 'casual', 'contract', 'employment', 'work']
+        potential_employment_checkboxes = []
+        for field in all_checkbox_fields:
+            # Check if any employment-related keywords might be in the field name
+            # Since we can't see the actual field names, let's look for patterns
+            if any(keyword in field.lower() for keyword in employment_keywords):
+                potential_employment_checkboxes.append(field)
+        logger.info(f"Potential employment checkboxes (by keywords): {sorted(potential_employment_checkboxes)}")
+        
+        # Comprehensive analysis of checkbox field numbers
+        checkbox_numbers = []
+        for field in all_checkbox_fields:
+            try:
+                # Extract the number from "Check Box123" -> 123
+                number = int(field.replace('Check Box', ''))
+                checkbox_numbers.append(number)
+            except:
+                pass
+        
+        checkbox_numbers.sort()
+        logger.info(f"All checkbox numbers found: {checkbox_numbers}")
+        
+        # Look for patterns - checkboxes that might be in groups of 4 (like employment types)
+        potential_groups = []
+        for i in range(len(checkbox_numbers) - 3):
+            group = checkbox_numbers[i:i+4]
+            if len(group) == 4 and all(group[j+1] - group[j] == 1 for j in range(3)):
+                potential_groups.append(group)
+        
+        logger.info(f"Potential checkbox groups of 4 consecutive numbers: {potential_groups}")
+        
+        # Special handling for first individual employment checkboxes
+        # Use the coordinates provided in the mapping
+        if 'employment_checkboxes' in field_mapping:
+            employment_checkboxes = field_mapping['employment_checkboxes']
             
-            if director2:
-                data["director2_name"] = director2.name
-                if director2.director_id:
-                    # Split director ID into individual digits (up to 12 characters)
-                    director_id = str(director2.director_id).ljust(12, ' ')
-                    for i in range(12):
-                        if i < len(director_id) and director_id[i] != ' ':
-                            data[f"director2_id_{i+1}"] = director_id[i]
-    
-    # Get individual borrowers (up to 2)
-    individual_borrowers = application.borrowers.filter(is_company=False)
-    borrower_count = 0
-    
-    for borrower in individual_borrowers[:2]:  # Limit to 2 borrowers
-        borrower_count += 1
-        prefix = f"borrower{borrower_count}"
+            # Process each page again to find these specific checkboxes by coordinates
+            logger.info("=== SPECIAL HANDLING FOR EMPLOYMENT CHECKBOXES ===")
+            for page_num, page in enumerate(template_pdf.pages):
+                if '/Annots' in page:
+                    annotations = page['/Annots']
+                    if annotations:
+                        for annotation in annotations:
+                            if annotation and '/Rect' in annotation and '/Subtype' in annotation and annotation['/Subtype'] == '/Widget':
+                                rect = annotation['/Rect']
+                                rect_str = [str(r).strip('()') for r in rect]
+                                
+                                # Check if this annotation matches any of our employment checkboxes
+                                for checkbox in employment_checkboxes:
+                                    # Compare the first two coordinates (top-left corner) with some tolerance
+                                    if (abs(float(rect_str[0]) - float(checkbox['rect'][0])) < 1 and
+                                        abs(float(rect_str[1]) - float(checkbox['rect'][1])) < 1):
+                                        
+                                        logger.info(f"Found employment checkbox for {checkbox['type']} at {rect_str}")
+                                        
+                                        # Check if we should check this checkbox
+                                        if checkbox['value']:
+                                            annotation.update(PdfDict(AS=PdfName.Yes, V=PdfName.Yes))
+                                            logger.info(f"Setting {checkbox['type']} checkbox to checked")
+                                        else:
+                                            annotation.update(PdfDict(AS=PdfName.Off, V=PdfName.Off))
+                                            logger.info(f"Setting {checkbox['type']} checkbox to unchecked")
         
-        # Basic individual info
-        if borrower.first_name:
-            data[f"{prefix}_given_names"] = borrower.first_name
-        if borrower.last_name:
-            data[f"{prefix}_surname"] = borrower.last_name
+        # Special debug for employment checkboxes
+        logger.info("=== EMPLOYMENT CHECKBOX DEBUG ===")
+        for i in range(120, 130):
+            checkbox_id = f"checkbox{i}"
+            if checkbox_id in field_mapping:
+                logger.info(f"{checkbox_id} = {field_mapping[checkbox_id]}")
+            else:
+                logger.info(f"{checkbox_id} = NOT IN MAPPING")
         
-        # Date of birth
-        if borrower.date_of_birth:
-            dob = borrower.date_of_birth
-            data[f"{prefix}_dob_day"] = str(dob.day)
-            data[f"{prefix}_dob_month"] = str(dob.month)
-            data[f"{prefix}_dob_year"] = str(dob.year)
+        # Check if there are any checkboxes with similar numbers in different formats
+        all_keys = list(field_mapping.keys())
+        employment_related = [k for k in all_keys if any(f"checkbox{i}" in k.lower() for i in range(120, 130))]
+        logger.info(f"All employment-related keys in mapping: {employment_related}")
         
-        # Contact info
-        if borrower.phone:
-            data[f"{prefix}_phone"] = borrower.phone
-        if borrower.email:
-            data[f"{prefix}_email"] = borrower.email
+        # Check the actual PDF field names for these checkboxes
+        logger.info("=== PDF FIELD NAMES FOR EMPLOYMENT CHECKBOXES ===")
+        employment_checkbox_fields = [field for field in all_checkbox_fields if any(str(i) in field for i in range(120, 130))]
+        logger.info(f"Employment checkbox fields in PDF: {sorted(employment_checkbox_fields)}")
         
-        # Address (parse from residential_address)
-        if borrower.residential_address:
-            # Try to extract components from full address
-            address_parts = borrower.residential_address.split(',')
-            if len(address_parts) >= 2:
-                street_part = address_parts[0].strip()
-                # Try to extract unit and street number from street part
-                street_words = street_part.split()
-                if len(street_words) >= 2:
-                    # First word might be unit, second might be street number
-                    if street_words[0].lower().startswith(('unit', 'apt', 'level')):
-                        data[f"{prefix}_address_unit"] = street_words[1] if len(street_words) > 1 else ""
-                        if len(street_words) >= 3:
-                            data[f"{prefix}_address_street_no"] = street_words[2]
-                            data[f"{prefix}_address_street_name"] = " ".join(street_words[3:])
-                    else:
-                        # First word is likely street number
-                        data[f"{prefix}_address_street_no"] = street_words[0]
-                        data[f"{prefix}_address_street_name"] = " ".join(street_words[1:])
-                
-                # Suburb (usually second part)
-                if len(address_parts) >= 2:
-                    suburb_state_post = address_parts[1].strip()
-                    suburb_words = suburb_state_post.split()
-                    if len(suburb_words) >= 3:
-                        data[f"{prefix}_address_suburb"] = " ".join(suburb_words[:-2])
-                        data[f"{prefix}_address_state"] = suburb_words[-2]
-                        data[f"{prefix}_address_postcode"] = suburb_words[-1]
+        logger.info(f"PDF generated successfully at: {output_path}")
+        return missing_fields
         
-        # Employment
-        if borrower.job_title:
-            data[f"{prefix}_occupation"] = borrower.job_title
-        if borrower.employer_name:
-            data[f"{prefix}_employer"] = borrower.employer_name
-        if borrower.annual_income:
-            data[f"{prefix}_annual_income"] = str(borrower.annual_income)
-    
-    # Get guarantors (treated as additional individuals)
-    guarantors = application.guarantors.all()
-    if guarantors.exists():
-        # For now, map first guarantor to borrower2 if borrower2 slot is available
-        if borrower_count < 2 and guarantors.first():
-            guarantor = guarantors.first()
-            prefix = "borrower2"
-            
-            if guarantor.title:
-                data[f"{prefix}_title"] = guarantor.title.title()
-            if guarantor.first_name:
-                data[f"{prefix}_given_names"] = guarantor.first_name
-            if guarantor.last_name:
-                data[f"{prefix}_surname"] = guarantor.last_name
-            
-            # Date of birth
-            if guarantor.date_of_birth:
-                dob = guarantor.date_of_birth
-                data[f"{prefix}_dob_day"] = str(dob.day)
-                data[f"{prefix}_dob_month"] = str(dob.month)
-                data[f"{prefix}_dob_year"] = str(dob.year)
-            
-            # Contact info
-            if guarantor.home_phone:
-                data[f"{prefix}_phone"] = guarantor.home_phone
-            if guarantor.mobile:
-                data[f"{prefix}_mobile"] = guarantor.mobile
-            if guarantor.email:
-                data[f"{prefix}_email"] = guarantor.email
-            
-            # Address
-            if guarantor.address_unit:
-                data[f"{prefix}_address_unit"] = guarantor.address_unit
-            if guarantor.address_street_no:
-                data[f"{prefix}_address_street_no"] = guarantor.address_street_no
-            if guarantor.address_street_name:
-                data[f"{prefix}_address_street_name"] = guarantor.address_street_name
-            if guarantor.address_suburb:
-                data[f"{prefix}_address_suburb"] = guarantor.address_suburb
-            if guarantor.address_state:
-                data[f"{prefix}_address_state"] = guarantor.address_state
-            if guarantor.address_postcode:
-                data[f"{prefix}_address_postcode"] = guarantor.address_postcode
-            
-            # Employment
-            if guarantor.occupation:
-                data[f"{prefix}_occupation"] = guarantor.occupation
-            if guarantor.employer_name:
-                data[f"{prefix}_employer"] = guarantor.employer_name
-            if guarantor.annual_income:
-                data[f"{prefix}_annual_income"] = str(guarantor.annual_income)
-    
-    # Get security properties
-    security_properties = application.security_properties.all()
-    for i, prop in enumerate(security_properties[:3]):  # Limit to 3 properties
-        prop_num = i + 1
-        prefix = f"security{prop_num}"
-        
-        # Address
-        if prop.address_unit:
-            data[f"{prefix}_unit"] = prop.address_unit
-        if prop.address_street_no:
-            data[f"{prefix}_street_no"] = prop.address_street_no
-        if prop.address_street_name:
-            data[f"{prefix}_street_name"] = prop.address_street_name
-        if prop.address_suburb:
-            data[f"{prefix}_suburb"] = prop.address_suburb
-        if prop.address_state:
-            data[f"{prefix}_state"] = prop.address_state
-        if prop.address_postcode:
-            data[f"{prefix}_postcode"] = prop.address_postcode
-        
-        # Mortgage details
-        if prop.current_mortgagee:
-            data[f"{prefix}_mortgagee1"] = prop.current_mortgagee
-        if prop.first_mortgage:
-            data[f"{prefix}_debt1"] = prop.first_mortgage
-        if prop.second_mortgage:
-            data[f"{prefix}_debt2"] = prop.second_mortgage
-        
-        # Valuation
-        if prop.estimated_value:
-            data[f"{prefix}_current_value"] = str(prop.estimated_value)
-        if prop.purchase_price:
-            data[f"{prefix}_purchase_price"] = str(prop.purchase_price)
-        
-        # Property details
-        if prop.bedrooms:
-            data[f"{prefix}_bedrooms"] = str(prop.bedrooms)
-        if prop.bathrooms:
-            data[f"{prefix}_bathrooms"] = str(prop.bathrooms)
-        if prop.car_spaces:
-            data[f"{prefix}_car_spaces"] = str(prop.car_spaces)
-        if prop.building_size:
-            data[f"{prefix}_building_size"] = str(prop.building_size)
-        if prop.land_size:
-            data[f"{prefix}_land_size"] = str(prop.land_size)
-    
-    # Get loan requirements
-    loan_requirements = application.loan_requirements.all()
-    for i, req in enumerate(loan_requirements[:6]):  # Limit to 6 requirements
-        req_num = i + 1
-        if req.description:
-            data[f"loan_purpose{req_num}_desc"] = req.description
-        if req.amount:
-            data[f"loan_purpose{req_num}_amount"] = str(req.amount)
-    
-    # Calculate total loan purposes
-    total_amount = sum(req.amount for req in loan_requirements if req.amount)
-    if total_amount:
-        data["loan_purposes_total"] = str(total_amount)
-    
-    return data
+    except Exception as e:
+        logger.error(f"Error filling PDF with mapping: {str(e)}")
+        raise
 
 
-def extract_checkbox_data(application: Application) -> Dict[str, bool]:
+def get_pdf_template_path(template_name: str = 'default_template') -> str:
     """
-    Extract checkbox data from Application model and related models
-    Based on corrected checkbox mappings
+    Get the path to a PDF template.
+    
+    Args:
+        template_name: Name of the template
+    
+    Returns:
+        Path to the PDF template file
     """
-    data = {}
+    # Try multiple possible template locations
+    possible_paths = [
+        os.path.join(settings.BASE_DIR, 'templates', 'pdf', f"{template_name}.pdf"),
+        os.path.join(settings.BASE_DIR, 'applications', 'ApplicationTemplate', 'Eternity Capital - Application Form.pdf'),
+        os.path.join(settings.BASE_DIR, 'applications', 'templates', f"{template_name}.pdf"),
+        os.path.join(settings.BASE_DIR, 'static', 'pdf', f"{template_name}.pdf"),
+    ]
     
-    # Company trustee status
-    company_borrowers = application.borrowers.filter(is_company=True)
-    if company_borrowers.exists():
-        company = company_borrowers.first()
-        
-        # Trustee checkboxes
-        if company.is_trustee is not None:
-            data["is_trustee_yes"] = company.is_trustee
-            data["is_trustee_no"] = not company.is_trustee
-        
-        if company.is_smsf_trustee is not None:
-            data["is_smsf_trustee_yes"] = company.is_smsf_trustee
-            data["is_smsf_trustee_no"] = not company.is_smsf_trustee
-        
-        # Director roles (if available)
-        directors = company.directors.all()
-        if directors.exists():
-            director1 = directors[0] if len(directors) >= 1 else None
-            director2 = directors[1] if len(directors) >= 2 else None
-            
-            if director1 and director1.roles:
-                roles = director1.roles.lower()
-                data["director1_role_director"] = "director" in roles
-                data["director1_role_secretary"] = "secretary" in roles
-                data["director1_role_public_officer"] = "public officer" in roles or "public_officer" in roles
-            
-            if director2 and director2.roles:
-                roles = director2.roles.lower()
-                data["director2_role_director"] = "director" in roles
-                data["director2_role_secretary"] = "secretary" in roles
-                data["director2_role_public_officer"] = "public officer" in roles or "public_officer" in roles
+    for template_path in possible_paths:
+        if os.path.exists(template_path):
+            return template_path
     
-    # Employment types for individual borrowers
-    individual_borrowers = application.borrowers.filter(is_company=False)
-    borrower_count = 0
-    
-    for borrower in individual_borrowers[:2]:
-        borrower_count += 1
-        prefix = f"borrower{borrower_count}"
-        
-        if borrower.employment_type:
-            emp_type = borrower.employment_type.lower()
-            data[f"{prefix}_fulltime"] = emp_type == "full_time"
-            data[f"{prefix}_parttime"] = emp_type == "part_time"
-            data[f"{prefix}_casual"] = emp_type == "casual"
-            data[f"{prefix}_contract"] = emp_type == "contractor" or emp_type == "contract"
-    
-    # Employment type for guarantors (if mapped to borrower2)
-    guarantors = application.guarantors.all()
-    if guarantors.exists() and borrower_count < 2:
-        guarantor = guarantors.first()
-        if guarantor.employment_type:
-            emp_type = guarantor.employment_type.lower()
-            data["borrower2_fulltime"] = emp_type == "full_time"
-            data["borrower2_parttime"] = emp_type == "part_time"
-            data["borrower2_casual"] = emp_type == "casual"
-            data["borrower2_contract"] = emp_type == "contract"
-    
-    # Solvency enquiries
-    data["pending_litigation_yes"] = application.has_pending_litigation
-    data["pending_litigation_no"] = not application.has_pending_litigation
-    data["unsatisfied_judgements_yes"] = application.has_unsatisfied_judgements
-    data["unsatisfied_judgements_no"] = not application.has_unsatisfied_judgements
-    data["been_bankrupt_yes"] = application.has_been_bankrupt
-    data["been_bankrupt_no"] = not application.has_been_bankrupt
-    data["refused_credit_yes"] = application.has_been_refused_credit
-    data["refused_credit_no"] = not application.has_been_refused_credit
-    data["ato_debt_yes"] = application.has_outstanding_ato_debt
-    data["ato_debt_no"] = not application.has_outstanding_ato_debt
-    data["tax_returns_yes"] = application.has_outstanding_tax_returns
-    data["tax_returns_no"] = not application.has_outstanding_tax_returns
-    data["payment_arrangements_yes"] = application.has_payment_arrangements
-    data["payment_arrangements_no"] = not application.has_payment_arrangements
-    
-    # Property types for security properties
-    security_properties = application.security_properties.all()
-    for i, prop in enumerate(security_properties[:3]):
-        prop_num = i + 1
-        prefix = f"security{prop_num}"
-        
-        if prop.property_type:
-            prop_type = prop.property_type.lower()
-            data[f"{prefix}_residential"] = prop_type == "residential"
-            data[f"{prefix}_commercial"] = prop_type == "commercial"
-            data[f"{prefix}_rural"] = prop_type == "rural"
-            data[f"{prefix}_industrial"] = prop_type == "industrial"
-            data[f"{prefix}_vacant_land"] = prop_type == "land"
-            data[f"{prefix}_other"] = prop_type == "other"
-        
-        # Property features
-        if hasattr(prop, 'is_single_story'):
-            data[f"{prefix}_single_story"] = prop.is_single_story
-            data[f"{prefix}_double_story"] = not prop.is_single_story
-        
-        if hasattr(prop, 'has_garage'):
-            data[f"{prefix}_garage"] = prop.has_garage
-        if hasattr(prop, 'has_carport'):
-            data[f"{prefix}_carport"] = prop.has_carport
-        if hasattr(prop, 'has_off_street_parking'):
-            data[f"{prefix}_off_street"] = prop.has_off_street_parking
-        
-        # Occupancy
-        if prop.occupancy:
-            data[f"{prefix}_owner_occupied"] = prop.occupancy == "owner_occupied"
-            data[f"{prefix}_investment"] = prop.occupancy == "investment"
-        
-        # Valuation type (default to current value)
-        data[f"{prefix}_valuation_current"] = True
-        data[f"{prefix}_valuation_purchase"] = False
-    
-    # Loan purpose
-    if application.loan_purpose:
-        purpose = application.loan_purpose.lower()
-        data["loan_purpose_purchase"] = purpose == "purchase"
-        data["loan_purpose_refinance"] = purpose == "refinance"
-        data["loan_purpose_construction"] = purpose == "construction"
-        data["loan_purpose_equity_venture"] = purpose == "equity_release"
-        data["loan_purpose_cash_out"] = "cash" in purpose
-        data["loan_purpose_payout_debt"] = "debt" in purpose
-        data["loan_purpose_other"] = purpose == "other"
-    
-    # Exit strategy
-    if application.exit_strategy:
-        exit_strat = application.exit_strategy.lower()
-        data["exit_strategy_sale"] = exit_strat == "sale"
-        data["exit_strategy_refinance"] = exit_strat == "refinance"
-        data["exit_strategy_cash_flow"] = exit_strat == "income"
-        data["exit_strategy_other"] = exit_strat == "other"
-    
-    # Other submissions (default to No)
-    data["other_submissions_yes"] = False
-    data["other_submissions_no"] = True
-    
-    return data
+    # If no template found, raise error with all attempted paths
+    raise FileNotFoundError(f"PDF template not found. Tried paths: {possible_paths}")
 
 
-def format_date(date_obj) -> Optional[str]:
-    """Format date object to DD/MM/YYYY string"""
-    if date_obj:
-        return date_obj.strftime("%d/%m/%Y")
-    return None 
+def validate_pdf_fields(field_mapping: Dict[str, Any]) -> List[str]:
+    """
+    Validate that required PDF fields are present in the mapping.
+    
+    Args:
+        field_mapping: Dictionary mapping field IDs to values
+    
+    Returns:
+        List of missing required fields
+    """
+    # Define required fields based on the PDF specification
+    required_fields = [
+        'text1',  # Company Name (if company borrower)
+        'text106',  # Title (if individual borrower)
+        'text107',  # Given Names (if individual borrower)
+        'text108',  # Surname (if individual borrower)
+        'text297',  # Net Loan Required
+        'text298',  # Term Required
+    ]
+    
+    missing_fields = []
+    for field_id in required_fields:
+        if field_id not in field_mapping or not field_mapping[field_id]:
+            missing_fields.append(field_id)
+    
+    return missing_fields
+
+
+def get_field_mapping_summary(field_mapping: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Get a summary of the field mapping for debugging and validation.
+    
+    Args:
+        field_mapping: Dictionary mapping field IDs to values
+    
+    Returns:
+        Summary dictionary with counts and sample data
+    """
+    text_fields = {k: v for k, v in field_mapping.items() if k.startswith('text')}
+    checkbox_fields = {k: v for k, v in field_mapping.items() if k.startswith('checkbox')}
+    
+    return {
+        'total_fields': len(field_mapping),
+        'text_fields_count': len(text_fields),
+        'checkbox_fields_count': len(checkbox_fields),
+        'filled_text_fields': len([v for v in text_fields.values() if v]),
+        'checked_checkboxes': len([v for v in checkbox_fields.values() if v]),
+        'sample_text_fields': dict(list(text_fields.items())[:5]),
+        'sample_checkbox_fields': dict(list(checkbox_fields.items())[:5]),
+    } 

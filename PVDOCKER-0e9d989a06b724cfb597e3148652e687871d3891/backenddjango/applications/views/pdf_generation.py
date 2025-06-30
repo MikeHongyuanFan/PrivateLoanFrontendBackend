@@ -10,7 +10,7 @@ from django.http import Http404, FileResponse
 from ..models import Application
 from ..utils.pdf_filler import fill_pdf_form
 from users.permissions import IsAdminOrBroker
-from ..serializers import GeneratePDFSerializer 
+from ..serializers.application import GeneratePDFSerializer 
 from rest_framework import generics, status
 
 logger = logging.getLogger(__name__)
